@@ -1,0 +1,175 @@
+"""Small deterministic constructor catalogs for concrete counterexample search."""
+from __future__ import annotations
+
+from itertools import combinations, islice, product
+
+from specdet.domain.models import JsonObject, JsonValue, canonical_json
+
+from .native.codegen.gen_det import _var_name
+from .native.extract import function_spec_from_dict
+from .type_context import parse_input_type
+from .witness_replay import UnsupportedWitness, witness_goal
+
+
+def _distinct(values: list[JsonValue], limit: int) -> list[JsonValue]:
+    seen = set()
+    result = []
+    for value in values:
+        key = canonical_json(value)
+        if key not in seen:
+            seen.add(key)
+            result.append(value)
+            if len(result) >= limit:
+                break
+    return result
+
+
+def constructor_values(
+    ty: dict, function, *, limit: int = 16, depth: int = 0,
+    type_arguments: JsonObject | None = None,
+) -> list[JsonValue]:
+    if depth > 5:
+        raise UnsupportedWitness("Constructor catalog exceeds its type-depth bound")
+    kind, name = ty.get("kind"), str(ty.get("name", ""))
+    type_arguments = {} if type_arguments is None else type_arguments
+    if isinstance(type_arguments.get(name), str):
+        kind = str(type_arguments[name])
+    if kind == "bool":
+        return [False, True]
+    if kind in {"usize", "u8", "u16", "u32", "u64", "u128", "nat"}:
+        return [0, 1, 2, 3]
+    if kind in {"int", "isize", "i8", "i16", "i32", "i64", "i128"}:
+        return [0, 1, 2, -1]
+    if kind == "()":
+        return [None]
+    arguments = ty.get("type_args", [])
+    if kind in {"Ghost", "Tracked"}:
+        if kind == "Tracked" or len(arguments) != 1:
+            raise UnsupportedWitness("Permission tokens cannot be invented as witness values")
+        return [
+            {"kind": "ghost", "value": value}
+            for value in constructor_values(
+                arguments[0], function, limit=limit, depth=depth + 1, type_arguments=type_arguments,
+            )
+        ]
+    if kind in {"Result", "Option"}:
+        choices = []
+        if kind == "Option":
+            choices.append({"kind": "variant", "name": "None", "items": []})
+        for index, variant in enumerate(("Ok", "Err") if kind == "Result" else ("Some",)):
+            if index < len(arguments):
+                choices.extend(
+                    {"kind": "variant", "name": variant, "items": [value]}
+                    for value in constructor_values(
+                        arguments[index], function, limit=limit, depth=depth + 1, type_arguments=type_arguments,
+                    )
+                )
+        return _distinct(choices, limit)
+    if kind == "Seq":
+        expression = parse_input_type(name, function)
+        if not arguments:
+            raise UnsupportedWitness(f"Sequence element type is unresolved: {name}")
+        elements = constructor_values(
+            arguments[0], function, limit=4, depth=depth + 1, type_arguments=type_arguments,
+        )
+        if expression.kind == "array":
+            length = expression.extra
+            if type(type_arguments.get(length)) is int:
+                length = str(type_arguments[length])
+            if not length.isdecimal() or not 0 <= int(length) <= 32:
+                raise UnsupportedWitness("Array witness search requires a small literal length")
+            size = int(length)
+            choices = [{"kind": "array", "items": [elements[0]] * size}]
+            if size:
+                choices.extend(
+                    {"kind": "array", "items": [value, *([elements[0]] * (size - 1))]}
+                    for value in elements[1:]
+                )
+            return choices
+        category = "vec" if ty.get("spec_view") is not None else "seq"
+        values: list[JsonValue] = [{"kind": category, "items": []}]
+        values.extend({"kind": category, "items": [element]} for element in elements)
+        if len(elements) > 1:
+            values.extend([
+                {"kind": category, "items": [elements[0], elements[1]]},
+                {"kind": category, "items": [elements[1], elements[0]]},
+            ])
+        return _distinct(values, limit)
+    if kind == "struct":
+        fields = ty.get("fields", [])
+        catalogs = [
+            constructor_values(
+                field["type"], function, limit=4, depth=depth + 1, type_arguments=type_arguments,
+            )
+            for field in fields
+        ]
+        if any(not values for values in catalogs):
+            return []
+        base = [values[0] for values in catalogs]
+        rows = [base]
+        for index, choices in enumerate(catalogs):
+            for value in choices[1:]:
+                row = list(base)
+                row[index] = value
+                rows.append(row)
+        if catalogs:
+            rows.append([values[min(1, len(values) - 1)] for values in catalogs])
+        if name.strip().startswith("("):
+            return _distinct([{"kind": "tuple", "items": row} for row in rows], limit)
+        if ty.get("is_opaque"):
+            raise UnsupportedWitness(f"Opaque type requires a source-authorized constructor: {name}")
+        return _distinct([
+            {"kind": "struct", "type": name,
+             "fields": {field["name"]: item for field, item in zip(fields, row)}}
+            for row in rows
+        ], limit)
+    raise UnsupportedWitness(f"No concrete constructor catalog for {name} ({kind})")
+
+
+def _shape(value: JsonValue) -> object:
+    if isinstance(value, dict):
+        kind = value.get("kind")
+        if kind in {"vec", "seq", "array", "tuple", "variant"}:
+            return kind, value.get("name"), tuple(_shape(item) for item in value.get("items", []))
+        if kind == "struct":
+            return kind, tuple((name, _shape(item)) for name, item in value["fields"].items())
+        if kind == "ghost":
+            return kind, _shape(value["value"])
+        return kind
+    return type(value).__name__
+
+
+def candidate_bindings(
+    obligation, *, max_candidates: int = 32, type_arguments: JsonObject | None = None,
+):
+    """Enumerate typed values; no case names, expected verdicts, or seeded outputs."""
+    if max_candidates <= 0:
+        return
+    function = function_spec_from_dict(obligation.native["function_spec"])
+    goal = witness_goal(obligation)
+    types = {"r1": function.return_type.to_dict(), "r2": function.return_type.to_dict()}
+    input_names = []
+    for parameter in function.params:
+        name = _var_name(parameter)
+        if parameter.is_mut_ref:
+            raise UnsupportedWitness("Mutable post-state enumeration is not enabled in this catalog")
+        types[name] = parameter.type.to_dict()
+        input_names.append(name)
+    if set(types) != {name for name, _ in goal.parameters}:
+        raise UnsupportedWitness("The concrete catalog does not cover this frozen input/output layout")
+    input_catalogs = [
+        constructor_values(types[name], function, type_arguments=type_arguments) for name in input_names
+    ]
+    outputs = constructor_values(types["r1"], function, type_arguments=type_arguments)
+    output_pairs = list(combinations(outputs, 2))
+    output_pairs.sort(key=lambda pair: _shape(pair[0]) != _shape(pair[1]))
+    produced = 0
+    # Interleave inputs for each output pair so a positive precondition is not
+    # starved by many impossible output shapes for the first input.
+    inputs = list(islice(product(*input_catalogs), max_candidates)) if input_catalogs else [()]
+    for first, second in output_pairs:
+        for row in inputs:
+            yield {**dict(zip(input_names, row)), "r1": first, "r2": second}
+            produced += 1
+            if produced >= max_candidates:
+                return

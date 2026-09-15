@@ -1,0 +1,37 @@
+schema_version = 1
+
+[project]
+root = "../../tests/fixtures/incomplete"
+
+[language]
+name = "verus"
+
+[targets]
+include = ["*.rs"]
+select = [
+    "vest_init_vec.rs:init_vec_u8",
+    "allocator_next_run.rs:next_run",
+    "atmosphere_array_new.rs:new@18",
+]
+
+[build]
+adapter = "verus.single_file"
+
+[analysis]
+kind = "concrete_determinism"
+observation_policy = "verus-observable-v1"
+
+[analysis.counterexamples]
+max_candidates = 16
+
+[limits]
+verifier_timeout_seconds = 30
+solver_timeout_ms = 1000
+max_search_rounds = 8
+seed = 0
+
+[artifacts]
+output_dir = "../../specdet-results/real-incompleteness"
+
+[assistance]
+mode = "off"

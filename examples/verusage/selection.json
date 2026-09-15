@@ -1,0 +1,453 @@
+{
+  "schema_version": 1,
+  "corpus": "VeruSAGE source-projects",
+  "coverage_notes": {
+    "anvil-controller": "The supplied verified and unverified corpus contains proof/spec functions, not executable contracts, and no actual input view() definitions. Three original proof targets are retained as explicit discovery exclusions, not determinism proofs.",
+    "anvil-library": "The supplied corpus has only two distinct executable contracts: VerusClone::verus_clone and vec_filter. The third selection is an original proof function, explicitly outside executable determinism coverage. View bounds on generic/Vec inputs are original, not invented.",
+    "node-replication": "The supplied verified and unverified corpus contains proof/spec functions only and no actual input view() definitions. Proof outputs must not be recast as executable functions merely to produce determinism results.",
+    "atmosphere": "ArraySet::new and Array::get were investigated but the current backend reports source-bound observation gaps for ArraySet<N> and &A. The final selections retain a real nongeneric virtual-address range constructor and accessor rather than modifying generic contracts to force them through.",
+    "ironkv": "StrictlyOrderedMap<K>::new was investigated but currently has a source-bound observation gap for generic map output. The final result case is the original EndPoint::clone_up_to_view, not a fabricated or specialized map contract."
+  },
+  "fixtures": [
+    {
+      "path": "anvil-controller/matching_pods.rs",
+      "source": "anvil-controller/verified/vreplicaset_controller__proof__helper_lemmas/vreplicaset_controller__proof__helper_lemmas__matching_pods_equal_to_matching_pod_entries_values.rs",
+      "classification": "full_source"
+    },
+    {
+      "path": "anvil-controller/stable_invariant.rs",
+      "source": "anvil-controller/verified/vreplicaset_controller__proof__liveness/vreplicaset_controller__proof__liveness__spec__invariant_since_phase_i_is_stable.rs",
+      "classification": "full_source"
+    },
+    {
+      "path": "anvil-controller/interference.rs",
+      "source": "anvil-controller/verified/vreplicaset_controller__proof__helper_lemmas/vreplicaset_controller__proof__helper_lemmas__only_interferes_with_itself_equivalent_to_lifted_only_interferes_with_itself_action.rs",
+      "classification": "full_source"
+    },
+    {
+      "path": "anvil-library/vec_filter.rs",
+      "source": "anvil-library/verified/vstd_exd/vec_lib/vec_lib.rs",
+      "classification": "contract_only",
+      "copied_source_lines": [[1, 12], [13, 18]],
+      "dependencies": ["VerusClone: View + Sized and its exact clone declaration", "Original Vec/View and Fn requirements and filtered-multiset postcondition", "Original vstd prelude and seq_lib imports"],
+      "transformations": ["Only vec_filter's implementation body is replaced with unimplemented!() and an explicit external_body attribute. All signature, requires and ensures text is unchanged."],
+      "omissions": ["Original vec_filter body lines 19-41, including the removed-vstd lemma_seq_properties invocation. This fixture does NOT verify the original filtering implementation."]
+    },
+    {
+      "path": "anvil-library/map_no_duplicates.rs",
+      "source": "anvil-library/verified/vstd_exd/seq_lib/map_values_weaknes_no_duplicates.rs",
+      "classification": "full_source"
+    },
+    {
+      "path": "atmosphere/page_index.rs",
+      "source": "atmosphere/verified/util/util__page_ptr_util_u__page_index2page_ptr.rs",
+      "classification": "full_source"
+    },
+    {
+      "path": "atmosphere/va_range_new.rs",
+      "source": "atmosphere/verified/va_range/va_range__impl2_new.rs",
+      "classification": "full_source"
+    },
+    {
+      "path": "atmosphere/va_range_index.rs",
+      "source": "atmosphere/verified/kernel/kernel__create_and_map_pages__impl0__check_address_space_va_range_free.rs",
+      "classification": "dependency_closed",
+      "copied_source_lines": [[19, 19], [1643, 1643], [1653, 1653], [1826, 1867], [2151, 2154]],
+      "dependencies": ["VAddr, KERNEL_MEM_END_L4INDEX, MEM_4k_MASK", "Entire original VaRange4K struct and impl, including its external view and view_match_spec declarations, wf and index", "spec_va_4k_valid"],
+      "transformations": ["Dependency-closed extraction into a prelude/verus!/main wrapper; retained source spans are byte-identical. No implementation bodies are changed."],
+      "omissions": ["All original material outside the declared copied spans: kernel, page table, allocator, IPC, process and other unrelated definitions. This View is deliberately the external one from this source, NOT the concrete-body View in va_range_new.rs."]
+    },
+    {
+      "path": "ironkv/vec_match.rs",
+      "source": "ironkv/verified/seq_is_unique_v/seq_is_unique__do_vec_u8s_match.rs",
+      "classification": "full_source"
+    },
+    {
+      "path": "ironkv/endpoints.rs",
+      "source": "ironkv/verified/seq_is_unique_v/seq_is_unique__endpoints_contain.rs",
+      "classification": "full_source"
+    },
+    {
+      "path": "ironkv/endpoint_clone.rs",
+      "source": "ironkv/verified/net_sht_v/net_sht_v__receive_with_demarshal.rs",
+      "classification": "dependency_closed",
+      "copied_source_lines": [[469, 471], [540, 556]],
+      "dependencies": ["Exact AbstractEndPoint and EndPoint structures", "Original EndPoint::clone_up_to_view contract/body and EndPoint::view body"],
+      "transformations": ["Dependency-closed extraction into a prelude/verus!/main wrapper, with a closing impl brace. All selected signatures, contracts and bodies are unchanged."],
+      "omissions": ["All original material outside the declared spans: protocol/network/demarshalling machinery and unrelated EndPoint::abstractable method. The selected function was already external_body in the original; no original implementation is being verified."]
+    },
+    {
+      "path": "memory-allocator/empty.rs",
+      "source": "memory-allocator/verified/commit_mask/commit_mask__impl__empty.rs",
+      "classification": "full_source"
+    },
+    {
+      "path": "memory-allocator/is_empty.rs",
+      "source": "memory-allocator/verified/commit_mask/commit_mask__impl__is_empty.rs",
+      "classification": "full_source"
+    },
+    {
+      "path": "memory-allocator/any_set.rs",
+      "source": "memory-allocator/verified/commit_mask/commit_mask__impl__any_set.rs",
+      "classification": "full_source"
+    },
+    {
+      "path": "node-replication/pop_rid.rs",
+      "source": "node-replication/verified/spec_linearization/spec__linearization__pop_rid.rs",
+      "classification": "full_source"
+    },
+    {
+      "path": "node-replication/max_of_set.rs",
+      "source": "node-replication/verified/spec__unbounded_log/spec__unbounded_log__max_of_set.rs",
+      "classification": "full_source"
+    },
+    {
+      "path": "node-replication/rids_match_pop.rs",
+      "source": "node-replication/verified/exec_utils/exec__utils__rids_match_pop.rs",
+      "classification": "full_source"
+    },
+    {
+      "path": "nrkernel/entry_base.rs",
+      "source": "nrkernel/verified/definitions_u/definitions_u__impl2__entry_base.rs",
+      "classification": "full_source"
+    },
+    {
+      "path": "nrkernel/x86_arch.rs",
+      "source": "nrkernel/verified/spec_t_mmu__defs/spec_t__mmu__defs__x86_arch_exec.rs",
+      "classification": "full_source"
+    },
+    {
+      "path": "storage/region_sizes.rs",
+      "source": "storage/verified/pmem_pmemutil/pmemutil_get_region_sizes.rs",
+      "classification": "contract_only",
+      "copied_source_lines": [[192, 268], [269, 277]],
+      "dependencies": ["PersistentMemoryByte, PersistentMemoryRegionView and its len", "Entire original PersistentMemoryRegionsView and impl, including spec_index and its distinct view method", "Entire PersistentMemoryRegions trait and the exact get_region_sizes signature/requires/ensures"],
+      "transformations": ["Dependency-closed extraction into a prelude/verus!/main wrapper. Only get_region_sizes's body is replaced by unimplemented!() plus external_body; every target requires/ensures clause and every spec/type definition is unchanged."],
+      "omissions": ["Original lines 1-191 contain unrelated deps_hack/PmSized/PmCopy definitions, sizing primitives and byte-conversion axioms.", "The original get_region_sizes loop body (lines 278-288) uses the retired iter.end field. This contract-only fixture does NOT verify the original implementation. No spec-function bodies are stubbed and no axioms are added."]
+    },
+    {
+      "path": "vest/compare_slice.rs",
+      "source": "vest/verified/utils/utils__compare_slice.rs",
+      "classification": "full_source"
+    },
+    {
+      "path": "vest/init_vec.rs",
+      "source": "vest/verified/utils/utils__init_vec_u8.rs",
+      "classification": "full_source"
+    },
+    {
+      "path": "vest/set_range.rs",
+      "source": "vest/verified/utils/utils__set_range.rs",
+      "classification": "compatibility_annotated",
+      "dependencies": ["The complete original source, including seq_splice, every requires/ensures clause, and the unchanged loop implementation"],
+      "transformations": ["Prepend #![verifier::deprecated_postcondition_mut_ref_style(true)] to explicitly preserve the original legacy interpretation of bare mutable parameters in ensures. No clause or equality is rewritten, and no final()/old() is inserted into any clause."],
+      "omissions": [],
+      "compatibility_reference": "https://github.com/verus-lang/verus/blob/main/source/docs/migration-mut-ref.md"
+    }
+  ],
+  "cases": [
+    {
+      "id": "anvil-controller.matching-pods",
+      "fixture": "anvil-controller/matching_pods.rs",
+      "function": "matching_pods_equal_to_matching_pod_entries_values",
+      "mode": "proof",
+      "role": "state relation",
+      "concrete": "not_applicable",
+      "abstract": "not_applicable",
+      "reason": "A proof lemma equates matching pods with the values of matching map entries. No executable return/post-state observation; no input View implementation."
+    },
+    {
+      "id": "anvil-controller.stable-invariant",
+      "fixture": "anvil-controller/stable_invariant.rs",
+      "function": "invariants_since_phase_i_is_stable",
+      "mode": "proof",
+      "role": "temporal invariant",
+      "concrete": "not_applicable",
+      "abstract": "not_applicable",
+      "reason": "A temporal invariant stability proof, not an executable contract. The VReplicaSetView name denotes an already abstract spec datatype, not an executable View implementation."
+    },
+    {
+      "id": "anvil-controller.interference",
+      "fixture": "anvil-controller/interference.rs",
+      "function": "only_interferes_with_itself_equivalent_to_lifted_only_interferes_with_itself_action",
+      "mode": "proof",
+      "role": "action equivalence",
+      "concrete": "not_applicable",
+      "abstract": "not_applicable",
+      "reason": "An action-equivalence proof without executable outputs. Retaining the proof mode is essential; converting it into an executable fixture would change the source semantics."
+    },
+    {
+      "id": "anvil-library.clone",
+      "fixture": "anvil-library/vec_filter.rs",
+      "function": "verus_clone",
+      "owner": "VerusClone",
+      "mode": "exec",
+      "role": "clone result",
+      "view_inputs": ["self"],
+      "concrete": "deterministic",
+      "abstract": "deterministic",
+      "reason": "The original trait extends View and Sized; self == r uniquely fixes the result, hence also its View for View-equivalent receivers."
+    },
+    {
+      "id": "anvil-library.vec-filter",
+      "fixture": "anvil-library/vec_filter.rs",
+      "function": "vec_filter",
+      "mode": "exec",
+      "role": "order-underconstrained collection result",
+      "view_inputs": ["v"],
+      "concrete": "nondeterministic_or_unknown",
+      "abstract": "nondeterministic_or_unknown",
+      "reason": "Only the filtered multiset is specified, not output order: two distinct selected values can be returned in either order. A bounded generic/callback witness search may remain UNKNOWN; only confirmed SAT counts as a counterexample."
+    },
+    {
+      "id": "anvil-library.map-no-duplicates",
+      "fixture": "anvil-library/map_no_duplicates.rs",
+      "function": "map_values_weakens_no_duplicates",
+      "mode": "proof",
+      "role": "collection invariant",
+      "concrete": "not_applicable",
+      "abstract": "not_applicable",
+      "reason": "The third distinct selection is a real proof lemma. There are only two distinct executable function names in the supplied anvil-library corpus."
+    },
+    {
+      "id": "atmosphere.page-index",
+      "fixture": "atmosphere/page_index.rs",
+      "function": "page_index2page_ptr",
+      "mode": "exec",
+      "role": "address conversion",
+      "view_inputs": [],
+      "concrete": "deterministic",
+      "abstract": "not_applicable",
+      "reason": "The bounded page index fixes the address through the original multiplication spec function. The usize input has no nontrivial View."
+    },
+    {
+      "id": "atmosphere.va-range-new",
+      "fixture": "atmosphere/va_range_new.rs",
+      "function": "new",
+      "owner": "VaRange4K",
+      "mode": "exec",
+      "role": "initial state result",
+      "view_inputs": [],
+      "concrete": "deterministic",
+      "abstract": "not_applicable",
+      "reason": "The result has the supplied start and length, plus wf. The exact source wf/view_match_spec forces each View element to spec_va_add_range(start,i) and fixes sequence length. All inputs are primitive, so input-View analysis is not applicable."
+    },
+    {
+      "id": "atmosphere.va-range-index",
+      "fixture": "atmosphere/va_range_index.rs",
+      "function": "index",
+      "owner": "VaRange4K",
+      "mode": "exec",
+      "role": "view-dependent accessor",
+      "view_inputs": ["self"],
+      "concrete": "deterministic",
+      "abstract": "deterministic",
+      "reason": "The result equals self@[i] for a well-formed receiver and a shared valid index. The source's external VaRange4K::view is preserved exactly; no concrete View body is borrowed from another flattened source."
+    },
+    {
+      "id": "ironkv.vec-match",
+      "fixture": "ironkv/vec_match.rs",
+      "function": "do_vec_u8s_match",
+      "mode": "exec",
+      "role": "byte comparison",
+      "view_inputs": ["e1", "e2"],
+      "concrete": "deterministic",
+      "abstract": "deterministic",
+      "reason": "eq is exactly the equality of the two byte sequence Views."
+    },
+    {
+      "id": "ironkv.endpoint-clone",
+      "fixture": "ironkv/endpoint_clone.rs",
+      "function": "clone_up_to_view",
+      "owner": "EndPoint",
+      "mode": "exec",
+      "role": "endpoint result",
+      "view_inputs": ["self"],
+      "concrete": "deterministic",
+      "abstract": "deterministic",
+      "reason": "The result's AbstractEndPoint View is exactly the receiver View. Internal Vec representation is intentionally not specified; the observable identifier sequence is fixed."
+    },
+    {
+      "id": "ironkv.endpoints-contain",
+      "fixture": "ironkv/endpoints.rs",
+      "function": "endpoints_contain",
+      "mode": "exec",
+      "role": "view-dependent membership",
+      "view_inputs": ["endpoints", "endpoint"],
+      "concrete": "deterministic",
+      "abstract": "deterministic",
+      "reason": "Membership is exactly the mapped endpoint Views containing endpoint@. Both the endpoint View and abstractify_end_points mapping are retained unchanged."
+    },
+    {
+      "id": "memory-allocator.empty",
+      "fixture": "memory-allocator/empty.rs",
+      "function": "empty",
+      "owner": "CommitMask",
+      "mode": "exec",
+      "role": "mask state result",
+      "view_inputs": [],
+      "concrete": "deterministic",
+      "abstract": "not_applicable",
+      "reason": "cm@ must equal the empty Set<int>. There is no abstract input. The exact source bit predicate and mask-to-set View remain in this fixture."
+    },
+    {
+      "id": "memory-allocator.is-empty",
+      "fixture": "memory-allocator/is_empty.rs",
+      "function": "is_empty",
+      "owner": "CommitMask",
+      "mode": "exec",
+      "role": "mask accessor",
+      "view_inputs": ["self"],
+      "concrete": "deterministic",
+      "abstract": "deterministic",
+      "reason": "The boolean is exactly whether the source-defined mask Set View is empty."
+    },
+    {
+      "id": "memory-allocator.any-set",
+      "fixture": "memory-allocator/any_set.rs",
+      "function": "any_set",
+      "owner": "CommitMask",
+      "mode": "exec",
+      "role": "two-view overlap",
+      "view_inputs": ["self", "other"],
+      "concrete": "deterministic",
+      "abstract": "deterministic",
+      "reason": "The boolean is exactly the negation of disjointness of two mask Views. This particular original makes is_bit_set external; it is not replaced by the different definition in the other CommitMask fixtures."
+    },
+    {
+      "id": "node-replication.pop-rid",
+      "fixture": "node-replication/pop_rid.rs",
+      "function": "pop_rid",
+      "mode": "proof",
+      "role": "choice result",
+      "concrete": "not_applicable",
+      "abstract": "not_applicable",
+      "reason": "This is a proof function with ghost outputs. Its contract permits any member of a nonempty finite set, but the executable backend excludes proof functions; no SAT result is claimed."
+    },
+    {
+      "id": "node-replication.max-of-set",
+      "fixture": "node-replication/max_of_set.rs",
+      "function": "max_of_set",
+      "mode": "proof",
+      "role": "upper-bound result",
+      "concrete": "not_applicable",
+      "abstract": "not_applicable",
+      "reason": "A proof function, not an executable accessor. Its original ensures only an upper bound, not the least upper bound; it must not be relabeled deterministic from the implementation."
+    },
+    {
+      "id": "node-replication.rids-match-pop",
+      "fixture": "node-replication/rids_match_pop.rs",
+      "function": "rids_match_pop",
+      "mode": "proof",
+      "role": "recursive state relation",
+      "concrete": "not_applicable",
+      "abstract": "not_applicable",
+      "reason": "The source proves a recursive relation between optional request IDs and a compact sequence; it has no executable result or actual input View."
+    },
+    {
+      "id": "nrkernel.entry-size",
+      "fixture": "nrkernel/entry_base.rs",
+      "function": "entry_size",
+      "owner": "ArchExec",
+      "mode": "exec",
+      "role": "architecture accessor",
+      "view_inputs": ["self"],
+      "concrete": "deterministic",
+      "abstract": "deterministic",
+      "reason": "The result is exactly self@.entry_size(layer). The receiver Arch View includes the sequence of ArchLayer Views."
+    },
+    {
+      "id": "nrkernel.x86-arch",
+      "fixture": "nrkernel/x86_arch.rs",
+      "function": "x86_arch_exec",
+      "mode": "exec",
+      "role": "architecture state result",
+      "view_inputs": [],
+      "concrete": "deterministic",
+      "abstract": "not_applicable",
+      "reason": "The constructor fixes the entire observable architecture to x86_arch_spec. No abstract inputs exist."
+    },
+    {
+      "id": "nrkernel.entry-base",
+      "fixture": "nrkernel/entry_base.rs",
+      "function": "entry_base",
+      "owner": "ArchExec",
+      "mode": "exec",
+      "role": "view-dependent address computation",
+      "view_inputs": ["self"],
+      "concrete": "deterministic",
+      "abstract": "deterministic",
+      "reason": "With the original architectural invariant and bounds, res is exactly the base-plus-index-times-entry-size function of the Arch View and shared numeric arguments."
+    },
+    {
+      "id": "storage.num-regions",
+      "fixture": "storage/region_sizes.rs",
+      "function": "get_num_regions",
+      "owner": "PersistentMemoryRegions",
+      "declaration": true,
+      "mode": "exec",
+      "role": "region count accessor",
+      "view_inputs": ["self"],
+      "concrete": "deterministic",
+      "abstract": "deterministic",
+      "reason": "The original trait declaration requires inv and fixes the count to the persistent-memory regions View length."
+    },
+    {
+      "id": "storage.region-size",
+      "fixture": "storage/region_sizes.rs",
+      "function": "get_region_size",
+      "owner": "PersistentMemoryRegions",
+      "declaration": true,
+      "mode": "exec",
+      "role": "indexed region result",
+      "view_inputs": ["self"],
+      "concrete": "deterministic",
+      "abstract": "deterministic",
+      "reason": "A valid index fixes result to the selected region's state length in the source View."
+    },
+    {
+      "id": "storage.region-sizes",
+      "fixture": "storage/region_sizes.rs",
+      "function": "get_region_sizes",
+      "mode": "exec",
+      "role": "view-dependent vector result",
+      "view_inputs": ["pm_regions"],
+      "concrete": "deterministic",
+      "abstract": "deterministic",
+      "reason": "The original length equality and pointwise region-size equality uniquely fix every element of the result sequence, including its length."
+    },
+    {
+      "id": "vest.compare-slice",
+      "fixture": "vest/compare_slice.rs",
+      "function": "compare_slice",
+      "mode": "exec",
+      "role": "slice accessor/comparison",
+      "view_inputs": ["x", "y"],
+      "concrete": "deterministic",
+      "abstract": "deterministic",
+      "reason": "The boolean is exactly extensional equality of the two byte slice Views."
+    },
+    {
+      "id": "vest.init-vec",
+      "fixture": "vest/init_vec.rs",
+      "function": "init_vec_u8",
+      "mode": "exec",
+      "role": "underconstrained vector result",
+      "view_inputs": [],
+      "concrete": "nondeterministic_or_unknown",
+      "abstract": "not_applicable",
+      "reason": "Only length is specified, not zero filling: n=1 admits [0] and [1]. The unchanged zero-filling implementation does not strengthen its contract. UNKNOWN from bounded sequence witness search is inconclusive, never a nondeterminism proof."
+    },
+    {
+      "id": "vest.set-range",
+      "fixture": "vest/set_range.rs",
+      "function": "set_range",
+      "mode": "exec",
+      "role": "mutable view-dependent splice",
+      "view_inputs": ["data", "input"],
+      "concrete": "deterministic",
+      "abstract": "deterministic",
+      "reason": "The post-state Vec View equals the original seq_splice of old(data)@, index and input@. Legacy mutable-state syntax is preserved literally; compiler rejection is a blocker, not a semantic pass."
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+"""Command-line composition root."""
+

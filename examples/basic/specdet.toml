@@ -1,0 +1,41 @@
+schema_version = 1
+
+[project]
+root = "."
+
+[language]
+name = "verus"
+
+[targets]
+include = ["contracts.rs"]
+visibility = "public"
+
+[build]
+adapter = "verus.single_file"
+
+[analysis]
+kind = "concrete_determinism"
+observation_policy = "verus-observable-v1"
+
+[analysis.proof_generation]
+strategies = ["baseline", "rules", "accepted", "assisted"]
+max_attempts = 3
+
+[limits]
+verifier_timeout_seconds = 30
+solver_timeout_ms = 1000
+max_search_rounds = 30
+seed = 0
+
+[artifacts]
+output_dir = "./specdet-results"
+
+[assistance]
+mode = "off"
+stage_policy = "all_applicable"
+excluded_stages = []
+max_rounds_per_stage = 2
+max_requests_per_target = 3
+max_requests_per_run = 30
+request_timeout_seconds = 300
+

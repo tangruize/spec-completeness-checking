@@ -1,0 +1,716 @@
+{
+  "schema_version": 1,
+  "recorded_date": "2026-09-11",
+  "analysis": "concrete_determinism",
+  "manifest_sha256": "8b494cd593ead0c4dcdf595601d3adba59bb1536d33abd648e5b2a512f4d2fad",
+  "verifier": {
+    "executable_digest": "17f3befe6b33d666301168fcd069092dfecce0158e8e2d86f8efbb4b25dacb80",
+    "rust_toolchain": "1.95.0-x86_64-unknown-linux-gnu",
+    "version": "Verus\n  Version: 0.2026.05.17.e479cce\n  Profile: release\n  Platform: linux_x86_64\n  Toolchain: 1.95.0-x86_64-unknown-linux-gnu",
+    "z3_python": "4.12.5"
+  },
+  "structural_validation": "11 tests passed; 2 real-verifier tests skipped without SPECDET_VERUS",
+  "real_unittest_result": "FAILED: 5 concrete subtests; real abstract test intentionally not enabled",
+  "selected": 27,
+  "matched_expectations": 22,
+  "decisive_semantic_results": 15,
+  "confirmed_sat_results": 0,
+  "proof_only_discovery_exclusions": 7,
+  "infrastructure_or_translation_failures": 5,
+  "abstract_run": "not_run_pending_parent_readiness",
+  "per_repo": {
+    "anvil-controller": {
+      "concrete:not_applicable": 3
+    },
+    "anvil-library": {
+      "concrete:proved_deterministic": 1,
+      "concrete:failure": 1,
+      "concrete:not_applicable": 1
+    },
+    "atmosphere": {
+      "concrete:proved_deterministic": 1,
+      "concrete:failure": 2
+    },
+    "ironkv": {
+      "concrete:proved_deterministic": 3
+    },
+    "memory-allocator": {
+      "concrete:proved_deterministic": 3
+    },
+    "node-replication": {
+      "concrete:not_applicable": 3
+    },
+    "nrkernel": {
+      "concrete:proved_deterministic": 3
+    },
+    "storage": {
+      "concrete:proved_deterministic": 2,
+      "concrete:failure": 1
+    },
+    "vest": {
+      "concrete:proved_deterministic": 2,
+      "concrete:failure": 1
+    }
+  },
+  "archives": [
+    {
+      "path": "runs/concrete-proof-evidence.tar.gz",
+      "sha256": "4053d37fc9f2aa3e6aae216036c467f8659798b6750f88ef56312b5385aa7368",
+      "compressed_bytes": 4472161,
+      "files": 949,
+      "retention": "Every original source, JSON report, stdout/stderr, verifier and SMT/query artifact. Only generated ELF executables omitted.",
+      "omitted_generated_executables": [
+        {
+          "member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/anvil-library.clone/concrete/20260911T095935Z-b82c8ff04e/targets/234edc2a77ed9b8669865ff7/attempts/000-43263cb59ca6/worktree/vec_filter",
+          "sha256": "58b5d8e7e7aadde156de6efea1636c7e365d6d84e7d5a198ad3eda10d7736f9d",
+          "bytes": 4330016,
+          "reason": "Generated post-verification executable; not source, proof, SMT query, verifier log, or process evidence"
+        },
+        {
+          "member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/atmosphere.page-index/concrete/20260911T095937Z-e716be0583/targets/b511c18cd4f7679d7aa69dae/attempts/000-b5cff3292c8e/worktree/page_index",
+          "sha256": "d85754340bed3918243e2ac06a5e49b249800a3260f37367853968dc57124d81",
+          "bytes": 4330016,
+          "reason": "Generated post-verification executable; not source, proof, SMT query, verifier log, or process evidence"
+        },
+        {
+          "member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/ironkv.endpoint-clone/concrete/20260911T095939Z-cee34bf426/targets/47a650c54ad94792934464e5/attempts/000-43e32bc1a4ba/worktree/endpoint_clone",
+          "sha256": "fc6d8d0a41fedd66b649e61812630c4d708c482e0fcca45eaab3b6626fa94b70",
+          "bytes": 4330056,
+          "reason": "Generated post-verification executable; not source, proof, SMT query, verifier log, or process evidence"
+        },
+        {
+          "member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/ironkv.endpoints-contain/concrete/20260911T095940Z-7590543f3b/targets/b3b3854da9216864b9d11e88/attempts/000-1705af82c440/worktree/endpoints",
+          "sha256": "5a0823953cb2f6b3e8d7f4204f1c1bcd6ead0ff5398f9fee37951b5128fa092a",
+          "bytes": 4330000,
+          "reason": "Generated post-verification executable; not source, proof, SMT query, verifier log, or process evidence"
+        },
+        {
+          "member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/ironkv.vec-match/concrete/20260911T095938Z-85bafe19ee/targets/bd88c84a99896973568b82c9/attempts/000-24047332687b/worktree/vec_match",
+          "sha256": "b57826b48dc4c23ae85addd11fba5c45abb95f71721ad5353f9de7f15d892a76",
+          "bytes": 4330000,
+          "reason": "Generated post-verification executable; not source, proof, SMT query, verifier log, or process evidence"
+        },
+        {
+          "member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/memory-allocator.any-set/concrete/20260911T095943Z-10f09acd9c/targets/bc8878050a76d74f2dbc0b43/attempts/000-7f1cfeeb7ebc/worktree/any_set",
+          "sha256": "c55b18e7f461eed4a44b398b93082e28ee8415001f658d8163513cd52bdd9a93",
+          "bytes": 4329984,
+          "reason": "Generated post-verification executable; not source, proof, SMT query, verifier log, or process evidence"
+        },
+        {
+          "member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/memory-allocator.empty/concrete/20260911T095941Z-b940005b8a/targets/3c3c9e60c196304effeb85d5/attempts/000-acbe78b2f06d/worktree/empty",
+          "sha256": "d55931c12ea029936b881a33d5e0f242fd676f0295fe46ddfe4082f5af2a0f37",
+          "bytes": 4329968,
+          "reason": "Generated post-verification executable; not source, proof, SMT query, verifier log, or process evidence"
+        },
+        {
+          "member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/memory-allocator.is-empty/concrete/20260911T095942Z-a9010b3833/targets/88cbf40794f0872cfd13cf35/attempts/000-f3f5a8a26fbb/worktree/is_empty",
+          "sha256": "5e07dcd2dd75ce7fc720e618a76461baaf77fe78ff106d5cdaa0d982031061a9",
+          "bytes": 4329992,
+          "reason": "Generated post-verification executable; not source, proof, SMT query, verifier log, or process evidence"
+        },
+        {
+          "member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/nrkernel.entry-base/concrete/20260911T095946Z-43704d86fc/targets/a7ce987c1a170f88edfb5d75/attempts/000-c8732f42a5cc/worktree/entry_base",
+          "sha256": "fab07ba2344869f165e811e0664f68e7ba6440077d18e0690ab90c7bd1713ba9",
+          "bytes": 4330016,
+          "reason": "Generated post-verification executable; not source, proof, SMT query, verifier log, or process evidence"
+        },
+        {
+          "member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/nrkernel.entry-size/concrete/20260911T095944Z-fadf053846/targets/54163073722337c8f2587c72/attempts/000-b5c270433629/worktree/entry_base",
+          "sha256": "fab07ba2344869f165e811e0664f68e7ba6440077d18e0690ab90c7bd1713ba9",
+          "bytes": 4330016,
+          "reason": "Generated post-verification executable; not source, proof, SMT query, verifier log, or process evidence"
+        },
+        {
+          "member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/nrkernel.x86-arch/concrete/20260911T095945Z-90bad58c9a/targets/ec0fe5063236475254c01273/attempts/000-520babc9f0d9/worktree/x86_arch",
+          "sha256": "5235dc249a45376f447bc1072163af538f04a568233cb762a5e15bda1c43e03a",
+          "bytes": 4329992,
+          "reason": "Generated post-verification executable; not source, proof, SMT query, verifier log, or process evidence"
+        },
+        {
+          "member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/storage.num-regions/concrete/20260911T095947Z-bda6045f07/targets/188634728d56ec04450b6a21/attempts/000-dae71b9c30ce/worktree/region_sizes",
+          "sha256": "b0b5e26dea3cca501782a52317261d0e2fe84b1198a219ab9ced24b1ef120769",
+          "bytes": 4330024,
+          "reason": "Generated post-verification executable; not source, proof, SMT query, verifier log, or process evidence"
+        },
+        {
+          "member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/storage.region-size/concrete/20260911T095948Z-c4148a27a9/targets/94c29fa22723c14d65611419/attempts/000-a2517d97d00f/worktree/region_sizes",
+          "sha256": "b0b5e26dea3cca501782a52317261d0e2fe84b1198a219ab9ced24b1ef120769",
+          "bytes": 4330024,
+          "reason": "Generated post-verification executable; not source, proof, SMT query, verifier log, or process evidence"
+        },
+        {
+          "member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/vest.compare-slice/concrete/20260911T095950Z-77a26f4ed0/targets/75a2e24863712fdff3d6726d/attempts/000-20674bc553fe/worktree/compare_slice",
+          "sha256": "e3f9a85a34846e8f90ff0c86990d14a243ede615685fe4197118eef504f73c30",
+          "bytes": 4330048,
+          "reason": "Generated post-verification executable; not source, proof, SMT query, verifier log, or process evidence"
+        },
+        {
+          "member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/vest.set-range/concrete/20260911T095952Z-873afae630/targets/d277029c1300c26924837d45/attempts/000-51485aa6e237/worktree/set_range",
+          "sha256": "fd2ed5bb830713e0d7d33912074461b01a07b24808f8ff9219141d10b2e81406",
+          "bytes": 4330000,
+          "reason": "Generated post-verification executable; not source, proof, SMT query, verifier log, or process evidence"
+        }
+      ]
+    },
+    {
+      "path": "runs/baseline-probes-evidence.tar.gz",
+      "sha256": "694acc2db827763898eccf92cd5cbe2489a69149c425ffb36f72ea957768b696",
+      "compressed_bytes": 675628,
+      "files": 76
+    }
+  ],
+  "cases": [
+    {
+      "id": "anvil-controller.matching-pods",
+      "repo": "anvil-controller",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "status": "not_applicable",
+      "function": "matching_pods_equal_to_matching_pod_entries_values",
+      "expected_concrete": "not_applicable",
+      "expected_abstract": "not_applicable",
+      "fixture": "anvil-controller/matching_pods.rs",
+      "fixture_sha256": "92e43a544655bf198f1ff153c6779b8a04d832c6743db229e565ec05776e1d0f",
+      "verdict": "not_evaluated",
+      "solver_statuses": [],
+      "api_exit_code": 0,
+      "reason": "Original proof function excluded from executable discovery; not compiled or proved",
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/anvil-controller.matching-pods/concrete/20260911T095935Z-36fb3275b7/summary.json"
+    },
+    {
+      "id": "anvil-controller.stable-invariant",
+      "repo": "anvil-controller",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "status": "not_applicable",
+      "function": "invariants_since_phase_i_is_stable",
+      "expected_concrete": "not_applicable",
+      "expected_abstract": "not_applicable",
+      "fixture": "anvil-controller/stable_invariant.rs",
+      "fixture_sha256": "d94f992abfdb44016d83fcf8da0ce4a24387dc616e4819d14e31388f249b7c59",
+      "verdict": "not_evaluated",
+      "solver_statuses": [],
+      "api_exit_code": 0,
+      "reason": "Original proof function excluded from executable discovery; not compiled or proved",
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/anvil-controller.stable-invariant/concrete/20260911T095935Z-e6c2971d07/summary.json"
+    },
+    {
+      "id": "anvil-controller.interference",
+      "repo": "anvil-controller",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "status": "not_applicable",
+      "function": "only_interferes_with_itself_equivalent_to_lifted_only_interferes_with_itself_action",
+      "expected_concrete": "not_applicable",
+      "expected_abstract": "not_applicable",
+      "fixture": "anvil-controller/interference.rs",
+      "fixture_sha256": "b61a5da07f539b5fe11285c3b1474140e7c0e89becbd41ce0c4dd17ed36bb4ca",
+      "verdict": "not_evaluated",
+      "solver_statuses": [],
+      "api_exit_code": 0,
+      "reason": "Original proof function excluded from executable discovery; not compiled or proved",
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/anvil-controller.interference/concrete/20260911T095935Z-8854733991/summary.json"
+    },
+    {
+      "id": "anvil-library.clone",
+      "repo": "anvil-library",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "status": "completed",
+      "function": "VerusClone::verus_clone",
+      "expected_concrete": "deterministic",
+      "expected_abstract": "deterministic",
+      "fixture": "anvil-library/vec_filter.rs",
+      "fixture_sha256": "6d592480c1d2e4987655d0df3f4208e31ba921b2214c6f18674f7b247adb1fd2",
+      "verdict": "deterministic",
+      "solver_statuses": [
+        "unsat"
+      ],
+      "api_exit_code": 0,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "errors": [],
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/anvil-library.clone/concrete/20260911T095935Z-b82c8ff04e/summary.json"
+    },
+    {
+      "id": "anvil-library.vec-filter",
+      "repo": "anvil-library",
+      "outcome": "failure",
+      "matched": false,
+      "semantic_coverage": false,
+      "status": "runner_error",
+      "function": "vec_filter",
+      "expected_concrete": "nondeterministic_or_unknown",
+      "expected_abstract": "nondeterministic_or_unknown",
+      "fixture": "anvil-library/vec_filter.rs",
+      "fixture_sha256": "6d592480c1d2e4987655d0df3f4208e31ba921b2214c6f18674f7b247adb1fd2",
+      "reason": "ValueError: Compiled predicate cannot be rendered: 'k'",
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/anvil-library.vec-filter/concrete/runner-error.txt",
+      "independent_baseline_probe": {
+        "proof_status": "unproved",
+        "query_status": "unknown",
+        "query_reason": "(incomplete quantifiers)",
+        "not_a_replacement_for_failed_api_run": true
+      }
+    },
+    {
+      "id": "anvil-library.map-no-duplicates",
+      "repo": "anvil-library",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "status": "not_applicable",
+      "function": "map_values_weakens_no_duplicates",
+      "expected_concrete": "not_applicable",
+      "expected_abstract": "not_applicable",
+      "fixture": "anvil-library/map_no_duplicates.rs",
+      "fixture_sha256": "f02aa03bb9a5b35075006675495cec0ff0917b3e9afad12904835f393e1fd58d",
+      "verdict": "not_evaluated",
+      "solver_statuses": [],
+      "api_exit_code": 0,
+      "reason": "Original proof function excluded from executable discovery; not compiled or proved",
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/anvil-library.map-no-duplicates/concrete/20260911T095937Z-ce54cffade/summary.json"
+    },
+    {
+      "id": "atmosphere.page-index",
+      "repo": "atmosphere",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "status": "completed",
+      "function": "page_index2page_ptr",
+      "expected_concrete": "deterministic",
+      "expected_abstract": "not_applicable",
+      "fixture": "atmosphere/page_index.rs",
+      "fixture_sha256": "b9485d8494adedb762a030634352ffac100f1879e80ced9da2ef886e99da6b16",
+      "verdict": "deterministic",
+      "solver_statuses": [
+        "unsat"
+      ],
+      "api_exit_code": 0,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "errors": [],
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/atmosphere.page-index/concrete/20260911T095937Z-e716be0583/summary.json"
+    },
+    {
+      "id": "atmosphere.va-range-new",
+      "repo": "atmosphere",
+      "outcome": "failure",
+      "matched": false,
+      "semantic_coverage": false,
+      "status": "failed",
+      "function": "VaRange4K::new",
+      "expected_concrete": "deterministic",
+      "expected_abstract": "not_applicable",
+      "fixture": "atmosphere/va_range_new.rs",
+      "fixture_sha256": "4a32dae1ee92b2c586eebf567f5bdd7352f34c0d0453c081880b1820d0906913",
+      "verdict": "not_evaluated",
+      "solver_statuses": [],
+      "api_exit_code": 2,
+      "reason": "Infrastructure/translation failure is not semantic coverage",
+      "errors": [
+        {
+          "code": "observation_gap",
+          "message": "No source-bound observation semantics were resolved for VAddr"
+        }
+      ],
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/atmosphere.va-range-new/concrete/20260911T095938Z-a7b52d91bf/summary.json"
+    },
+    {
+      "id": "atmosphere.va-range-index",
+      "repo": "atmosphere",
+      "outcome": "failure",
+      "matched": false,
+      "semantic_coverage": false,
+      "status": "failed",
+      "function": "VaRange4K::index",
+      "expected_concrete": "deterministic",
+      "expected_abstract": "deterministic",
+      "fixture": "atmosphere/va_range_index.rs",
+      "fixture_sha256": "66a0cf75cdf7c3c880fd7d297576ffc21951cb89b9432aac26758662743bf62b",
+      "verdict": "not_evaluated",
+      "solver_statuses": [],
+      "api_exit_code": 2,
+      "reason": "Infrastructure/translation failure is not semantic coverage",
+      "errors": [
+        {
+          "code": "observation_gap",
+          "message": "No source-bound observation semantics were resolved for VAddr"
+        }
+      ],
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/atmosphere.va-range-index/concrete/20260911T095938Z-4ca1cc19cb/summary.json"
+    },
+    {
+      "id": "ironkv.vec-match",
+      "repo": "ironkv",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "status": "completed",
+      "function": "do_vec_u8s_match",
+      "expected_concrete": "deterministic",
+      "expected_abstract": "deterministic",
+      "fixture": "ironkv/vec_match.rs",
+      "fixture_sha256": "bec764009113a6d72388d593a36b08d9ba393923a5c245b93f4585c3848df821",
+      "verdict": "deterministic",
+      "solver_statuses": [
+        "unsat"
+      ],
+      "api_exit_code": 0,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "errors": [],
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/ironkv.vec-match/concrete/20260911T095938Z-85bafe19ee/summary.json"
+    },
+    {
+      "id": "ironkv.endpoint-clone",
+      "repo": "ironkv",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "status": "completed",
+      "function": "EndPoint::clone_up_to_view",
+      "expected_concrete": "deterministic",
+      "expected_abstract": "deterministic",
+      "fixture": "ironkv/endpoint_clone.rs",
+      "fixture_sha256": "4de6e48400c16c7f6f1b967c5d38f6a67f0e2d6131874ee1b947fe091555f448",
+      "verdict": "deterministic",
+      "solver_statuses": [
+        "unsat"
+      ],
+      "api_exit_code": 0,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "errors": [],
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/ironkv.endpoint-clone/concrete/20260911T095939Z-cee34bf426/summary.json"
+    },
+    {
+      "id": "ironkv.endpoints-contain",
+      "repo": "ironkv",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "status": "completed",
+      "function": "endpoints_contain",
+      "expected_concrete": "deterministic",
+      "expected_abstract": "deterministic",
+      "fixture": "ironkv/endpoints.rs",
+      "fixture_sha256": "be30c8e7761f7bde8cfd36034a2ffb5617a9be8bb943452384ef676fced1f69a",
+      "verdict": "deterministic",
+      "solver_statuses": [
+        "unsat"
+      ],
+      "api_exit_code": 0,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "errors": [],
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/ironkv.endpoints-contain/concrete/20260911T095940Z-7590543f3b/summary.json"
+    },
+    {
+      "id": "memory-allocator.empty",
+      "repo": "memory-allocator",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "status": "completed",
+      "function": "CommitMask::empty",
+      "expected_concrete": "deterministic",
+      "expected_abstract": "not_applicable",
+      "fixture": "memory-allocator/empty.rs",
+      "fixture_sha256": "8fe22c47a90fc386ccb7e2f22b4ecc39ae2cb9ae68da6196383e16716d5e82f9",
+      "verdict": "deterministic",
+      "solver_statuses": [
+        "unsat"
+      ],
+      "api_exit_code": 0,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "errors": [],
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/memory-allocator.empty/concrete/20260911T095941Z-b940005b8a/summary.json"
+    },
+    {
+      "id": "memory-allocator.is-empty",
+      "repo": "memory-allocator",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "status": "completed",
+      "function": "CommitMask::is_empty",
+      "expected_concrete": "deterministic",
+      "expected_abstract": "deterministic",
+      "fixture": "memory-allocator/is_empty.rs",
+      "fixture_sha256": "49b92c5aa99a51f898575eef21a492c585a311f1ac22181b0cd1b390619830ae",
+      "verdict": "deterministic",
+      "solver_statuses": [
+        "unsat"
+      ],
+      "api_exit_code": 0,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "errors": [],
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/memory-allocator.is-empty/concrete/20260911T095942Z-a9010b3833/summary.json"
+    },
+    {
+      "id": "memory-allocator.any-set",
+      "repo": "memory-allocator",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "status": "completed",
+      "function": "CommitMask::any_set",
+      "expected_concrete": "deterministic",
+      "expected_abstract": "deterministic",
+      "fixture": "memory-allocator/any_set.rs",
+      "fixture_sha256": "b178ca691d6b58bee4191b6fb21ef7f9e3fa0d13f7af872e06d38bc4514cfa63",
+      "verdict": "deterministic",
+      "solver_statuses": [
+        "unsat"
+      ],
+      "api_exit_code": 0,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "errors": [],
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/memory-allocator.any-set/concrete/20260911T095943Z-10f09acd9c/summary.json"
+    },
+    {
+      "id": "node-replication.pop-rid",
+      "repo": "node-replication",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "status": "not_applicable",
+      "function": "pop_rid",
+      "expected_concrete": "not_applicable",
+      "expected_abstract": "not_applicable",
+      "fixture": "node-replication/pop_rid.rs",
+      "fixture_sha256": "24d0f787fd49688ee927cc2d8c1b25f236cb8001251502bd1bcbf7aabf0a4d44",
+      "verdict": "not_evaluated",
+      "solver_statuses": [],
+      "api_exit_code": 0,
+      "reason": "Original proof function excluded from executable discovery; not compiled or proved",
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/node-replication.pop-rid/concrete/20260911T095944Z-e6615b215c/summary.json"
+    },
+    {
+      "id": "node-replication.max-of-set",
+      "repo": "node-replication",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "status": "not_applicable",
+      "function": "max_of_set",
+      "expected_concrete": "not_applicable",
+      "expected_abstract": "not_applicable",
+      "fixture": "node-replication/max_of_set.rs",
+      "fixture_sha256": "b1039e9b3b4cd25f8aee5f1f475d3826192d418def4e6782300b663802269749",
+      "verdict": "not_evaluated",
+      "solver_statuses": [],
+      "api_exit_code": 0,
+      "reason": "Original proof function excluded from executable discovery; not compiled or proved",
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/node-replication.max-of-set/concrete/20260911T095944Z-96842e1abe/summary.json"
+    },
+    {
+      "id": "node-replication.rids-match-pop",
+      "repo": "node-replication",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "status": "not_applicable",
+      "function": "rids_match_pop",
+      "expected_concrete": "not_applicable",
+      "expected_abstract": "not_applicable",
+      "fixture": "node-replication/rids_match_pop.rs",
+      "fixture_sha256": "eacba8e0f314e8e02a13dfe577134e51bc55edb613ac645d007e44cc096d8fd8",
+      "verdict": "not_evaluated",
+      "solver_statuses": [],
+      "api_exit_code": 0,
+      "reason": "Original proof function excluded from executable discovery; not compiled or proved",
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/node-replication.rids-match-pop/concrete/20260911T095944Z-09d6c8872e/summary.json"
+    },
+    {
+      "id": "nrkernel.entry-size",
+      "repo": "nrkernel",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "status": "completed",
+      "function": "ArchExec::entry_size",
+      "expected_concrete": "deterministic",
+      "expected_abstract": "deterministic",
+      "fixture": "nrkernel/entry_base.rs",
+      "fixture_sha256": "fbfc251e733503562a6614da72fb0d382b2d06b97a3419a33b379f08c5b3f6f0",
+      "verdict": "deterministic",
+      "solver_statuses": [
+        "unsat"
+      ],
+      "api_exit_code": 0,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "errors": [],
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/nrkernel.entry-size/concrete/20260911T095944Z-fadf053846/summary.json"
+    },
+    {
+      "id": "nrkernel.x86-arch",
+      "repo": "nrkernel",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "status": "completed",
+      "function": "x86_arch_exec",
+      "expected_concrete": "deterministic",
+      "expected_abstract": "not_applicable",
+      "fixture": "nrkernel/x86_arch.rs",
+      "fixture_sha256": "ce32761c93a9c29635b280d7dac36a54ef85ed7334fa5d6cf9dcbf2e100c0d81",
+      "verdict": "deterministic",
+      "solver_statuses": [
+        "unsat"
+      ],
+      "api_exit_code": 0,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "errors": [],
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/nrkernel.x86-arch/concrete/20260911T095945Z-90bad58c9a/summary.json"
+    },
+    {
+      "id": "nrkernel.entry-base",
+      "repo": "nrkernel",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "status": "completed",
+      "function": "ArchExec::entry_base",
+      "expected_concrete": "deterministic",
+      "expected_abstract": "deterministic",
+      "fixture": "nrkernel/entry_base.rs",
+      "fixture_sha256": "fbfc251e733503562a6614da72fb0d382b2d06b97a3419a33b379f08c5b3f6f0",
+      "verdict": "deterministic",
+      "solver_statuses": [
+        "unsat"
+      ],
+      "api_exit_code": 0,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "errors": [],
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/nrkernel.entry-base/concrete/20260911T095946Z-43704d86fc/summary.json"
+    },
+    {
+      "id": "storage.num-regions",
+      "repo": "storage",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "status": "completed",
+      "function": "PersistentMemoryRegions::get_num_regions",
+      "expected_concrete": "deterministic",
+      "expected_abstract": "deterministic",
+      "fixture": "storage/region_sizes.rs",
+      "fixture_sha256": "7dc83fceb2361b976da9b97d7fdb8e4585a1a79d6b5574c218d09582aac3cc45",
+      "verdict": "deterministic",
+      "solver_statuses": [
+        "unsat"
+      ],
+      "api_exit_code": 0,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "errors": [],
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/storage.num-regions/concrete/20260911T095947Z-bda6045f07/summary.json"
+    },
+    {
+      "id": "storage.region-size",
+      "repo": "storage",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "status": "completed",
+      "function": "PersistentMemoryRegions::get_region_size",
+      "expected_concrete": "deterministic",
+      "expected_abstract": "deterministic",
+      "fixture": "storage/region_sizes.rs",
+      "fixture_sha256": "7dc83fceb2361b976da9b97d7fdb8e4585a1a79d6b5574c218d09582aac3cc45",
+      "verdict": "deterministic",
+      "solver_statuses": [
+        "unsat"
+      ],
+      "api_exit_code": 0,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "errors": [],
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/storage.region-size/concrete/20260911T095948Z-c4148a27a9/summary.json"
+    },
+    {
+      "id": "storage.region-sizes",
+      "repo": "storage",
+      "outcome": "failure",
+      "matched": false,
+      "semantic_coverage": false,
+      "status": "runner_error",
+      "function": "get_region_sizes",
+      "expected_concrete": "deterministic",
+      "expected_abstract": "deterministic",
+      "fixture": "storage/region_sizes.rs",
+      "fixture_sha256": "7dc83fceb2361b976da9b97d7fdb8e4585a1a79d6b5574c218d09582aac3cc45",
+      "reason": "ValueError: Compiled predicate cannot be rendered: 'k'",
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/storage.region-sizes/concrete/runner-error.txt",
+      "independent_baseline_probe": {
+        "proof_status": "unproved",
+        "query_status": "unknown",
+        "query_reason": "(incomplete quantifiers)",
+        "not_a_replacement_for_failed_api_run": true
+      }
+    },
+    {
+      "id": "vest.compare-slice",
+      "repo": "vest",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "status": "completed",
+      "function": "compare_slice",
+      "expected_concrete": "deterministic",
+      "expected_abstract": "deterministic",
+      "fixture": "vest/compare_slice.rs",
+      "fixture_sha256": "6ff1129a206f85ff4218568fe8896eb17fe5836e712b94545317840641000da5",
+      "verdict": "deterministic",
+      "solver_statuses": [
+        "unsat"
+      ],
+      "api_exit_code": 0,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "errors": [],
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/vest.compare-slice/concrete/20260911T095950Z-77a26f4ed0/summary.json"
+    },
+    {
+      "id": "vest.init-vec",
+      "repo": "vest",
+      "outcome": "failure",
+      "matched": false,
+      "semantic_coverage": false,
+      "status": "runner_error",
+      "function": "init_vec_u8",
+      "expected_concrete": "nondeterministic_or_unknown",
+      "expected_abstract": "not_applicable",
+      "fixture": "vest/init_vec.rs",
+      "fixture_sha256": "26d122557a7c0289361f18d094108baafc27f6dc9dd1b38f8075112c91aeace0",
+      "reason": "ValueError: Compiled predicate cannot be rendered: 'k_lo'",
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/vest.init-vec/concrete/runner-error.txt",
+      "independent_baseline_probe": {
+        "proof_status": "unproved",
+        "query_status": "unknown",
+        "query_reason": "(incomplete quantifiers)",
+        "not_a_replacement_for_failed_api_run": true
+      }
+    },
+    {
+      "id": "vest.set-range",
+      "repo": "vest",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "status": "completed",
+      "function": "set_range",
+      "expected_concrete": "deterministic",
+      "expected_abstract": "deterministic",
+      "fixture": "vest/set_range.rs",
+      "fixture_sha256": "21eefe09bed67fde5946c752519f7b80a4ef3914cfd584a08846ba626a15b2c8",
+      "verdict": "deterministic",
+      "solver_statuses": [
+        "unsat"
+      ],
+      "api_exit_code": 0,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "errors": [],
+      "evidence_member": "concrete-regression/unittest-4b0308932b304317822f720636a1c23d/vest.set-range/concrete/20260911T095952Z-873afae630/summary.json"
+    }
+  ]
+}

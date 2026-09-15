@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "vest.init_vec_u8",
+      "fixture": "vest_init_vec.rs",
+      "source": "vest/verified/utils/utils__init_vec_u8.rs",
+      "source_sha256": "26d122557a7c0289361f18d094108baafc27f6dc9dd1b38f8075112c91aeace0",
+      "function": "init_vec_u8",
+      "gap": "The postcondition constrains only the returned vector length, not its elements.",
+      "type_arguments": {},
+      "transformation": "none"
+    },
+    {
+      "id": "memory-allocator.CommitMask.next_run",
+      "fixture": "allocator_next_run.rs",
+      "source": "memory-allocator/verified/commit_mask/commit_mask__impl__next_run.rs",
+      "source_sha256": "97ce258c650698a6c1b8d2f48c22a6252b79f8adf4ec1f8806e43a683f7da9dd",
+      "function": "next_run",
+      "gap": "The contract permits zero-length runs at multiple start indices; first/maximal run clauses are commented out.",
+      "type_arguments": {},
+      "transformation": "none"
+    },
+    {
+      "id": "atmosphere.Array.new",
+      "fixture": "atmosphere_array_new.rs",
+      "source": "atmosphere/verified/array/array_set__impl0__new.rs",
+      "source_sha256": "5894385fc7ee77666a4d98852473970b356504045989d69cb95669f56ac2edf8",
+      "function": "new",
+      "exclude_owner": "ArraySet",
+      "gap": "Array::new ensures only wf(), whose sole constraint is the ghost sequence length N.",
+      "type_arguments": {"A": "bool", "N": 1},
+      "transformation": "prepend_legacy_mut_ref_compatibility"
+    }
+  ]
+}

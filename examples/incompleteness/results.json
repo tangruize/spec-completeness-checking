@@ -1,0 +1,133 @@
+{
+  "schema_version": 1,
+  "evidence_kind": "source_verified_constructive",
+  "original_smt_status_preserved": true,
+  "run": "specdet-results/real-incompleteness/20260914T043108Z-58c9a8e7f5",
+  "results": [
+    {
+      "function": "init_vec_u8",
+      "file": "vest_init_vec.rs",
+      "verdict": "nondeterministic",
+      "original_smt_status": "unknown",
+      "bindings": {
+        "n": 1,
+        "r1": {
+          "kind": "vec",
+          "items": [
+            0
+          ]
+        },
+        "r2": {
+          "kind": "vec",
+          "items": [
+            1
+          ]
+        }
+      },
+      "type_arguments": {},
+      "certificate_status": "verified",
+      "certificate_kind": "source_verified_constructive"
+    },
+    {
+      "function": "next_run",
+      "file": "allocator_next_run.rs",
+      "verdict": "nondeterministic",
+      "original_smt_status": "unknown",
+      "bindings": {
+        "self_": {
+          "kind": "struct",
+          "type": "CommitMask",
+          "fields": {
+            "mask": {
+              "kind": "array",
+              "items": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ]
+            }
+          }
+        },
+        "idx": 0,
+        "r1": {
+          "kind": "tuple",
+          "items": [
+            0,
+            0
+          ]
+        },
+        "r2": {
+          "kind": "tuple",
+          "items": [
+            1,
+            0
+          ]
+        }
+      },
+      "type_arguments": {},
+      "certificate_status": "verified",
+      "certificate_kind": "source_verified_constructive"
+    },
+    {
+      "function": "new",
+      "file": "atmosphere_array_new.rs",
+      "verdict": "nondeterministic",
+      "original_smt_status": "unknown",
+      "bindings": {
+        "r1": {
+          "kind": "struct",
+          "type": "Array<A, N>",
+          "fields": {
+            "seq": {
+              "kind": "ghost",
+              "value": {
+                "kind": "seq",
+                "items": [
+                  false
+                ]
+              }
+            },
+            "ar": {
+              "kind": "array",
+              "items": [
+                false
+              ]
+            }
+          }
+        },
+        "r2": {
+          "kind": "struct",
+          "type": "Array<A, N>",
+          "fields": {
+            "seq": {
+              "kind": "ghost",
+              "value": {
+                "kind": "seq",
+                "items": [
+                  true
+                ]
+              }
+            },
+            "ar": {
+              "kind": "array",
+              "items": [
+                false
+              ]
+            }
+          }
+        }
+      },
+      "type_arguments": {
+        "A": "bool",
+        "N": 1
+      },
+      "certificate_status": "verified",
+      "certificate_kind": "source_verified_constructive"
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+"""Versioned local artifacts."""
+

@@ -1,0 +1,934 @@
+{
+  "schema_version": 1,
+  "run": "specdet-results/verusage-final-regression",
+  "matched": 54,
+  "total": 54,
+  "semantic_coverage": 32,
+  "per_repo": {
+    "anvil-controller": {
+      "concrete:not_applicable": 3,
+      "abstract:not_applicable": 3
+    },
+    "anvil-library": {
+      "concrete:proved_deterministic": 1,
+      "abstract:proved_deterministic": 1,
+      "concrete:inconclusive": 1,
+      "abstract:concrete_prerequisite_not_proved": 1,
+      "concrete:not_applicable": 1,
+      "abstract:not_applicable": 1
+    },
+    "atmosphere": {
+      "concrete:proved_deterministic": 3,
+      "abstract:not_applicable": 2,
+      "abstract:proved_deterministic": 1
+    },
+    "ironkv": {
+      "concrete:proved_deterministic": 3,
+      "abstract:proved_deterministic": 3
+    },
+    "memory-allocator": {
+      "concrete:proved_deterministic": 3,
+      "abstract:not_applicable": 1,
+      "abstract:proved_deterministic": 2
+    },
+    "node-replication": {
+      "concrete:not_applicable": 3,
+      "abstract:not_applicable": 3
+    },
+    "nrkernel": {
+      "concrete:proved_deterministic": 3,
+      "abstract:proved_deterministic": 2,
+      "abstract:not_applicable": 1
+    },
+    "storage": {
+      "concrete:proved_deterministic": 3,
+      "abstract:proved_deterministic": 3
+    },
+    "vest": {
+      "concrete:proved_deterministic": 2,
+      "abstract:proved_deterministic": 2,
+      "concrete:inconclusive": 1,
+      "abstract:not_applicable": 1
+    }
+  },
+  "exit_code": 0,
+  "live_model_tested": false,
+  "cases": [
+    {
+      "id": "anvil-controller.matching-pods",
+      "repo": "anvil-controller",
+      "analysis": "concrete",
+      "expected": null,
+      "status": "not_applicable",
+      "verdict": "not_evaluated",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "reason": "Original proof function excluded from executable discovery; not compiled or proved",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "anvil-controller.matching-pods",
+      "repo": "anvil-controller",
+      "analysis": "abstract",
+      "expected": null,
+      "status": "not_applicable",
+      "verdict": "not_evaluated",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "reason": "Original proof function excluded from executable discovery; not compiled or proved",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "anvil-controller.stable-invariant",
+      "repo": "anvil-controller",
+      "analysis": "concrete",
+      "expected": null,
+      "status": "not_applicable",
+      "verdict": "not_evaluated",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "reason": "Original proof function excluded from executable discovery; not compiled or proved",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "anvil-controller.stable-invariant",
+      "repo": "anvil-controller",
+      "analysis": "abstract",
+      "expected": null,
+      "status": "not_applicable",
+      "verdict": "not_evaluated",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "reason": "Original proof function excluded from executable discovery; not compiled or proved",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "anvil-controller.interference",
+      "repo": "anvil-controller",
+      "analysis": "concrete",
+      "expected": null,
+      "status": "not_applicable",
+      "verdict": "not_evaluated",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "reason": "Original proof function excluded from executable discovery; not compiled or proved",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "anvil-controller.interference",
+      "repo": "anvil-controller",
+      "analysis": "abstract",
+      "expected": null,
+      "status": "not_applicable",
+      "verdict": "not_evaluated",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "reason": "Original proof function excluded from executable discovery; not compiled or proved",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "anvil-library.clone",
+      "repo": "anvil-library",
+      "analysis": "concrete",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "anvil-library.clone",
+      "repo": "anvil-library",
+      "analysis": "abstract",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": [
+        "self"
+      ],
+      "paired_inputs": [
+        "self"
+      ]
+    },
+    {
+      "id": "anvil-library.vec-filter",
+      "repo": "anvil-library",
+      "analysis": "concrete",
+      "expected": "nondeterministic_or_unknown",
+      "status": "completed",
+      "verdict": "inconclusive",
+      "outcome": "inconclusive",
+      "matched": true,
+      "semantic_coverage": false,
+      "reason": "UNKNOWN is an allowed bounded-search limitation, not evidence of nondeterminism",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "anvil-library.vec-filter",
+      "repo": "anvil-library",
+      "analysis": "abstract",
+      "expected": "nondeterministic_or_unknown",
+      "status": "skipped",
+      "verdict": "not_evaluated",
+      "outcome": "concrete_prerequisite_not_proved",
+      "matched": true,
+      "semantic_coverage": false,
+      "reason": "Abstract analysis was not performed because concrete determinism was not proved",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "anvil-library.map-no-duplicates",
+      "repo": "anvil-library",
+      "analysis": "concrete",
+      "expected": null,
+      "status": "not_applicable",
+      "verdict": "not_evaluated",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "reason": "Original proof function excluded from executable discovery; not compiled or proved",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "anvil-library.map-no-duplicates",
+      "repo": "anvil-library",
+      "analysis": "abstract",
+      "expected": null,
+      "status": "not_applicable",
+      "verdict": "not_evaluated",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "reason": "Original proof function excluded from executable discovery; not compiled or proved",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "atmosphere.page-index",
+      "repo": "atmosphere",
+      "analysis": "concrete",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "atmosphere.page-index",
+      "repo": "atmosphere",
+      "analysis": "abstract",
+      "expected": "not_applicable",
+      "status": "not_applicable",
+      "verdict": "not_evaluated",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "reason": "No source-defined nontrivial input View; not an abstract proof",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "atmosphere.va-range-new",
+      "repo": "atmosphere",
+      "analysis": "concrete",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": "offline_reference",
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "atmosphere.va-range-new",
+      "repo": "atmosphere",
+      "analysis": "abstract",
+      "expected": "not_applicable",
+      "status": "not_applicable",
+      "verdict": "not_evaluated",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "reason": "No source-defined nontrivial input View; not an abstract proof",
+      "proof_candidate_source": "offline_reference",
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "atmosphere.va-range-index",
+      "repo": "atmosphere",
+      "analysis": "concrete",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "atmosphere.va-range-index",
+      "repo": "atmosphere",
+      "analysis": "abstract",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": [
+        "self"
+      ],
+      "paired_inputs": [
+        "self"
+      ]
+    },
+    {
+      "id": "ironkv.vec-match",
+      "repo": "ironkv",
+      "analysis": "concrete",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "ironkv.vec-match",
+      "repo": "ironkv",
+      "analysis": "abstract",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": [
+        "e1",
+        "e2"
+      ],
+      "paired_inputs": [
+        "e1",
+        "e2"
+      ]
+    },
+    {
+      "id": "ironkv.endpoint-clone",
+      "repo": "ironkv",
+      "analysis": "concrete",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "ironkv.endpoint-clone",
+      "repo": "ironkv",
+      "analysis": "abstract",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": [
+        "self"
+      ],
+      "paired_inputs": [
+        "self"
+      ]
+    },
+    {
+      "id": "ironkv.endpoints-contain",
+      "repo": "ironkv",
+      "analysis": "concrete",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "ironkv.endpoints-contain",
+      "repo": "ironkv",
+      "analysis": "abstract",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": [
+        "endpoint",
+        "endpoints"
+      ],
+      "paired_inputs": [
+        "endpoint",
+        "endpoints"
+      ]
+    },
+    {
+      "id": "memory-allocator.empty",
+      "repo": "memory-allocator",
+      "analysis": "concrete",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "memory-allocator.empty",
+      "repo": "memory-allocator",
+      "analysis": "abstract",
+      "expected": "not_applicable",
+      "status": "not_applicable",
+      "verdict": "not_evaluated",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "reason": "No source-defined nontrivial input View; not an abstract proof",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "memory-allocator.is-empty",
+      "repo": "memory-allocator",
+      "analysis": "concrete",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "memory-allocator.is-empty",
+      "repo": "memory-allocator",
+      "analysis": "abstract",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": [
+        "self"
+      ],
+      "paired_inputs": [
+        "self"
+      ]
+    },
+    {
+      "id": "memory-allocator.any-set",
+      "repo": "memory-allocator",
+      "analysis": "concrete",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "memory-allocator.any-set",
+      "repo": "memory-allocator",
+      "analysis": "abstract",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": [
+        "other",
+        "self"
+      ],
+      "paired_inputs": [
+        "other",
+        "self"
+      ]
+    },
+    {
+      "id": "node-replication.pop-rid",
+      "repo": "node-replication",
+      "analysis": "concrete",
+      "expected": null,
+      "status": "not_applicable",
+      "verdict": "not_evaluated",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "reason": "Original proof function excluded from executable discovery; not compiled or proved",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "node-replication.pop-rid",
+      "repo": "node-replication",
+      "analysis": "abstract",
+      "expected": null,
+      "status": "not_applicable",
+      "verdict": "not_evaluated",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "reason": "Original proof function excluded from executable discovery; not compiled or proved",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "node-replication.max-of-set",
+      "repo": "node-replication",
+      "analysis": "concrete",
+      "expected": null,
+      "status": "not_applicable",
+      "verdict": "not_evaluated",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "reason": "Original proof function excluded from executable discovery; not compiled or proved",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "node-replication.max-of-set",
+      "repo": "node-replication",
+      "analysis": "abstract",
+      "expected": null,
+      "status": "not_applicable",
+      "verdict": "not_evaluated",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "reason": "Original proof function excluded from executable discovery; not compiled or proved",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "node-replication.rids-match-pop",
+      "repo": "node-replication",
+      "analysis": "concrete",
+      "expected": null,
+      "status": "not_applicable",
+      "verdict": "not_evaluated",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "reason": "Original proof function excluded from executable discovery; not compiled or proved",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "node-replication.rids-match-pop",
+      "repo": "node-replication",
+      "analysis": "abstract",
+      "expected": null,
+      "status": "not_applicable",
+      "verdict": "not_evaluated",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "reason": "Original proof function excluded from executable discovery; not compiled or proved",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "nrkernel.entry-size",
+      "repo": "nrkernel",
+      "analysis": "concrete",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "nrkernel.entry-size",
+      "repo": "nrkernel",
+      "analysis": "abstract",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": [
+        "self"
+      ],
+      "paired_inputs": [
+        "self"
+      ]
+    },
+    {
+      "id": "nrkernel.x86-arch",
+      "repo": "nrkernel",
+      "analysis": "concrete",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "nrkernel.x86-arch",
+      "repo": "nrkernel",
+      "analysis": "abstract",
+      "expected": "not_applicable",
+      "status": "not_applicable",
+      "verdict": "not_evaluated",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "reason": "No source-defined nontrivial input View; not an abstract proof",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "nrkernel.entry-base",
+      "repo": "nrkernel",
+      "analysis": "concrete",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "nrkernel.entry-base",
+      "repo": "nrkernel",
+      "analysis": "abstract",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": [
+        "self"
+      ],
+      "paired_inputs": [
+        "self"
+      ]
+    },
+    {
+      "id": "storage.num-regions",
+      "repo": "storage",
+      "analysis": "concrete",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "storage.num-regions",
+      "repo": "storage",
+      "analysis": "abstract",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": [
+        "self"
+      ],
+      "paired_inputs": [
+        "self"
+      ]
+    },
+    {
+      "id": "storage.region-size",
+      "repo": "storage",
+      "analysis": "concrete",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "storage.region-size",
+      "repo": "storage",
+      "analysis": "abstract",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": [
+        "self"
+      ],
+      "paired_inputs": [
+        "self"
+      ]
+    },
+    {
+      "id": "storage.region-sizes",
+      "repo": "storage",
+      "analysis": "concrete",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "storage.region-sizes",
+      "repo": "storage",
+      "analysis": "abstract",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": [
+        "pm_regions"
+      ],
+      "paired_inputs": [
+        "pm_regions"
+      ]
+    },
+    {
+      "id": "vest.compare-slice",
+      "repo": "vest",
+      "analysis": "concrete",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "vest.compare-slice",
+      "repo": "vest",
+      "analysis": "abstract",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": [
+        "x",
+        "y"
+      ],
+      "paired_inputs": [
+        "x",
+        "y"
+      ]
+    },
+    {
+      "id": "vest.init-vec",
+      "repo": "vest",
+      "analysis": "concrete",
+      "expected": "nondeterministic_or_unknown",
+      "status": "completed",
+      "verdict": "inconclusive",
+      "outcome": "inconclusive",
+      "matched": true,
+      "semantic_coverage": false,
+      "reason": "UNKNOWN is an allowed bounded-search limitation, not evidence of nondeterminism",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "vest.init-vec",
+      "repo": "vest",
+      "analysis": "abstract",
+      "expected": "not_applicable",
+      "status": "not_applicable",
+      "verdict": "not_evaluated",
+      "outcome": "not_applicable",
+      "matched": true,
+      "semantic_coverage": false,
+      "reason": "No source-defined nontrivial input View; not an abstract proof",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "vest.set-range",
+      "repo": "vest",
+      "analysis": "concrete",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": null,
+      "paired_inputs": null
+    },
+    {
+      "id": "vest.set-range",
+      "repo": "vest",
+      "analysis": "abstract",
+      "expected": "deterministic",
+      "status": "completed",
+      "verdict": "deterministic",
+      "outcome": "proved_deterministic",
+      "matched": true,
+      "semantic_coverage": true,
+      "reason": "The original contract must prove uniqueness, not merely fail to produce a counterexample",
+      "proof_candidate_source": null,
+      "expected_paired_inputs": [
+        "data",
+        "input"
+      ],
+      "paired_inputs": [
+        "data",
+        "input"
+      ]
+    }
+  ]
+}
