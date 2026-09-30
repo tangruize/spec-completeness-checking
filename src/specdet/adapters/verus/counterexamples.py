@@ -10,6 +10,7 @@ from specdet.domain.models import (
 )
 from specdet.storage.artifacts import ArtifactStore
 from specdet.storage.workspace import PreparedProject
+from specdet.runtime import RunDeadlineExceeded, check_deadline
 
 from .witness_replay import UnsupportedWitness, replay_witness, witness_goal
 from .witness_values import candidate_bindings
@@ -51,6 +52,7 @@ def find_counterexample(
 
     try:
         for bindings, arguments in candidates():
+            check_deadline()
             key = digest([bindings, arguments])
             if key in seen:
                 continue
@@ -90,6 +92,11 @@ def find_counterexample(
     except UnsupportedWitness as error:
         diagnostics.append(Diagnostic(
             Stage.COUNTEREXAMPLE, "unsupported_witness", str(error), "warning",
+        ))
+    except RunDeadlineExceeded:
+        diagnostics.append(Diagnostic(
+            Stage.COUNTEREXAMPLE, "run_budget_exhausted",
+            "Whole-analysis budget exhausted during constructor search; recorded attempts are retained", "warning",
         ))
     summary = CounterexampleSearchResult(
         attempts=attempts, exhausted=attempts >= max_candidates,

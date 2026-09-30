@@ -45,6 +45,7 @@ def main() -> int:
     parser.add_argument("--verify-implementation", action="store_true")
     parser.add_argument("--verifier-timeout", type=int, default=30)
     parser.add_argument("--solver-timeout-ms", type=int, default=1000)
+    parser.add_argument("--run-timeout", type=int, default=60, help="Whole checker analysis budget in seconds")
     args = parser.parse_args()
     root = args.source_root.resolve()
     source = root / "src"
@@ -114,6 +115,7 @@ def main() -> int:
             verifier_timeout_seconds=args.verifier_timeout,
             solver_timeout_ms=args.solver_timeout_ms,
             max_search_rounds=4,
+            run_timeout_seconds=args.run_timeout,
         ),
         proof_strategies=("baseline", "rules"),
         max_proof_attempts=2,

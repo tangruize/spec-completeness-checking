@@ -10,6 +10,7 @@ from pathlib import Path
 
 from specdet.config import Config
 from specdet.domain.models import Diagnostic, Stage, StageError
+from specdet.runtime import RunDeadlineExceeded, bounded_timeout, check_deadline, kill_owned_process, owned_process
 from specdet.storage.artifacts import ArtifactStore, file_digest
 
 
@@ -30,22 +31,22 @@ def _decode(value: str | bytes | None) -> str:
 
 
 def run_process(
-    command: list[str], cwd: Path, timeout: int, environment: dict[str, str],
+    command: list[str], cwd: Path, timeout: float, environment: dict[str, str],
 ) -> ProcessResult:
     started = time.monotonic()
-    try:
-        result = subprocess.run(
-            command, cwd=cwd, env=environment, timeout=timeout,
-            capture_output=True, text=True,
-        )
-    except subprocess.TimeoutExpired as error:
-        return ProcessResult(
-            tuple(command), -1, _decode(error.stdout), _decode(error.stderr),
-            (time.monotonic() - started) * 1000, timed_out=True,
-        )
+    timeout = bounded_timeout(timeout)
+    timed_out = False
+    with owned_process(command, cwd=cwd, environment=environment) as process:
+        try:
+            stdout, stderr = process.communicate(timeout=timeout)
+        except (subprocess.TimeoutExpired, RunDeadlineExceeded):
+            kill_owned_process(process)
+            stdout, stderr = process.communicate()
+            timed_out = True
+        returncode = -1 if timed_out else process.returncode
     return ProcessResult(
-        tuple(command), result.returncode, result.stdout, result.stderr,
-        (time.monotonic() - started) * 1000,
+        tuple(command), returncode, _decode(stdout), _decode(stderr),
+        (time.monotonic() - started) * 1000, timed_out=timed_out,
     )
 
 
@@ -63,6 +64,7 @@ class VerusExecutor:
                 raise FileNotFoundError("rustup is required for the configured rust_toolchain")
             command = ["rustup", "run", config.toolchain.rust_toolchain, "rustc", "--print", "sysroot"]
             proc = run_process(command, config.project_root, 30, self.environment)
+            check_deadline()
             if proc.returncode != 0:
                 raise RuntimeError(f"Cannot resolve Rust sysroot: {proc.stderr}")
             library = str(Path(proc.stdout.strip()) / "lib")
@@ -70,6 +72,7 @@ class VerusExecutor:
 
     def identity(self) -> dict:
         result = run_process([str(self.executable), "--version"], self.executable.parent, 30, self.environment)
+        check_deadline()
         if result.returncode != 0 or result.timed_out:
             raise StageError(Diagnostic(
                 Stage.CONFIG, "toolchain_error",

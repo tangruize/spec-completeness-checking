@@ -17,6 +17,20 @@ TOOL = Path(__file__).resolve().parents[1]
 
 
 class CliTests(unittest.TestCase):
+    def test_run_timeout_override_does_not_change_per_verifier_timeout(self):
+        from specdet.cli.main import _config, _parser
+
+        args = _parser().parse_args([
+            "analyze", "--config", str(TOOL / "examples/basic/specdet.toml"),
+            "--run-timeout", "180", "--timeout", "5",
+        ])
+        config = _config(args)
+        self.assertEqual(config.limits.run_timeout_seconds, 180)
+        self.assertEqual(config.limits.verifier_timeout_seconds, 5)
+        args.run_timeout = 0
+        with self.assertRaisesRegex(ValueError, "--run-timeout must be positive"):
+            _config(args)
+
     def test_installed_help_from_unrelated_directory(self):
         with tempfile.TemporaryDirectory() as directory:
             process = subprocess.run(

@@ -84,6 +84,7 @@ class SolverStatus(str, Enum):
     UNKNOWN = "unknown"
     NOT_RUN = "not_run"
     UNSUPPORTED = "unsupported"
+    INTERRUPTED = "interrupted"
 
 
 class Verdict(str, Enum):

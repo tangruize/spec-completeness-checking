@@ -13,6 +13,7 @@ from specdet.domain.models import (
 from specdet.domain.proposals import GenerationRequest, Proposal, ValidationRecord
 from specdet.ports.assistance import AssistanceSession
 from specdet.ports.language import LanguageBackend
+from specdet.runtime import check_deadline
 from specdet.storage.artifacts import ArtifactStore
 from specdet.storage.workspace import PreparedProject, prepare_project
 from .verdicts import classify
@@ -166,6 +167,7 @@ class ProjectSession(_Session):
         })
 
     def advance(self) -> StageOutcome:
+        check_deadline()
         if self.finished:
             return StageOutcome(Stage.DISCOVER, "completed")
         if self._waiting is not None:
@@ -242,6 +244,7 @@ class AnalysisSession(_Session):
     ):
         super().__init__(backend, config, run_dir)
         self._started = time.monotonic()
+        self._timed_out = False
         self.project = project
         self.target = target
         self._budget_target_id = target.id
@@ -324,6 +327,7 @@ class AnalysisSession(_Session):
     def advance(self) -> StageOutcome:
         if self.finished:
             return StageOutcome(Stage.REPORT, "completed")
+        check_deadline()
         if self._waiting is not None:
             raise RuntimeError("Resolve or decline the pending stage before advancing")
         if self.project is None or self.target is None:
@@ -611,8 +615,27 @@ class AnalysisSession(_Session):
             },
             "verifier_timeout_seconds_per_call": self.config.limits.verifier_timeout_seconds,
             "solver_timeout_ms_per_query": self.config.limits.solver_timeout_ms,
-            "wall_time_limit_seconds": None,
+            "wall_time_limit_seconds": self.config.limits.run_timeout_seconds,
+            "wall_time_limit_scope": "whole_run",
         }
+        for stage, key in (
+            (Stage.SEARCH, "search_rounds"), (Stage.COUNTEREXAMPLE, "counterexample_candidates"),
+        ):
+            if self._timed_out and self.stage == stage:
+                counter = self.report.resources[key]
+                counter["known_used"] = counter["used"]
+                counter["used"] = None
+
+    def stop_for_timeout(self) -> None:
+        if self.finished:
+            return
+        self._timed_out = True
+        self._waiting = None
+        self.report.diagnostics.append(Diagnostic(
+            self.stage, "run_budget_exhausted",
+            "Whole-analysis wall-time budget exhausted; completed evidence is retained", "warning",
+        ))
+        self._finish()
 
     def _finish(self) -> StageOutcome:
         trusted = (
@@ -622,10 +645,10 @@ class AnalysisSession(_Session):
         if not self._verdict_ready:
             self.report.verdict = classify(self.report, trusted_translation=trusted)
             self._verdict_ready = True
-        if self._phase_kind == "concrete_determinism" and self._requested_kind == "abstract_determinism":
+        if self.report.analysis_kind == "concrete_determinism" and self._requested_kind == "abstract_determinism":
             return self._finish_prerequisite()
         if (
-            not self._failed and not self._explanation_requested
+            not self._failed and not self._timed_out and not self._explanation_requested
             and self.report.verdict in {Verdict.INCONCLUSIVE, Verdict.NONDETERMINISTIC}
         ):
             self._explanation_requested = True
@@ -635,7 +658,7 @@ class AnalysisSession(_Session):
             )
         self.report.status = (
             "not_applicable" if self._not_applicable
-            else "failed" if self._failed else "completed"
+            else "failed" if self._failed else "timed_out" if self._timed_out else "completed"
         )
         if self._failed and self.report.verdict == Verdict.NOT_EVALUATED:
             unsupported = {"no_contract", "unsupported_return", "unsupported_syntax", "unsupported_capability"}
@@ -648,7 +671,7 @@ class AnalysisSession(_Session):
         return self._record(StageOutcome(Stage.REPORT, "produced"))
 
     def _finish_prerequisite(self) -> StageOutcome:
-        self.report.status = "failed" if self._failed else "completed"
+        self.report.status = "failed" if self._failed else "timed_out" if self._timed_out else "completed"
         self.report.assistance["accepted_proposals"] = list(self._accepted_ids)
         self._record_resources()
         concrete = self.report.to_dict()
@@ -659,10 +682,11 @@ class AnalysisSession(_Session):
             concrete_result=concrete, artifact_dir=str(self.run_dir.resolve()),
         )
         if concrete["status"] != "completed" or concrete["verdict"] != Verdict.DETERMINISTIC.value:
-            self.report.status = "skipped"
+            self.report.status = "timed_out" if self._timed_out else "skipped"
             self.report.diagnostics.append(Diagnostic(
-                Stage.LOWER, "concrete_prerequisite_unproved",
-                "Abstract checking requires a proved concrete-input determinism result",
+                Stage.LOWER, "run_budget_exhausted" if self._timed_out else "concrete_prerequisite_unproved",
+                "Whole-analysis budget exhausted before abstract checking" if self._timed_out
+                else "Abstract checking requires a proved concrete-input determinism result",
                 "warning", {"concrete_report": "concrete-report.json"},
             ))
             self._record_resources()
@@ -757,6 +781,7 @@ class AnalysisSession(_Session):
 
 def run_mechanical(session: AssistanceSession) -> None:
     while not session.finished:
+        check_deadline()
         outcome = session.advance()
         if outcome.status == "needs_assistance":
             session.decline_assistance(outcome, "Live and replay assistance are disabled")

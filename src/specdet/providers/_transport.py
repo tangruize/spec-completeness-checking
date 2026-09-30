@@ -3,7 +3,6 @@ from __future__ import annotations
 import math
 import os
 import shutil
-import signal
 import subprocess
 from contextlib import contextmanager
 from pathlib import Path
@@ -12,6 +11,7 @@ from uuid import uuid4
 
 from specdet.assistance.prompts import MAX_RESPONSE_BYTES
 from specdet.domain.models import JsonObject
+from specdet.runtime import bounded_timeout, check_deadline, kill_owned_process, owned_process
 
 from .errors import ProviderError
 
@@ -105,43 +105,32 @@ def _output(value: str | bytes | None) -> str:
     return (value or "")[:16384]
 
 
-def _kill_owned_process(process: subprocess.Popen) -> None:
-    try:
-        if os.name == "posix":
-            os.killpg(process.pid, signal.SIGKILL)
-        else:
-            process.kill()
-    except ProcessLookupError:
-        pass
-
-
 def run_process(
     argv: Sequence[str], *, workspace: Path, environment: Mapping[str, str],
     timeout: float, prompt: str | None = None,
 ) -> subprocess.CompletedProcess:
     """One invocation, with no retries; timeout terminates its owned process group."""
     try:
-        with subprocess.Popen(
-            list(argv), cwd=workspace, env=dict(environment), shell=False,
-            stdin=subprocess.DEVNULL if prompt is None else subprocess.PIPE,
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            text=True, encoding="utf-8", start_new_session=True,
+        timeout = bounded_timeout(timeout)
+        with owned_process(
+            argv, cwd=workspace, environment=environment, with_input=prompt is not None,
         ) as process:
             try:
                 stdout, stderr = process.communicate(input=prompt, timeout=timeout)
             except subprocess.TimeoutExpired as error:
-                _kill_owned_process(process)
+                kill_owned_process(process)
                 try:
                     stdout, stderr = process.communicate()
                 except UnicodeError:
                     stdout, stderr = error.output, error.stderr
+                check_deadline()
                 raise ProviderError(
                     "provider_timeout", f"Provider exceeded its {timeout:g}s transport timeout",
                     retryable=True,
                     metadata={"stdout": _output(stdout), "stderr": _output(stderr)},
                 ) from error
             except UnicodeError as error:
-                _kill_owned_process(process)
+                kill_owned_process(process)
                 process.wait()
                 raise ProviderError("provider_encoding", "Provider output is not UTF-8") from error
             if process.returncode:

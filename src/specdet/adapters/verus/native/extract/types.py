@@ -484,7 +484,7 @@ class Witness:
     trace: list[dict] = field(default_factory=list)
     gap_type: str = ""
     gap_description: str = ""
-    r0_z3: str = ""
+    r0_z3: Optional[str] = ""
     candidate_assumes: list[Assume] = field(default_factory=list)
     search_exhausted: bool = False
     diagnostics: list[str] = field(default_factory=list)

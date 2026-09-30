@@ -15,7 +15,7 @@ The [agent evidence guide](../../docs/agent-evidence.md) explains how to attach 
 
 ## Tool-native output regression
 
-On 2026-09-30, the same sealed inputs were rerun after adding tool-native compact output and timing. Each row compares human output, `--compact-json` and complete `--json` for the **same new run**. Sizes are UTF-8 bytes, not estimated tokens; times are shared-host observations rather than an isolated speed benchmark.
+On 2026-09-30, the same sealed inputs were rerun for output-only commit `97a166d`, before the default whole-run deadline was added. Each row compares human output, `--compact-json` and complete `--json` for the **same new run**. Sizes are UTF-8 bytes, not estimated tokens; times are shared-host observations rather than an isolated speed benchmark. To repeat the longer analyses with the current tool, explicitly extend the whole-run budget.
 
 | Case | Reconfirmed result | Analysis time | Human bytes | Compact JSON bytes | Full JSON bytes |
 |---|---|---:|---:|---:|---:|
@@ -28,3 +28,5 @@ On 2026-09-30, the same sealed inputs were rerun after adding tool-native compac
 The comparison checked target/source hashes and problem IDs, verdicts and raw baselines, policy/exclusions/trust/feasibility, decisive evidence and witness digests, real used/limit counters, positive target/whole-run durations, and existence/digests of linked artifacts. In particular, Nanvix retains its unsupported `NonNull<u8>` constructor and **0/8 attempts**, rather than claiming budget exhaustion. Repeated recovery warnings are bounded without suppressing distinct blockers. Synthetic tests also cover huge logs/observations/witnesses, local UNSAT, untrusted translations, old metadata, failures and interruptions.
 
 The HFS row reruns the normal global analysis only; it does not rerun or promote the separate conditional error-alternative probe. The LRU control remains a deliberate omission, not an unexpected discovery. Native/extract/model scope and source-publication boundaries remain unchanged. Human byte counts include the separately bounded project diagnostics on stderr; both JSON modes put recorded diagnostics in stdout.
+
+With the subsequent **default 60-second whole-analysis budget**, native HFS returned `timed_out`/`inconclusive` with retained source-bound artifacts in **61.683 s** including cleanup. A real one-second LRU cutoff returned in **1.115 s**; the same control with `--run-timeout 20` completed in **7.781 s**, retaining the original UNKNOWN and the source-verified witness at candidate 9/16. These checks change execution budgets, not contracts, observations or evidence classification.

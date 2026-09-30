@@ -9,9 +9,10 @@ from typing import Callable
 
 from specdet.analysis.pipeline import AnalysisSession, ProjectSession, run_mechanical
 from specdet.config import Config
-from specdet.domain.models import JsonObject, as_object
+from specdet.domain.models import Diagnostic, JsonObject, Stage, as_object
 from specdet.ports.assistance import AssistanceSession
 from specdet.ports.language import LanguageBackend
+from specdet.runtime import RunDeadlineExceeded, check_deadline, run_deadline
 from specdet.storage.artifacts import ArtifactStore
 
 SessionDriver = Callable[[AssistanceSession], None]
@@ -45,7 +46,6 @@ def analyze(
     """Analyze a project, optionally driven by an explicit assistance controller."""
     started = time.monotonic()
     config.validate()
-    selected_backend = backend if backend is not None else create_backend(config)
     drive = driver if driver is not None else run_mechanical
     if driver is None and config.assistance.get("mode", "off") != "off":
         raise ValueError("Pass an explicit assistance driver when assistance is enabled")
@@ -58,39 +58,74 @@ def analyze(
     })
     completed = False
     results: list[JsonObject] = []
-    summary: JsonObject = {"schema_version": 1, "run_id": run_id, "run_dir": str(run_dir)}
+    summary: JsonObject = {
+        "schema_version": 1, "run_id": run_id, "run_dir": str(run_dir),
+        "run_timeout_seconds": config.limits.run_timeout_seconds,
+    }
+    project: ProjectSession | None = None
+    active: AnalysisSession | None = None
+    active_index = 0
     try:
-        project = ProjectSession(selected_backend, config, run_dir, require_toolchain=not discover_only)
-        drive(project)
-        summary["diagnostics"] = [as_object(item) for item in project.diagnostics]
-        summary["discovery_coverage"] = (
-            "partial" if any(item.code == "partial_discovery" for item in project.diagnostics)
-            else "source-visible"
-        )
-        summary["targets"] = [as_object(item) for item in project.targets]
-        if project.failed or project.project is None:
-            summary.update({"results": [], "status": "failed", "counts": {}})
-            code = 2
-        elif discover_only:
-            summary.update({"results": [], "status": "completed", "counts": {"targets": len(project.targets)}})
-            code = 0
-        else:
-            for target in project.targets:
-                session = AnalysisSession(
-                    selected_backend, config, project.project, target,
-                    run_dir / "targets" / target.id, run_id,
+        try:
+            with run_deadline(config.limits.run_timeout_seconds, started=started):
+                selected_backend = backend if backend is not None else create_backend(config)
+                project = ProjectSession(selected_backend, config, run_dir, require_toolchain=not discover_only)
+                drive(project)
+                check_deadline()
+                summary["diagnostics"] = [as_object(item) for item in project.diagnostics]
+                summary["discovery_coverage"] = (
+                    "partial" if any(item.code == "partial_discovery" for item in project.diagnostics)
+                    else "source-visible"
                 )
-                drive(session)
-                results.append(session.report.to_dict())
-                store.artifact("partial-summary.json", "run_summary", {
-                    **summary, "results": results, "status": "running",
-                    "duration_ms": round((time.monotonic() - started) * 1000, 3),
-                })
+                summary["targets"] = [as_object(item) for item in project.targets]
+                if project.failed or project.project is None:
+                    summary.update({"results": [], "status": "failed", "counts": {}})
+                    code = 2
+                elif discover_only:
+                    summary.update({"results": [], "status": "completed", "counts": {"targets": len(project.targets)}})
+                    code = 0
+                else:
+                    for active_index, target in enumerate(project.targets):
+                        check_deadline()
+                        active = AnalysisSession(
+                            selected_backend, config, project.project, target,
+                            run_dir / "targets" / target.id, run_id,
+                        )
+                        drive(active)
+                        results.append(active.report.to_dict())
+                        active = None
+                        store.artifact("partial-summary.json", "run_summary", {
+                            **summary, "results": results, "status": "running",
+                            "duration_ms": round((time.monotonic() - started) * 1000, 3),
+                        })
+                    summary.update({
+                        "results": results, "status": "completed",
+                        "counts": dict(Counter(str(row["verdict"]) for row in results)),
+                    })
+                    code = result_exit_code(results)
+        except RunDeadlineExceeded:
+            if active is not None and len(results) == active_index:
+                active.stop_for_timeout()
+                results.append(active.report.to_dict())
+            stage = active.stage if active is not None else project.stage if project is not None else Stage.CONFIG
+            diagnostic = Diagnostic(
+                stage, "run_budget_exhausted",
+                f"Whole-analysis {config.limits.run_timeout_seconds}s budget exhausted; "
+                "recorded evidence is retained. Increase --run-timeout to allow a longer run.",
+                "warning",
+            )
+            diagnostics = [as_object(item) for item in project.diagnostics] if project is not None else []
+            targets = project.targets if project is not None else []
             summary.update({
-                "results": results, "status": "completed",
+                "results": results, "status": "timed_out",
+                "diagnostics": [*diagnostics, as_object(diagnostic)],
+                "targets": [as_object(item) for item in targets],
+                "pending_targets": [as_object(item) for item in targets[len(results):]],
+                "discovery_coverage": summary.get("discovery_coverage", "not_completed"),
                 "counts": dict(Counter(str(row["verdict"]) for row in results)),
             })
-            code = result_exit_code(results)
+            recorded_code = result_exit_code(results) if results else 3
+            code = recorded_code if recorded_code in {1, 2} else 3
         summary["exit_code"] = code
         summary["duration_ms"] = round((time.monotonic() - started) * 1000, 3)
         store.artifact("summary.json", "run_summary", summary)

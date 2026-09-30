@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import tempfile
+import time
 import unittest
 from dataclasses import replace
 from pathlib import Path
@@ -125,7 +126,8 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(session.report.coverage["observation_policy"], "test-policy")
         self.assertEqual(session.report.resources["proof_attempts"]["used"], 1)
         self.assertEqual(session.report.resources["counterexample_candidates"]["used"], 0)
-        self.assertIsNone(session.report.resources["wall_time_limit_seconds"])
+        self.assertEqual(session.report.resources["wall_time_limit_seconds"], 60)
+        self.assertEqual(session.report.resources["wall_time_limit_scope"], "whole_run")
         self.assertGreaterEqual(session.report.duration_ms, 0)
 
     def test_public_api_accepts_a_non_verus_backend(self):
@@ -184,6 +186,95 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(session.report.verdict, Verdict.INCONCLUSIVE)
         self.assertEqual(session.report.search.confirmed_constraints, ())
         self.assertTrue(session.report.search.candidate_constraints)
+
+    def test_whole_run_deadline_interrupts_preparation_without_a_fake_verdict(self):
+        class SlowBackend(FakeBackend):
+            def toolchain_identity(self):
+                time.sleep(5)
+                return super().toolchain_identity()
+
+        config = replace(self.config, limits=replace(self.config.limits, run_timeout_seconds=1))
+        started = time.monotonic()
+        summary, code = analyze(config, backend=SlowBackend())
+        self.assertLess(time.monotonic() - started, 2.5)
+        self.assertGreaterEqual(summary["duration_ms"], 950)
+        self.assertEqual((code, summary["status"]), (3, "timed_out"))
+        self.assertEqual(summary["results"], [])
+        self.assertEqual(summary["discovery_coverage"], "not_completed")
+        self.assertEqual(summary["diagnostics"][-1]["code"], "run_budget_exhausted")
+        self.assertEqual(ArtifactStore(Path(summary["run_dir"])).read_artifact("manifest.json")["status"], "timed_out")
+
+    def test_whole_run_deadline_retains_completed_target_and_lists_unstarted_targets(self):
+        class SlowSecondTarget(FakeBackend):
+            def discover(self, project):
+                targets, diagnostics = super().discover(project)
+                return [targets[0], replace(targets[0], name="g"), replace(targets[0], name="h")], diagnostics
+
+            def check(self, project, obligation, candidate, attempt_dir, *, baseline=False):
+                if obligation.target.name == "g":
+                    time.sleep(5)
+                return super().check(project, obligation, candidate, attempt_dir, baseline=baseline)
+
+        config = replace(self.config, limits=replace(self.config.limits, run_timeout_seconds=1))
+        summary, code = analyze(config, backend=SlowSecondTarget(SolverStatus.UNSAT))
+        self.assertEqual((code, summary["status"]), (3, "timed_out"))
+        self.assertEqual([row["target"]["name"] for row in summary["results"]], ["f", "g"])
+        self.assertEqual(summary["results"][0]["verdict"], "deterministic")
+        self.assertEqual(summary["results"][0]["status"], "completed")
+        self.assertEqual(summary["results"][1]["status"], "timed_out")
+        self.assertEqual(summary["results"][1]["resources"]["proof_attempts"]["used"], 1)
+        self.assertEqual([target["name"] for target in summary["pending_targets"]], ["h"])
+        for row in summary["results"]:
+            self.assertTrue((Path(row["artifact_dir"]) / "report.json").is_file())
+
+    def test_deadline_does_not_erase_an_already_confirmed_result(self):
+        def drive(session):
+            run_mechanical(session)
+            if isinstance(session, AnalysisSession):
+                time.sleep(5)
+
+        config = replace(self.config, limits=replace(self.config.limits, run_timeout_seconds=1))
+        summary, code = analyze(config, backend=FakeBackend(SolverStatus.SAT), driver=drive)
+        self.assertEqual(summary["status"], "timed_out")
+        self.assertEqual(code, 1)
+        self.assertEqual(summary["results"][0]["verdict"], "nondeterministic")
+        self.assertEqual(summary["results"][0]["baseline"]["status"], "sat")
+
+    def test_deadline_keeps_abstract_request_separate_from_unfinished_concrete_prerequisite(self):
+        class SlowBackend(FakeBackend):
+            def check(self, *args, **kwargs):
+                time.sleep(5)
+                return super().check(*args, **kwargs)
+
+        config = replace(
+            self.config, analysis_kind="abstract_determinism",
+            limits=replace(self.config.limits, run_timeout_seconds=1),
+        )
+        summary, code = analyze(config, backend=SlowBackend())
+        self.assertEqual(code, 3)
+        row = summary["results"][0]
+        self.assertEqual(row["analysis_kind"], "abstract_determinism")
+        self.assertEqual(row["status"], "timed_out")
+        self.assertEqual(row["concrete_result"]["analysis_kind"], "concrete_determinism")
+        self.assertEqual(row["concrete_result"]["status"], "timed_out")
+        self.assertEqual(row["resources"]["wall_time_limit_seconds"], 1)
+
+    def test_timeout_during_phase_transition_preserves_the_completed_concrete_report(self):
+        config = replace(self.config, analysis_kind="abstract_determinism")
+        session = AnalysisSession(
+            FakeBackend(SolverStatus.UNSAT), config, self.project, self.target, self.run_dir, "run",
+        )
+        while session.report.analysis_kind != "abstract_determinism":
+            outcome = session.advance()
+            if outcome.status == "needs_assistance":
+                session.decline_assistance(outcome, "off")
+        concrete = session.report.concrete_result
+        session._phase_kind = "concrete_determinism"
+        session.stop_for_timeout()
+        self.assertIs(session.report.concrete_result, concrete)
+        self.assertEqual(concrete["analysis_kind"], "concrete_determinism")
+        self.assertEqual(concrete["verdict"], "deterministic")
+        self.assertEqual(session.report.status, "timed_out")
 
     def test_sat_and_confirmed_constraints_are_separate(self):
         session = self.session(FakeBackend(SolverStatus.SAT))

@@ -10,6 +10,8 @@ from pathlib import Path
 
 import z3
 
+from specdet.runtime import RunDeadlineExceeded, bounded_timeout_ms, check_deadline
+
 from ..extract.narrow import AssumeNode, _add_distinctness_witnesses, narrow
 from ..extract.predicates import NotEqualFnPred
 from ..extract.types import Assume, DetCheckSpec, Witness
@@ -49,9 +51,20 @@ def _check_constraints(
     seed: int,
 ) -> dict:
     _validate_query_settings(timeout_ms, seed)
-    solver.set(timeout=timeout_ms, random_seed=seed)
     started = time.monotonic()
-    result = solver.check(*constraints)
+    effective_timeout = None
+    try:
+        effective_timeout = bounded_timeout_ms(timeout_ms)
+        solver.set(timeout=effective_timeout, random_seed=seed)
+        result = solver.check(*constraints)
+    except RunDeadlineExceeded:
+        return {
+            "result": "interrupted", "z3_raw": None,
+            "query_constraints": [constraint.sexpr() for constraint in constraints],
+            "z3_ms": (time.monotonic() - started) * 1000,
+            "reason_unknown": "Whole-analysis budget exhausted before the solver returned a result",
+            "timeout_ms": effective_timeout, "seed": seed,
+        }
     elapsed = (time.monotonic() - started) * 1000
     status = str(result)
     if status not in {"sat", "unsat", "unknown"}:
@@ -62,7 +75,7 @@ def _check_constraints(
         "query_constraints": [constraint.sexpr() for constraint in constraints],
         "z3_ms": elapsed,
         "reason_unknown": solver.reason_unknown() if status == "unknown" else "",
-        "timeout_ms": timeout_ms,
+        "timeout_ms": effective_timeout,
         "seed": seed,
     }
 
@@ -288,6 +301,7 @@ class SchemaSearchContext:
         self.search_exhausted = False
 
     def _consume_round(self) -> int:
+        check_deadline()
         if self._used_rounds >= self.max_rounds:
             self.search_exhausted = True
             raise _SearchBudgetExhausted
@@ -327,7 +341,8 @@ class SchemaSearchContext:
             self.a.solver, constraints, timeout_ms=self.timeout_ms, seed=self.seed,
         )
         self.check_time_ms += result["z3_ms"]
-        return result["z3_raw"], result["z3_ms"], result["reason_unknown"]
+        self.last_timeout_ms = result["timeout_ms"]
+        return result["result"], result["z3_ms"], result["reason_unknown"]
 
     def initial_check(self) -> str:
         round_number = self._consume_round()
@@ -337,11 +352,13 @@ class SchemaSearchContext:
             "round": round_number, "phase": "initial", "node_key": "root",
             "assumes": [], "new_assume": None,
             "query_constraints": [constraint.sexpr() for constraint in constraints],
-            "result": status, "z3_raw": status,
+            "result": status, "z3_raw": None if status == "interrupted" else status,
             "z3_ms": round(elapsed, 2), "reason_unknown": reason,
-            "timeout_ms": self.timeout_ms, "seed": self.seed,
+            "timeout_ms": self.last_timeout_ms, "seed": self.seed,
             "scope": "baseline", "description": "fixed global goal; all schema guards disabled",
         })
+        if status == "interrupted":
+            raise RunDeadlineExceeded
         if status == "sat":
             self.last_sat_round = round_number
         return status
@@ -375,10 +392,14 @@ class SchemaSearchContext:
             node.assume = old_assume
             raise
         self.trace.append({
-            **entry, "result": status, "z3_raw": status,
+            **entry, "result": status, "z3_raw": None if status == "interrupted" else status,
             "query_constraints": [constraint.sexpr() for constraint in constraints],
             "z3_ms": round(elapsed, 2), "reason_unknown": reason,
+            "timeout_ms": self.last_timeout_ms,
         })
+        if status == "interrupted":
+            node.assume = old_assume
+            raise RunDeadlineExceeded
         logger.info("R%s [%s] %s: %s", round_number, phase or "search", assume.expression, status)
         if status == "sat":
             self.confirmed_assumes = list(all_assumes)
@@ -419,6 +440,10 @@ def run_schema_search(
         context.diagnostics.append(
             f"Total round budget ({max_rounds}, including baseline) exhausted"
         )
+    except RunDeadlineExceeded:
+        if not context.trace or context.trace[0].get("result") == "interrupted":
+            r0_z3 = None
+        context.diagnostics.append("Whole-analysis wall-time budget exhausted; partial query trace retained")
     candidates = context.tree.collect_assumes()
     if candidates == context.confirmed_assumes:
         candidates = []

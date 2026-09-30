@@ -178,6 +178,8 @@ def compact_summary(summary: JsonObject) -> JsonObject:
         "run_id": summary.get("run_id"), "run_dir": run_dir,
         "status": summary.get("status"), "exit_code": summary.get("exit_code"),
         "duration_ms": summary.get("duration_ms"),
+        "run_timeout_seconds": summary.get("run_timeout_seconds"),
+        "pending_targets": summary.get("pending_targets", []),
         "counts": summary.get("counts", {}),
         "discovery_coverage": summary.get("discovery_coverage"),
         "targets": summary.get("targets", []) if not results else [],
@@ -233,7 +235,10 @@ def print_summary(summary: JsonObject, *, json_output: bool = False, compact: bo
             print(f"  concrete prerequisite: {prerequisite['verdict']} [{prerequisite['status']}]")
         resources = result["resources"]
         budgets = [
-            f"{name} {resources[key]['used']}/{resources[key]['limit']}"
+            f"{name} "
+            + (str(resources[key]["used"]) if resources[key]["used"] is not None
+               else f"unknown (at least {resources[key]['known_used']})")
+            + f"/{resources[key]['limit']}"
             + (" (disabled)" if resources[key]["limit"] == 0 else "")
             for key, name in (("proof_attempts", "proofs"), ("search_rounds", "search rounds"),
                               ("counterexample_candidates", "witness candidates"))
@@ -248,7 +253,7 @@ def print_summary(summary: JsonObject, *, json_output: bool = False, compact: bo
                 print("  search boundary: local UNSAT does not prove global determinism")
         if result["duration_ms"] is not None:
             print(f"  elapsed (target): {result['duration_ms'] / 1000:.3f}s")
-        if result["verdict"] not in {"deterministic", "nondeterministic"} or result["status"] == "failed":
+        if result["verdict"] not in {"deterministic", "nondeterministic"} or result["status"] in {"failed", "timed_out"}:
             for diagnostic in result["diagnostics"]:
                 print(f"  diagnostic {diagnostic['stage']}/{diagnostic['code']}: {diagnostic['message']}")
                 if diagnostic.get("verifier_error"):
@@ -258,6 +263,10 @@ def print_summary(summary: JsonObject, *, json_output: bool = False, compact: bo
             if result["artifact_dir"]:
                 print(f"  detail: {Path(result['artifact_dir']) / 'report.json'}")
     print(f"Run: {brief['run_dir']}")
+    if brief["status"] == "timed_out":
+        print(f"Run status: timed_out; {len(brief['pending_targets'])} target(s) not started")
+    if brief["run_timeout_seconds"] is not None:
+        print(f"Budget (whole run): {brief['run_timeout_seconds']}s")
     if brief["counts"]:
         print(json.dumps(brief["counts"], sort_keys=True))
     for diagnostic in brief["diagnostics"]:

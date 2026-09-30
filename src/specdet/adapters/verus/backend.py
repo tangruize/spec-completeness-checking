@@ -114,12 +114,14 @@ class VerusBackend:
         return _copy(self._identity)
 
     def _solver_options(self) -> tuple[int, int]:
+        from specdet.runtime import bounded_timeout_ms
+
         limits = self.config.limits
         if type(limits.solver_timeout_ms) is not int or limits.solver_timeout_ms <= 0:
             _fail(Stage.CONFIG, "invalid_solver_timeout", "The Verus/Z3 solver timeout must be a positive integer")
         if type(limits.seed) is not int or not 0 <= limits.seed < 2**32:
             _fail(Stage.CONFIG, "invalid_solver_seed", "The Verus/Z3 seed must be an unsigned 32-bit integer")
-        return limits.solver_timeout_ms, limits.seed
+        return bounded_timeout_ms(limits.solver_timeout_ms), limits.seed
 
     def _effective_overlays(self, project: PreparedProject, target: TargetRef | None = None) -> dict[str, str]:
         result = dict(self._overlays.get(project.snapshot_digest, {}))
@@ -1507,6 +1509,7 @@ class VerusBackend:
                 arguments.append(ctx.k_consts[name] == value)
         timeout, seed = self._solver_options()
         ctx.solver.set(timeout=timeout, random_seed=seed)
+        bundle["last_query_timeout_ms"] = timeout
         started = time.monotonic()
         status = self._solver_status(ctx.solver.check(*arguments))
         duration = (time.monotonic() - started) * 1000
@@ -1554,7 +1557,7 @@ class VerusBackend:
             "source_transcript": str(bundle["path"]),
             "source_transcript_digest": bundle["file_digest"],
             "guard_assignments": {schema.guard_name: False for schema in bundle["schemas"]},
-            "solver_timeout_ms": self.config.limits.solver_timeout_ms,
+            "solver_timeout_ms": bundle["last_query_timeout_ms"],
             "seed": self.config.limits.seed,
         }, (obligation.id, digest(baseline)))
         self._baselines[key] = evidence
@@ -1764,7 +1767,7 @@ class VerusBackend:
                 "proposal_id": accepted["proposal_id"], "constraints": _copy(planned),
                 "query_constraints": [value.sexpr() for value in arguments],
                 "z3_raw": status.value, "z3_ms": duration, "reason_unknown": reason,
-                "timeout_ms": self.config.limits.solver_timeout_ms, "seed": self.config.limits.seed,
+                "timeout_ms": bundle["last_query_timeout_ms"], "seed": self.config.limits.seed,
             }
             traces.append(trace)
             path = store.write_json("plan-check.json", trace)
@@ -1807,18 +1810,27 @@ class VerusBackend:
                     if rounds >= budget:
                         _fail(Stage.SEARCH, "native_budget_exceeded", "Native search exceeded the remaining query budget")
                     if raw_status not in {"sat", "unsat", "unknown"}:
-                        if entry.get("result") != "unsupported" or raw_status is not None:
+                        if entry.get("result") not in {"unsupported", "interrupted"} or raw_status is not None:
                             _fail(Stage.SEARCH, "invalid_native_trace", "Native search returned an unrecognized attempt status")
                         trace = _copy(entry)
                         trace["round"], trace["native_round"] = rounds, entry["round"]
                         traces.append(trace)
                         path = store.write_json(f"checks/{rounds:06d}.json", trace)
-                        reason = str(entry.get("diagnostic") or "No compiled schema supports this candidate")
+                        interrupted = entry.get("result") == "interrupted"
+                        reason = str(entry.get("diagnostic") or entry.get("reason_unknown") or
+                                     "No compiled schema supports this candidate")
+                        constraints = self._trace_constraints(obligation, bundle, entry) if interrupted else ()
+                        role = "baseline" if interrupted and entry.get("scope") == "baseline" and not constraints else "refinement"
                         native_evidence.append(CheckEvidence(
-                            obligation.problem_id, SolverStatus.UNSUPPORTED, "refinement",
-                            bundle["query_digest"], reason=reason, artifact=str(path),
+                            obligation.problem_id,
+                            SolverStatus.INTERRUPTED if interrupted else SolverStatus.UNSUPPORTED,
+                            role, bundle["query_digest"], constraints,
+                            reason=reason, artifact=str(path),
                         ))
-                        diagnostics.append(Diagnostic(Stage.SEARCH, "unsupported_dimension", reason, "warning"))
+                        diagnostics.append(Diagnostic(
+                            Stage.SEARCH, "run_budget_exhausted" if interrupted else "unsupported_dimension",
+                            reason, "warning",
+                        ))
                         rounds += 1
                         continue
                     constraints = self._trace_constraints(obligation, bundle, entry)

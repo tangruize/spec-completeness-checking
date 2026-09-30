@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import json
 import os
+import signal
+import subprocess
+import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -15,7 +19,8 @@ from specdet.domain.models import (
 from specdet.analysis.verdicts import classify
 from specdet.storage.artifacts import ArtifactStore
 from specdet.storage.workspace import prepare_project
-from specdet.adapters.verus.execution import ProcessResult, classify_process
+from specdet.adapters.verus.execution import ProcessResult, classify_process, run_process
+from specdet.runtime import RunDeadlineExceeded, bounded_timeout_ms, check_deadline, run_deadline
 
 
 class DomainTests(unittest.TestCase):
@@ -142,6 +147,23 @@ class StorageTests(unittest.TestCase):
 
 
 class ConfigTests(unittest.TestCase):
+    def test_whole_run_default_and_explicit_override_are_separate_from_per_call_timeout(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            path = base / "specdet.toml"
+            path.write_text('schema_version=1\n[project]\nroot="."\n')
+            self.assertEqual(load_config(path).limits.run_timeout_seconds, 60)
+            path.write_text(
+                'schema_version=1\n[project]\nroot="."\n'
+                '[limits]\nrun_timeout_seconds=180\nverifier_timeout_seconds=17\n'
+            )
+            config = load_config(path)
+            self.assertEqual(config.limits.run_timeout_seconds, 180)
+            self.assertEqual(config.limits.verifier_timeout_seconds, 17)
+            path.write_text('schema_version=1\n[limits]\nrun_timeout_seconds=0\n')
+            with self.assertRaisesRegex(ValueError, "run_timeout_seconds"):
+                load_config(path)
+
     def test_paths_are_relative_to_config_not_cwd(self):
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
@@ -196,6 +218,54 @@ class ProcessTests(unittest.TestCase):
         self.assertEqual(classify_process(ProcessResult((), 0, dependency + empty_target, "", 1)), ("error", 0))
         self.assertEqual(classify_process(ProcessResult((), 0, dependency + target, "", 1)), ("verified", 1))
 
+    @unittest.skipUnless(os.name == "posix", "Whole-run signal cancellation is POSIX-only")
+    def test_deadline_reaps_owned_process_group_and_preserves_partial_output(self):
+        script = (
+            "import subprocess, sys, time; "
+            "p = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(30)']); "
+            "print(p.pid, flush=True); print('partial evidence', flush=True); time.sleep(30)"
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            with subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)"]) as unrelated:
+                try:
+                    started = time.monotonic()
+                    with self.assertRaises(RunDeadlineExceeded):
+                        with run_deadline(0.5, started=started):
+                            result = run_process(
+                                [sys.executable, "-c", script], Path(directory), 20, os.environ.copy(),
+                            )
+                    self.assertLess(time.monotonic() - started, 2)
+                    self.assertTrue(result.timed_out)
+                    self.assertIn("partial evidence", result.stdout)
+                    pid = int(result.stdout.splitlines()[0])
+                    stat = Path(f"/proc/{pid}/stat")
+                    if stat.exists():
+                        self.assertEqual(stat.read_text().split()[2], "Z")
+                    self.assertIsNone(unrelated.poll())
+                finally:
+                    unrelated.terminate()
+                    unrelated.wait(timeout=3)
+
+    @unittest.skipUnless(os.name == "posix", "Whole-run signal cancellation is POSIX-only")
+    def test_deadline_is_scoped_and_does_not_steal_an_existing_alarm(self):
+        original = signal.getsignal(signal.SIGALRM)
+        with self.assertRaises(RunDeadlineExceeded):
+            with run_deadline(0.05, started=time.monotonic()):
+                self.assertGreater(bounded_timeout_ms(10000), 0)
+                self.assertLessEqual(bounded_timeout_ms(10000), 50)
+                time.sleep(1)
+        self.assertEqual(signal.getsignal(signal.SIGALRM), original)
+        self.assertEqual(signal.getitimer(signal.ITIMER_REAL)[0], 0)
+        check_deadline()
+        self.assertEqual(bounded_timeout_ms(123), 123)
+        signal.setitimer(signal.ITIMER_REAL, 10)
+        try:
+            with self.assertRaisesRegex(ValueError, "existing process alarm"):
+                with run_deadline(1, started=time.monotonic()):
+                    self.fail("Must not replace the caller's timer")
+            self.assertGreater(signal.getitimer(signal.ITIMER_REAL)[0], 0)
+        finally:
+            signal.setitimer(signal.ITIMER_REAL, 0)
 
 if __name__ == "__main__":
     unittest.main()

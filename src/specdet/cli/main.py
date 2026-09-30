@@ -40,11 +40,12 @@ def _parser() -> argparse.ArgumentParser:
         item.add_argument("--max-rounds", type=int)
         item.add_argument("--counterexample-candidates", type=int)
         item.add_argument("--solver-timeout-ms", type=int)
-        item.add_argument("--timeout", type=int)
+        item.add_argument("--timeout", type=int, help="Timeout per verifier call, in seconds")
         item.add_argument("--offline", action="store_true")
         if command == "doctor":
             item.add_argument("--json", action="store_true")
         else:
+            item.add_argument("--run-timeout", type=int, help="Whole-analysis budget in seconds (default: 60; overrides config)")
             _output_options(item)
         item.add_argument("--llm-fallback", choices=["off", "live", "replay"])
         item.add_argument("--provider")
@@ -59,6 +60,7 @@ def _parser() -> argparse.ArgumentParser:
     replay.add_argument("--config", type=Path)
     replay.add_argument("--verus")
     replay.add_argument("--out", type=Path)
+    replay.add_argument("--run-timeout", type=int, help="Whole-analysis budget when reexecuting, in seconds")
     _output_options(replay)
     assist = commands.add_parser("assist")
     assist.add_argument("--run", type=Path, required=True)
@@ -70,6 +72,7 @@ def _parser() -> argparse.ArgumentParser:
     assist.add_argument("--config", type=Path)
     assist.add_argument("--verus")
     assist.add_argument("--out", type=Path)
+    assist.add_argument("--run-timeout", type=int, help="Whole-analysis budget in seconds")
     _output_options(assist)
     adopt = commands.add_parser("adopt")
     adopt.add_argument("--proposal", type=Path, required=True)
@@ -129,8 +132,9 @@ def _config(args: argparse.Namespace) -> Config:
         ("max_rounds", "max_search_rounds"),
         ("solver_timeout_ms", "solver_timeout_ms"),
         ("timeout", "verifier_timeout_seconds"),
+        ("run_timeout", "run_timeout_seconds"),
     ):
-        value = getattr(args, argument)
+        value = getattr(args, argument, None)
         if value is not None:
             if value <= 0:
                 raise ValueError(f"--{argument.replace('_', '-')} must be positive")
@@ -305,6 +309,8 @@ def main(argv: list[str] | None = None) -> int:
                 ))
             if args.out:
                 config = replace(config, output_dir=args.out.expanduser().resolve())
+            if args.run_timeout is not None:
+                config = replace(config, limits=replace(config.limits, run_timeout_seconds=args.run_timeout))
             if args.command == "assist":
                 from specdet.domain.models import Stage
 

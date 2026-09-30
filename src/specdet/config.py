@@ -49,6 +49,7 @@ class Limits:
     max_search_rounds: int = 500
     max_container_depth: int = 1
     seed: int = 0
+    run_timeout_seconds: int = 60
 
 
 @dataclass(frozen=True)
@@ -126,7 +127,7 @@ class Config:
             raise ValueError("analysis.abstract.inputs must not contain duplicates")
         if not self.observation_policy:
             raise ValueError("An observation policy must be selected")
-        for name in ("verifier_timeout_seconds", "solver_timeout_ms", "max_search_rounds"):
+        for name in ("verifier_timeout_seconds", "solver_timeout_ms", "max_search_rounds", "run_timeout_seconds"):
             value = getattr(self.limits, name)
             if type(value) is not int or value <= 0:
                 raise ValueError(f"{name} must be a positive integer")
@@ -257,6 +258,7 @@ def load_config(path: Path) -> Config:
             max_search_rounds=_positive(limits, "max_search_rounds", 500),
             max_container_depth=depth,
             seed=seed,
+            run_timeout_seconds=_positive(limits, "run_timeout_seconds", 60),
         ),
         analysis_kind=_text(analysis, "kind", "concrete_determinism"),
         abstract_inputs=_strings(abstract, "inputs"),

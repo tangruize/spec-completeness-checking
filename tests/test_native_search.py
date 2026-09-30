@@ -20,6 +20,7 @@ from specdet.adapters.verus.native.schema_search.search import (
     MissingSchemaBinding, SchemaCtx, SchemaSearchContext, UnsupportedTranscript,
     UnsupportedPredicate, build_schema_ctx, run_schema_search,
 )
+from specdet.runtime import RunDeadlineExceeded
 
 
 class ScriptedSolver:
@@ -33,7 +34,10 @@ class ScriptedSolver:
 
     def check(self, *constraints):
         self.checks.append(list(constraints))
-        return next(self.statuses)
+        result = next(self.statuses)
+        if isinstance(result, BaseException):
+            raise result
+        return result
 
     def reason_unknown(self):
         return "scripted undecided query"
@@ -65,6 +69,27 @@ def scripted_context(spec, statuses, schemas=None):
 
 
 class SearchEvidenceTests(unittest.TestCase):
+    def test_deadline_preserves_prior_sat_slice_and_marks_interrupted_query_without_raw_status(self):
+        spec = det_spec("x", "y")
+        context = scripted_context(spec, [z3.unknown, z3.sat, RunDeadlineExceeded()])
+        witness = run_schema_search(spec, context)
+        self.assertEqual(witness.r0_z3, "unknown")
+        self.assertEqual([assume.expression for assume in witness.assumes], ["x == true"])
+        self.assertEqual(witness.last_sat_round, 1)
+        self.assertEqual(len(witness.trace), 3)
+        self.assertEqual(witness.trace[-1]["result"], "interrupted")
+        self.assertIsNone(witness.trace[-1]["z3_raw"])
+        self.assertFalse(witness.search_exhausted)
+        self.assertEqual(witness.candidate_assumes, [])
+
+    def test_interrupted_initial_query_does_not_invent_unknown_or_sat(self):
+        spec = det_spec("x")
+        witness = run_schema_search(spec, scripted_context(spec, [RunDeadlineExceeded()]))
+        self.assertIsNone(witness.r0_z3)
+        self.assertIsNone(witness.trace[0]["z3_raw"])
+        self.assertEqual(witness.trace[0]["result"], "interrupted")
+        self.assertEqual(witness.assumes, [])
+
     def test_unknown_retains_candidates_not_witness_assumes(self):
         spec = det_spec("x", "y")
         context = scripted_context(spec, [z3.unknown, z3.unknown, z3.unknown])

@@ -77,7 +77,11 @@ specdet report --run /path/to/evidence/RUN_ID --json
 
 `analyze`、`discover`、`report`、`replay` 和 `assist` 都支持 `--compact-json`，它与 `--json` 互斥。输出格式为 `specdet.summary.v1`，保留源码/问题身份、执行状态、语义结论、原始 baseline、证据与较小的见证值、覆盖边界、预算及 artifact 链接，不内嵌 verifier 日志或生成源码。长预览和额外诊断会明确标记截断或省略；总长度仍随所选目标数增加。完整报告和产物不截断，也没有增加 agent adapter 或模型调用。
 
-`duration_ms` 是包含准备阶段、但不包含最后报告序列化和 CLI 展示的分析墙钟时间；每个目标另有用时。`resources` 统计该目标所有阶段和 revision 的累计消耗，包括 abstract 分析前的 concrete prerequisite。verifier/solver 的单次超时**不是整次运行的总时限**。可处理的失败和中断会显示本次调用用时，compact 模式还返回结构化状态与退出码（中断为 `130`）。读取旧报告时不会虚构缺失的时间或预算。`report` 展示原分析的用时和语义退出码；读取命令自身成功仍返回 `0`。字段和解读见 [evidence guide](docs/agent-evidence.md)。
+`duration_ms` 是包含准备阶段和取消清理、但不包含最后报告序列化和 CLI 展示的分析墙钟时间；每个目标另有用时。`resources` 统计该目标所有阶段和 revision 的累计消耗，包括 abstract 分析前的 concrete prerequisite。可处理的失败和中断会显示本次调用用时，compact 模式还返回结构化状态与退出码（中断为 `130`）。读取旧报告时不会虚构缺失的时间或预算。`report` 展示原分析的用时和语义退出码；读取命令自身成功仍返回 `0`。字段和解读见 [evidence guide](docs/agent-evidence.md)。
+
+**每次分析默认只有 60 秒总预算**，准备阶段、所有选中的目标、证明、见证构造和 solver 搜索共享这一个预算。较长任务可使用 `--run-timeout 180`，或在 `[limits]` 中设置 `run_timeout_seconds = 180`。原有 `--timeout` 仍是单次 verifier 的限制，含义不变。`discover`、重新执行的 `replay` 和 `assist` 也支持总预算覆盖；仅仅读取已有报告不会重新分析。
+
+到期后终止本次启动的 verifier/provider 进程，保存 `timed_out` 报告：完成的结果不丢，当前目标保留已记录的证据，尚未开始的目标列在 `pending_targets`。清理和保存证据可能使实际退出稍晚于预算，报告会如实计入这段用时。退出码通常为 `3`；已有确认的非确定性（`1`）或执行/支持错误（`2`）仍按原优先级保留。超时不是规格缺陷，也不是确定性证明。当前取消机制要求 POSIX 主线程运行；其他线程应调用受支持主机上的 CLI。已有进程 alarm 会被明确拒绝，不会被工具覆盖。
 
 ## 真实欠约束函数与具体反例
 

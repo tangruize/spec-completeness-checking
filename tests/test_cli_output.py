@@ -46,6 +46,20 @@ class CliOutputTests(unittest.TestCase):
         self.assertEqual(summary, before)
         self.assertFalse(stderr)
 
+    def test_deadline_pending_targets_and_incomplete_counters_are_explicit(self):
+        summary = report()
+        summary.update(status="timed_out", run_timeout_seconds=1, pending_targets=[{"name": "next"}])
+        row = summary["results"][0]
+        row["status"] = "timed_out"
+        row["resources"]["counterexample_candidates"] = {"used": None, "known_used": 2, "limit": 16}
+        brief = compact_summary(summary)
+        self.assertEqual(brief["pending_targets"], [{"name": "next"}])
+        self.assertEqual(brief["run_timeout_seconds"], 1)
+        stdout, _ = self.render(summary)
+        self.assertIn("Run status: timed_out; 1 target(s) not started", stdout)
+        self.assertIn("witness candidates unknown (at least 2)/16", stdout)
+        self.assertTrue(stdout.rstrip().endswith("Elapsed (whole run): 1.250s"))
+
     def test_unknown_explains_target_blocker_observation_and_actual_budget(self):
         summary = report()
         summary["results"][0]["diagnostics"] = [

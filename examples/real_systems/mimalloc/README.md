@@ -35,10 +35,13 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$PWD/src" \
   --z3 "$TOOLS/z3" \
   --libc "$TARGET/.build/verifier/debug/deps/liblibc-9cd8a66bfd45f04e.rlib" \
   --verify-implementation \
+  --run-timeout 180 \
   --out examples/real_systems/mimalloc/runs/native-rerun
 ```
 
 The output directory must be new. `--function clear` (repeatable) narrows the run. The runner uses the real API exit code and reads persisted `summary.json` **`.payload.results`**. Per-verifier timeout is 30 seconds, per-SMT-query timeout 1,000 ms, search budget four queries, maximum proof attempts two, and constructive counterexample candidates zero. Assistance is off and execution is offline. Native implementation verification is an optional separate check.
+
+The checker now defaults to a 60-second whole-analysis budget. The command above explicitly allows 180 seconds to reproduce all four targets; `--run-timeout` changes that analyzer budget, not the optional independent implementation check. On expiry, completed targets remain in the report and unstarted targets are listed separately.
 
 Omit `--source-seal` when intentionally evaluating another source revision; the new run’s `inputs.json` freezes that working tree’s hashes, and its results apply only to those inputs.
 
