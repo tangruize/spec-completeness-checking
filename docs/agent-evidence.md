@@ -24,7 +24,7 @@ Outputs include the return value and final values of mutable parameters. `E` is 
 
 ## One bounded invocation
 
-Install with `python -m pip install -e ".[verus]"`. The backend extra uses a pinned public Verus grammar, so installation needs Git and a C compiler. Select a verifier compatible with the project's Verus syntax; a launcher that rewrites its inputs is rejected.
+In the unified checkout, install the repository-pinned grammar first with `python tools/bootstrap_toolchains.py grammar`, then install this package with `python -m pip install -e ".[verus]"`. For standalone use, install `tree-sitter-verus` from `https://github.com/tangruize/tree-sitter-verus.git@568c38d2b23c8db245fe6765715db2dcae532a8e` before installing the extra. Building the committed generated C parser needs a C compiler but not Node or grammar regeneration. Select a verifier compatible with the project's Verus syntax; a launcher that rewrites its inputs is rejected.
 
 ```bash
 python -m specdet doctor --verus /path/to/verus

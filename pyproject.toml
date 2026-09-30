@@ -13,7 +13,7 @@ dependencies = []
 [project.optional-dependencies]
 verus = [
     "tree-sitter==0.25.2",
-    "tree-sitter-verus @ git+https://github.com/q5438722/tree-sitter-verus.git@8639c4e4196ce36dd8a40c57fbad6200735bd2d1",
+    "tree-sitter-verus==0.23.2",
     "z3-solver>=4.12.5",
 ]
 
