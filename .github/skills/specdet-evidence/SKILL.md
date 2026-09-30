@@ -1,11 +1,13 @@
 ---
 name: specdet-evidence
-description: "Use when a system-proof caller edge may depend on whether one Verus contract uniquely determines an observable return or post-state; run bounded source-linked determinism evidence without deciding specification adequacy."
+description: "Use primarily to attack top-level intent contracts and assumed or opaque TCB contracts for underconstrained returns or post-state; use selectively at verified intermediate layers when the active proof depends on output uniqueness or state preservation."
 ---
 
 # Collect caller-oriented contract determinism evidence
 
-Use this skill only when output uniqueness can change one named caller/proof-map edge: attacking a provisional contract, comparing revisions, diagnosing a possible missing frame/result relation, or replaying an earlier witness. Do not run it merely because a function is reachable. Cross-operation, lifecycle, concurrency and `await`-spanning properties belong in protocol/invariant analysis.
+Prioritize top-level intent/goal contracts, whose proof cannot establish that the statement captures Human intent, and assumed/external/opaque TCB contracts, whose behavior is not constrained by a verified body. Use it selectively for verified intermediate contracts: attack them when they block the proof frontier, form a reused abstraction boundary, hide caller-visible effects, or are consumed as assumptions. If the implementation satisfies an intermediate contract and the top-level theorem succeeds using it, omitted dimensions may be irrelevant to the active goal; do not scan every internal helper.
+
+This attack finds underconstraint, not false or overstrong assumptions. TCB review also needs source/model correspondence, implementation validation where possible and Human review of trusted assumptions. Cross-operation, lifecycle, concurrency and `await`-spanning properties belong in protocol/invariant analysis.
 
 During specification writing, ask whether the candidate determines the result and post-state that the direct caller relies on. Two permitted caller-distinguishable returns suggest a missing result relation; a fixed return with two permitted caller-distinguishable post-states suggests a missing state relation or frame condition. Trace the difference to an actual caller requirement, add only the smallest clause justified by that requirement, replay the witness, and then prove implementation conformance. If the caller intentionally accepts both outcomes, preserve the freedom instead of strengthening the contract.
 

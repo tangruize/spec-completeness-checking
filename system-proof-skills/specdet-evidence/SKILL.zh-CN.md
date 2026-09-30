@@ -1,6 +1,6 @@
 ---
 name: specdet-evidence
-description: "当 system-proof 的某条 caller edge 可能依赖一个 Verus 契约是否唯一决定可观察返回值或后状态时使用；运行有预算、绑定源码的确定性 attack，保留 proof/witness 证据并返回 caller-oriented 结果，不代替 agent 判断规格充分性。"
+description: "主要用于攻击 top-level intent contract 和 assumed/opaque TCB contract 中返回值或后状态的欠约束；对已验证的中间层，只在当前证明或抽象边界依赖输出唯一性、状态保持时选择性使用。"
 ---
 
 # 检查一个候选契约是否存在可观察欠约束
@@ -8,6 +8,20 @@ description: "当 system-proof 的某条 caller edge 可能依赖一个 Verus �
 [English](SKILL.md) · [完整用法与术语](README.zh-CN.md)
 
 本 skill 只回答一条明确的 caller/proof-map 问题。它不是每个 reachable function 都必须运行的流水线，也不是 specification completeness oracle。
+
+## 在 proof stack 中哪里最有价值
+
+按契约在证明栈中的角色确定优先级：
+
+| 边界 | Attack 价值 | 原因 |
+|---|---|---|
+| Top-level intent/goal contract | 高 | 证明只能建立写下来的目标；证明成功不能机械地说明这个目标完整表达了 Human intent。应攻击任何可能削弱目标的 result/state 自由度。 |
+| Assumed、external 或 opaque TCB contract | 高 | 没有 verified body 独立检查契约。遗漏的 result relation 或 frame condition 会使 trusted boundary 缺少本应提供的 guarantee。 |
+| 已验证的中间层 contract | 选择性 | 如果实现满足它，并且 top-level theorem 只使用它就能成功，未提及的维度可能与当前目标无关。只有当它阻塞 proof frontier、构成复用抽象边界、向 caller 隐藏 effect，或自身被当作 assumption 使用时才 attack。 |
+
+这不表示中间层规格永远不重要：proof 可能通过展开代码绕过一个过弱 contract，而另一个 caller 只能使用 contract。反过来，如果当前 top-level property 不观察、也不依赖某个遗漏维度，就不应对每个 internal helper 消耗 completeness budget。
+
+本 attack 检查的是 **欠约束**：契约是否允许多个 caller 可区分的 result 或 post-state。它不能发现一个 **过强或不真实的 assumption** 是否没有被实现。因此 TCB review 还需要 source/model correspondence、可行时的 implementation validation，以及对 trusted assumption 的 Human review。
 
 ## 它怎样帮助 agent 写规格
 

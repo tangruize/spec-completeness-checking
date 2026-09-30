@@ -1,6 +1,6 @@
 ---
 name: specdet-evidence
-description: "Use when a system-proof caller edge may depend on whether one Verus contract uniquely determines an observable return or post-state; run a bounded source-linked determinism attack, preserve proof/witness evidence, and return a caller-oriented result without deciding specification adequacy."
+description: "Use primarily to attack top-level intent contracts and assumed or opaque TCB contracts for underconstrained returns or post-state; use selectively at verified intermediate layers only when the active proof or abstraction boundary depends on output uniqueness or state preservation."
 ---
 
 # Test one candidate contract for observable underconstraint
@@ -8,6 +8,20 @@ description: "Use when a system-proof caller edge may depend on whether one Veru
 [中文](SKILL.zh-CN.md) · [Full usage and terminology](README.md)
 
 Use this skill for one named caller/proof-map question. It is not a mandatory scan for every reachable function and not a specification-completeness oracle.
+
+## Where it has the most value
+
+Prioritize contracts by their role in the proof stack:
+
+| Boundary | Value of this attack | Why |
+|---|---|---|
+| Top-level intent/goal contract | High | The proof establishes only the written goal; it cannot mechanically establish that the written goal captures Human intent. Attack any result/state freedom that could weaken the intended goal. |
+| Assumed, external or opaque TCB contract | High | No verified body independently checks the contract. An omitted result relation or frame condition can leave an intended guarantee absent from the trusted boundary. |
+| Verified intermediate contract | Selective | If the implementation satisfies it and the top-level theorem succeeds using it, unmentioned dimensions may be irrelevant to the active goal. Attack it only when it blocks the proof frontier, defines a reused abstraction boundary, hides effects from callers, or is itself consumed as an assumption. |
+
+Do not conclude that intermediate specifications never matter. A proof may bypass a weak contract by unfolding code, while another caller can use only the contract. Conversely, do not spend completeness budget on every internal helper when the active top-level property neither observes nor depends on the omitted dimension.
+
+This attack addresses **underconstraint**: whether the contract permits multiple caller-distinguishable results or post-states. It does not detect an **overstrong or false assumption** whose promised behavior is not implemented. TCB review therefore also needs source/model correspondence, implementation validation where possible, and Human review of trusted assumptions.
 
 ## How it helps while writing a specification
 
