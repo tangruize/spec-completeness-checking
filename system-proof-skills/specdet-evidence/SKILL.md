@@ -9,6 +9,26 @@ description: "Use when a system-proof caller edge may depend on whether one Veru
 
 Use this skill for one named caller/proof-map question. It is not a mandatory scan for every reachable function and not a specification-completeness oracle.
 
+## How it helps while writing a specification
+
+A system-proof agent often starts with a provisional contract inferred from the caller, implementation and surrounding invariants. Before investing in implementation proof, this skill attacks one question:
+
+> Does the candidate actually determine the part of the result and post-state that the direct caller relies on?
+
+Use the evidence in the specification-writing loop:
+
+| Writing stage | What the attack can reveal | Agent action |
+|---|---|---|
+| First candidate | Two caller-distinguishable return values both satisfy the contract | Trace the difference to a caller requirement; draft the smallest justified result relation. |
+| Mutable operation | The return is fixed but two caller-distinguishable post-states are allowed | Draft a state relation or frame condition preserving the required state. |
+| Proof failure | A verified alternative output exists | Treat the contract, not only the proof, as a revision candidate. |
+| Candidate revision | An old witness still works | The revision did not remove that freedom; revise again or record that it is intentional. |
+| Candidate revision | The exact old witness is rejected and a complete global uniqueness proof succeeds | Record support that this ambiguity was removed, then continue with feasibility and implementation proof. |
+
+For example, a draft may say only that an allocation succeeds. If the caller requires the returned identifier to name the newly inserted object, two different identifiers satisfying the draft expose a missing caller-result relation. A mutator may constrain its return while leaving unrelated map entries unconstrained; two allowed post-states expose a possible missing frame condition. Conversely, if the caller intentionally accepts either output, preserve the freedom rather than strengthening the contract.
+
+The tool does not write the missing clause by itself. It makes an allowed freedom concrete. The agent must connect the differing output/state dimension to a caller requirement, propose the minimal clause justified by that requirement, replay the witness, and then prove the implementation against the revision.
+
 ## When to use
 
 Use `specdet` when at least one of these can change the active caller edge:
@@ -61,7 +81,7 @@ If the intended observations are unknown, stop and resolve that ambiguity first.
    - `challenges candidate`: the demonstrated freedom conflicts with a caller need;
    - `supports uniqueness only`: evidence removes one ambiguity but does not close the caller edge;
    - `does not decide`: the result is conditional, unsupported, timed out or inconclusive.
-6. **Choose the next authoritative step.** Depending on the caller question: retain intentional nondeterminism, revise the candidate and replay the witness, establish input feasibility, prove implementation conformance, investigate a cross-operation invariant, or request bounded Human intent review.
+6. **Choose the next authoritative step.** If the evidence challenges the candidate, identify the differing result/state dimension, trace the caller requirement that rules it out, add only that justified result relation or frame condition, and replay the witness. Otherwise retain intentional freedom, establish input feasibility, prove implementation conformance, investigate a cross-operation invariant, or request bounded Human intent review.
 
 ## Handoff
 

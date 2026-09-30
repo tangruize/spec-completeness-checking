@@ -9,6 +9,26 @@ description: "当 system-proof 的某条 caller edge 可能依赖一个 Verus �
 
 本 skill 只回答一条明确的 caller/proof-map 问题。它不是每个 reachable function 都必须运行的流水线，也不是 specification completeness oracle。
 
+## 它怎样帮助 agent 写规格
+
+System-proof agent 通常先从 caller、实现和周围 invariant 得到一个暂定契约。在投入 implementation proof 之前，本 skill 攻击一个问题：
+
+> 这个 candidate 是否真的决定了 direct caller 所依赖的 result 和 post-state 部分？
+
+把证据放入规格编写闭环：
+
+| 写规格阶段 | Attack 可能揭示什么 | Agent 应采取的动作 |
+|---|---|---|
+| 第一版 candidate | 两个 caller 可区分的返回值都满足契约 | 把差异追溯到 caller requirement，编写最小且有依据的 result relation。 |
+| Mutable operation | 返回值固定，但允许两个 caller 可区分的 post-state | 编写所需 state relation 或 frame condition，保护必须保持的状态。 |
+| Proof failure | 存在 verified alternative output | 不只修改 proof，也把 contract 作为 revision candidate。 |
+| Candidate revision | 旧 witness 仍然成立 | Revision 没有消除该自由度；继续修订，或明确记录它是有意的。 |
+| Candidate revision | 原 witness 被拒绝，并且完整 global uniqueness proof 成功 | 记录“该歧义已被消除”的支持证据，再继续 feasibility 和 implementation proof。 |
+
+例如，初稿可能只规定 allocation 成功。如果 caller 要求返回 identifier 必须指向刚插入的对象，而初稿允许两个不同 identifier，那么 witness 暴露的是可能缺少 caller-result relation。一个 mutator 也可能只约束返回值，却没有约束无关 map entry 保持不变；两个允许的 post-state 暴露的是可能缺少 frame condition。反过来，如果 caller 本来就接受两个输出，则应保留自由度，而不是为了确定性盲目加强契约。
+
+工具不会自己编写缺失条款。它只是把契约允许的自由度具体化。Agent 必须把不同的 output/state 维度连接到 caller requirement，提出由该 requirement 支持的最小条款，replay witness，然后证明实现满足 revision。
+
 ## 何时使用
 
 只有当以下证据可能改变当前 caller edge 时使用 `specdet`：
@@ -61,7 +81,7 @@ description: "当 system-proof 的某条 caller edge 可能依赖一个 Verus �
    - `challenges candidate`：已证明存在的自由度与 caller 需要冲突；
    - `supports uniqueness only`：减少一个歧义，但没有关闭 caller edge；
    - `does not decide`：结果有条件、不支持、超时或未决。
-6. **选择下一项权威检查。** 根据 caller 问题：保留有意的非确定性、修订候选并 replay witness、建立输入可行性、证明实现满足契约、分析 cross-operation invariant，或请求 bounded Human intent review。
+6. **选择下一项权威检查。** 如果 evidence 挑战 candidate，识别不同的 result/state 维度，追溯排除该差异的 caller requirement，只增加由它支持的 result relation 或 frame condition，然后 replay witness。否则保留有意自由度、建立输入可行性、证明实现满足契约、分析 cross-operation invariant，或请求 bounded Human intent review。
 
 ## 交付格式
 

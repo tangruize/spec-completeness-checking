@@ -7,6 +7,8 @@ description: "Use when a system-proof caller edge may depend on whether one Veru
 
 Use this skill only when output uniqueness can change one named caller/proof-map edge: attacking a provisional contract, comparing revisions, diagnosing a possible missing frame/result relation, or replaying an earlier witness. Do not run it merely because a function is reachable. Cross-operation, lifecycle, concurrency and `await`-spanning properties belong in protocol/invariant analysis.
 
+During specification writing, ask whether the candidate determines the result and post-state that the direct caller relies on. Two permitted caller-distinguishable returns suggest a missing result relation; a fixed return with two permitted caller-distinguishable post-states suggests a missing state relation or frame condition. Trace the difference to an actual caller requirement, add only the smallest clause justified by that requirement, replay the witness, and then prove implementation conformance. If the caller intentionally accepts both outcomes, preserve the freedom instead of strengthening the contract.
+
 Read [the evidence guide](../../../docs/agent-evidence.md) for invocation, terminology, result codes and artifact layout.
 
 1. Record the active goal, direct caller, blocking edge, preserved candidate revision, caller-relevant observation and native/extract/model provenance. If the observation is ambiguous, stop.
