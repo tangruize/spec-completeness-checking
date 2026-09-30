@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "source_revision": "1bc5bdb9b3528997264811fea59235a41f2af840",
+  "source_hashes": {
+    "src/libs/bitmap/src/lib.rs": "73a4badfd74069b87a412cb39e20146885c9a4bee9eea200c8013f43b335971d",
+    "src/libs/bitmap/src/lib.spec.rs": "eb9931c531bb64ca0267273e03633f9f0b461032737e49d343d1eb8f18ae3e12",
+    "src/libs/raw-array/src/lib.rs": "a2ece325306b98296ef7209c91b2ea39c724ceab8508954acdf0d4a1fea976aa",
+    "src/libs/raw-array/src/lib.spec.rs": "c78fe992e0d7705f296640b4281b1c1cfb56a728b745cc5ce202fb4c4783e29b",
+    "src/libs/error/src/lib.rs": "f4e54a883a6e126ecabda386852c519b92f8201cbfe5cebca53d5e56346ca00d",
+    "src/libs/sysapi/src/errno.rs": "5284891af6f5dee6efbb1315ae204ddf46b5a16d56b842624a89291b55d4d3d8",
+    "src/libs/sysapi/src/ffi.rs": "c8767158a1fc53291bab1dc518a4ce66b5c05b9c60ec9bb2fa5b39b9eab5cfcd",
+    "LICENSE.txt": "177e39cfc9418e6f8090c88afb239e0efc3e764d8fc8b59edb2ebc8b46473403"
+  },
+  "scope": "Reviewed local source layout and file digests only. Source bytes and original contract headers are generated under ignored inputs/, never bundled for publication."
+}

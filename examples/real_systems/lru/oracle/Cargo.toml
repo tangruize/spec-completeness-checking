@@ -1,0 +1,10 @@
+[package]
+name = "lru-source-correspondence"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+lru = { path = "../source-checkout", default-features = false }
+
+[workspace]

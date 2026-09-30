@@ -1,0 +1,293 @@
+{
+  "schema_version": 1,
+  "classification": "dependency-closed, source-sealed contract extract",
+  "analysis": "concrete_determinism",
+  "observation_policy": "verus-observable-v1",
+  "source_revision": "1bc5bdb9b3528997264811fea59235a41f2af840",
+  "source_worktree_status": [
+    " M src/libs/bitmap/src/lib.rs",
+    " M src/libs/bitmap/src/lib.spec.rs"
+  ],
+  "source_hashes": {
+    "src/libs/bitmap/src/lib.rs": "73a4badfd74069b87a412cb39e20146885c9a4bee9eea200c8013f43b335971d",
+    "src/libs/bitmap/src/lib.spec.rs": "eb9931c531bb64ca0267273e03633f9f0b461032737e49d343d1eb8f18ae3e12",
+    "src/libs/raw-array/src/lib.rs": "a2ece325306b98296ef7209c91b2ea39c724ceab8508954acdf0d4a1fea976aa",
+    "src/libs/raw-array/src/lib.spec.rs": "c78fe992e0d7705f296640b4281b1c1cfb56a728b745cc5ce202fb4c4783e29b",
+    "src/libs/error/src/lib.rs": "f4e54a883a6e126ecabda386852c519b92f8201cbfe5cebca53d5e56346ca00d",
+    "src/libs/sysapi/src/errno.rs": "5284891af6f5dee6efbb1315ae204ddf46b5a16d56b842624a89291b55d4d3d8",
+    "src/libs/sysapi/src/ffi.rs": "c8767158a1fc53291bab1dc518a4ce66b5c05b9c60ec9bb2fa5b39b9eab5cfcd",
+    "LICENSE.txt": "177e39cfc9418e6f8090c88afb239e0efc3e764d8fc8b59edb2ebc8b46473403"
+  },
+  "fixture_hashes": {
+    "bitmap_contract.rs": "5e635e3da698d2ff3b6e75c3e35ec2883338413f0cd14f6510bf9b56572ce279",
+    "errno.rs": "5284891af6f5dee6efbb1315ae204ddf46b5a16d56b842624a89291b55d4d3d8",
+    "LICENSE.txt": "177e39cfc9418e6f8090c88afb239e0efc3e764d8fc8b59edb2ebc8b46473403"
+  },
+  "checker_base_revision": "af2ce8931ca778b9c3b13ebd0115f5e72c1e3169",
+  "checker_working_tree_source_manifest_sha256": "b6cd86e30f6e881e63a48f62bfb58f40b379378cadf799f1dbff3bd1eb053cf7",
+  "checker_source_hashes_evidence": "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/nanvix-evidence/final-integration/20260930T011438Z-0413e08507/measured-result.json",
+  "checker_sources_unchanged_during_run": true,
+  "verifier": {
+    "executable": "/home/ruize/verus-bin/rust_verify",
+    "sha256": "262aea21344228e0432ba2d512f0d5ae205c43a81d9616d98608d670c99a1fd4",
+    "version": "0.2026.05.13.fae8859",
+    "rust_toolchain": "1.95.0"
+  },
+  "elapsed_seconds": 6.491281071677804,
+  "exit_code": 3,
+  "decisive_targets": 3,
+  "selected_targets": 4,
+  "run_dir": "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/nanvix-evidence/final-integration/20260930T011438Z-0413e08507",
+  "artifact_hashes": {
+    "summary.json": "137cd6a84449be0ce1a4a3af00fb6223399103f5e6a669a756bae6cc367607e9",
+    "measured-result.json": "358e090849b5489bb416779f8ad538e0006dde70672b635454ccc29912d93e4e",
+    "effective-config.json": "a871404559a4bd5beffb20aae2b388178370b4d2845de8192151d15aa0779f70",
+    "toolchains.json": "b582f853f80e2c9c07a202b9cc4377650cceb92162c9ca97c80cbba12cf8b6af",
+    "snapshot.json": "94b45e7fc4452a36cb7467ddc7a4f318bf7f36de320cba7127a1d1da8c8e1fcb"
+  },
+  "results": [
+    {
+      "target": "number_of_bits",
+      "status": "completed",
+      "verdict": "deterministic",
+      "problem_id": "92bf29be229c5cb8e4a85dca358b3af5f639878df087b03bdc5b03e2d1be9251",
+      "baseline": {
+        "problem_id": "92bf29be229c5cb8e4a85dca358b3af5f639878df087b03bdc5b03e2d1be9251",
+        "status": "unsat",
+        "role": "baseline",
+        "query_digest": "f8de94a7ea733517374caddf5a8159adb61a825efbb75609e0db31147cb83da0",
+        "constraints": [],
+        "reason": "",
+        "duration_ms": 2.0186565816402435,
+        "artifact": "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/nanvix-evidence/final-integration/20260930T011438Z-0413e08507/targets/3885c9c65ccfe2d4b6b2d81b/attempts/000-a0acc450507e/query/originalC.smt2"
+      },
+      "proofs": [
+        {
+          "problem_id": "92bf29be229c5cb8e4a85dca358b3af5f639878df087b03bdc5b03e2d1be9251",
+          "status": "verified",
+          "verified_goals": 1,
+          "duration_ms": 720.8527037873864,
+          "artifact": "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/nanvix-evidence/final-integration/20260930T011438Z-0413e08507/targets/3885c9c65ccfe2d4b6b2d81b/attempts/000-a0acc450507e"
+        }
+      ],
+      "coverage": {
+        "ignored_dimensions": [],
+        "contract_feasibility": "not_run",
+        "global_or_unmentioned_heap": "not_modeled",
+        "mutable_parameter_poststates": "modeled",
+        "pre_feasibility": "not_run",
+        "return": "modeled",
+        "input_observations": [],
+        "trusted_translation": true,
+        "feasibility": "not_run"
+      },
+      "verified_counterexample": false
+    },
+    {
+      "target": "usage",
+      "status": "completed",
+      "verdict": "deterministic",
+      "problem_id": "c57d8682461046ea49dd64e7ca7d07028f186ce329e31c8e37299f5ab0def38d",
+      "baseline": {
+        "problem_id": "c57d8682461046ea49dd64e7ca7d07028f186ce329e31c8e37299f5ab0def38d",
+        "status": "unsat",
+        "role": "baseline",
+        "query_digest": "334295265c8dc73541114c310c52670907f3ddbd03ff2e06316dfab630fe87ac",
+        "constraints": [],
+        "reason": "",
+        "duration_ms": 1.8532909452915192,
+        "artifact": "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/nanvix-evidence/final-integration/20260930T011438Z-0413e08507/targets/252824adba6ff9137023a395/attempts/000-4b13d90f126c/query/originalC.smt2"
+      },
+      "proofs": [
+        {
+          "problem_id": "c57d8682461046ea49dd64e7ca7d07028f186ce329e31c8e37299f5ab0def38d",
+          "status": "verified",
+          "verified_goals": 1,
+          "duration_ms": 718.3851692825556,
+          "artifact": "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/nanvix-evidence/final-integration/20260930T011438Z-0413e08507/targets/252824adba6ff9137023a395/attempts/000-4b13d90f126c"
+        }
+      ],
+      "coverage": {
+        "ignored_dimensions": [],
+        "contract_feasibility": "not_run",
+        "global_or_unmentioned_heap": "not_modeled",
+        "mutable_parameter_poststates": "modeled",
+        "pre_feasibility": "not_run",
+        "return": "modeled",
+        "input_observations": [],
+        "trusted_translation": true,
+        "feasibility": "not_run"
+      },
+      "verified_counterexample": false
+    },
+    {
+      "target": "alloc",
+      "status": "completed",
+      "verdict": "inconclusive",
+      "problem_id": "37974bbb2e6f711c750b31ff3915a50016da23857c9b1728b2198398a6bceb69",
+      "baseline": {
+        "problem_id": "37974bbb2e6f711c750b31ff3915a50016da23857c9b1728b2198398a6bceb69",
+        "status": "unknown",
+        "role": "baseline",
+        "query_digest": "4b0f26c970c8c77658b85efdfd6519da246ede3104dc0f6b65cff1ca9493d5de",
+        "constraints": [],
+        "reason": "(incomplete quantifiers)",
+        "duration_ms": 16.985575668513775,
+        "artifact": "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/nanvix-evidence/final-integration/20260930T011438Z-0413e08507/targets/84a7780f0f7004c7be9dd2f7/attempts/000-fba3d1e1d592/query/originalC.smt2"
+      },
+      "proofs": [
+        {
+          "problem_id": "37974bbb2e6f711c750b31ff3915a50016da23857c9b1728b2198398a6bceb69",
+          "status": "unproved",
+          "verified_goals": 0,
+          "duration_ms": 645.7615057006478,
+          "artifact": "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/nanvix-evidence/final-integration/20260930T011438Z-0413e08507/targets/84a7780f0f7004c7be9dd2f7/attempts/000-fba3d1e1d592"
+        }
+      ],
+      "coverage": {
+        "ignored_dimensions": [
+          "return.Err.payload",
+          "post:self.representation_beyond_view"
+        ],
+        "contract_feasibility": "not_run",
+        "global_or_unmentioned_heap": "not_modeled",
+        "mutable_parameter_poststates": "modeled",
+        "pre_feasibility": "not_run",
+        "return": "modeled",
+        "input_observations": [],
+        "trusted_translation": true,
+        "feasibility": "not_run"
+      },
+      "verified_counterexample": false
+    },
+    {
+      "target": "set",
+      "status": "completed",
+      "verdict": "deterministic",
+      "problem_id": "258f441413c6d8794ed12c08f19a93ae9dc3f0fd67f23357904e94c702148ff0",
+      "baseline": {
+        "problem_id": "258f441413c6d8794ed12c08f19a93ae9dc3f0fd67f23357904e94c702148ff0",
+        "status": "unsat",
+        "role": "baseline",
+        "query_digest": "ad3aebfcd9b9146b2859100fe4906e01bcc2f4b8d73d39a8ddfcd2a1f217fd05",
+        "constraints": [],
+        "reason": "",
+        "duration_ms": 6.090219132602215,
+        "artifact": "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/nanvix-evidence/final-integration/20260930T011438Z-0413e08507/targets/514c6bc4cbe566e7612bed26/attempts/000-011e0bd9f676/query/originalC.smt2"
+      },
+      "proofs": [
+        {
+          "problem_id": "258f441413c6d8794ed12c08f19a93ae9dc3f0fd67f23357904e94c702148ff0",
+          "status": "verified",
+          "verified_goals": 1,
+          "duration_ms": 798.7484326586127,
+          "artifact": "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/nanvix-evidence/final-integration/20260930T011438Z-0413e08507/targets/514c6bc4cbe566e7612bed26/attempts/000-011e0bd9f676"
+        }
+      ],
+      "coverage": {
+        "ignored_dimensions": [
+          "return.Err.payload",
+          "post:self.representation_beyond_view"
+        ],
+        "contract_feasibility": "not_run",
+        "global_or_unmentioned_heap": "not_modeled",
+        "mutable_parameter_poststates": "modeled",
+        "pre_feasibility": "not_run",
+        "return": "modeled",
+        "input_observations": [],
+        "trusted_translation": true,
+        "feasibility": "not_run"
+      },
+      "verified_counterexample": false
+    }
+  ],
+  "remaining_support_blockers": [
+    {
+      "target": "alloc",
+      "code": "unsupported_witness",
+      "message": "No concrete constructor catalog for ptr::NonNull<u8> (unknown)",
+      "counterexample_attempts": 0,
+      "counterexample_budget_exhausted": false,
+      "artifact": "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/nanvix-evidence/final-integration/20260930T011438Z-0413e08507/targets/84a7780f0f7004c7be9dd2f7/revisions/0/counterexample-search.json"
+    },
+    {
+      "target": "alloc",
+      "code": "unsupported_dimension",
+      "dimensions": [
+        "Input bitmap View capacity ranges",
+        "Input bitmap View allocated-bit set emptiness"
+      ]
+    }
+  ],
+  "extract_verification": {
+    "command": [
+      "/home/ruize/verus-bin/rust_verify",
+      "/home/ruize/argus-spec-work/sources/spec-completeness-checking/examples/real_systems/nanvix/sealed/bitmap_contract.rs",
+      "--crate-type=lib"
+    ],
+    "elapsed_seconds": 0.5691692493855953,
+    "returncode": 0,
+    "stdout": "verification results:: 2 verified, 0 errors\n",
+    "source_hash_before": "5e635e3da698d2ff3b6e75c3e35ec2883338413f0cd14f6510bf9b56572ce279",
+    "source_hash_after": "5e635e3da698d2ff3b6e75c3e35ec2883338413f0cd14f6510bf9b56572ce279",
+    "evidence": "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/nanvix-evidence/sealed-verifier-smoke-final.json",
+    "boundary": "Two unchanged getter bodies verified; mutation bodies explicitly external and not implementation-verified."
+  },
+  "native_profile_probe": {
+    "elapsed_seconds": 2.6205247724428773,
+    "exit_code": 2,
+    "run_dir": "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/nanvix-evidence/native-probe/20260929T233242Z-8cfb9c829e",
+    "selected_targets": [
+      "number_of_bits",
+      "alloc"
+    ],
+    "outcome": "compile_error: unresolved raw_array/sys crates; no semantic evidence",
+    "source_unchanged": true,
+    "evidence": "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/nanvix-evidence/native-probe-result.json"
+  },
+  "initial_extraction_failures": {
+    "evidence": "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/nanvix-evidence/expression-diagnostics.json",
+    "usage": "Cast-comparison clauses were merged at a comma.",
+    "set": "Nested match clause was split before its closing brace.",
+    "resolution": "Resolved by parent extractor changes before the recorded corrected run; all original target clauses retained.",
+    "regression_command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python -m unittest discover -s examples/real_systems/nanvix -p test_case.py"
+  },
+  "claim_boundary": "Contract determinism only under the checker observation policy. This is not native Cargo verification, implementation correctness, allocation liveness, or a specification-quality verdict. No target requires/ensures clauses, Views, invariants, or type fields are changed.",
+  "publication_boundary": {
+    "bundled_source": false,
+    "local_inputs": "inputs/",
+    "local_source_provenance": "inputs/provenance.json",
+    "public_source_selection": "source-selection.json",
+    "source_input_required": true
+  },
+  "preparation_elapsed_seconds": 0.013647042214870453,
+  "previous_measured_run": {
+    "elapsed_seconds": 17.7765703946352,
+    "run_dir": "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/nanvix-evidence/mutable-poststate-rerun/20260929T234743Z-75b7499773",
+    "decisive_targets": 3,
+    "selected_targets": 4,
+    "allocator_counterexample_blocker": "No concrete constructor catalog for ptr::NonNull<u8> (unknown)",
+    "semantic_verdicts_changed": false,
+    "historical_summary": "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/nanvix-evidence/before-final-integration-summary.json",
+    "earlier_run_reference": "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/nanvix-evidence/before-mutable-poststate-summary.json"
+  },
+  "validation_phase": "final stable-core integration; one unchanged four-target run",
+  "python": {
+    "executable": "/home/ruize/argus-spec-work/sources/spec-completeness-checking/.venv/bin/python",
+    "version": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+    "dependency_versions_observed_after_run": {
+      "tree-sitter": "0.25.2",
+      "tree-sitter-verus": "0.23.2",
+      "z3-solver": "5.1.0.0"
+    }
+  },
+  "invocation_evidence": "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/nanvix-evidence/final-integration-invocation.json",
+  "invocation_evidence_sha256": "86b046c0ebf2d9888848854de46b9107fc8b1f08cba7d2cbdfa1dc1767f2acfe",
+  "case_input_hashes": {
+    "specdet.toml": "0ab692798e89742fbfca9f44ea04853251c6d505a9ff22ed3567aa04f780a921",
+    "source-selection.json": "d410a8faf7c336136b1ba6af6748f0c831ead04814d8d18e0bf19ace4f81c94e",
+    "run.py": "24c8ea793ad242b450eb4bf43b70eec21260f48966301cff18fbd791f3c13aff",
+    "seal.py": "b6a84ff16c5f25b916e0361189362dd463f3d323b39315c58485ae24b71133e4"
+  },
+  "case_inputs_unchanged_during_run": true
+}

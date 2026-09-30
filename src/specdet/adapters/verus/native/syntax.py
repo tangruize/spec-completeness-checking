@@ -73,3 +73,53 @@ def mask_noncode(text: str) -> str:
             continue
         blank(start, index)
     return "".join(out)
+
+
+def verus_spec_payload(attribute: str) -> tuple[str | None, str] | None:
+    """Unwrap a direct or cfg_attr contract without interpreting its expressions."""
+    masked = mask_noncode(attribute)
+    outer = re.fullmatch(r"\s*#\s*\[\s*(.*?)\s*\]\s*", masked, re.S)
+    if outer is None:
+        return None
+
+    def call(start: int, end: int, name: str) -> tuple[int, int] | None:
+        match = re.match(rf"{name}\s*\(", masked[start:end])
+        if match is None:
+            return None
+        begin = start + match.end()
+        stack = ["("]
+        for index in range(begin, end):
+            char = masked[index]
+            if char in "([{":
+                stack.append(char)
+            elif char in ")]}":
+                if not stack or stack.pop() != {")": "(", "]": "[", "}": "{"}[char]:
+                    raise LexicalError("Unbalanced contract attribute", index)
+                if not stack:
+                    if masked[index + 1:end].strip():
+                        raise LexicalError("Unexpected tokens after contract attribute", index + 1)
+                    return begin, index
+        raise LexicalError("Unterminated contract attribute", start)
+
+    start, end = outer.span(1)
+    condition = None
+    if conditional := call(start, end, "cfg_attr"):
+        begin, finish = conditional
+        depth = 0
+        comma = None
+        for index in range(begin, finish):
+            char = masked[index]
+            depth += (char in "([{") - (char in ")]}")
+            if char == "," and depth == 0:
+                comma = index
+                break
+        if comma is None:
+            return None
+        condition = attribute[begin:comma].strip()
+        start, end = comma + 1, finish
+        while start < end and masked[start].isspace():
+            start += 1
+        while end > start and masked[end - 1].isspace():
+            end -= 1
+    payload = call(start, end, "verus_spec")
+    return (condition, attribute[payload[0]:payload[1]]) if payload else None

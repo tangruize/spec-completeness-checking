@@ -1,0 +1,10 @@
+{
+  "before_control_run": true,
+  "known_mutation_not_surprise": true,
+  "sealed_utc": "2026-09-29T23:39:29.181685+00:00",
+  "sha256": {
+    "control.toml": "47b67349eba1c3cf0a1c8106c3ae08b58948c5882d0a98006ed2cc9d0bb8ee0d",
+    "controls/known-control.json": "5b51ac0eb71f277efa5328fad800717659545503e93728a930768cd45f278491",
+    "controls/pop_return_omitted.rs": "67ff6ccf3f7e0a1eef199e41a03cfc9123420f4516cd0c0f9c6c582eb94fd8c4"
+  }
+}

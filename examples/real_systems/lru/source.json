@@ -1,0 +1,65 @@
+{
+  "commit": "f1e972197053a6814e77b77afacb51f03fc03170",
+  "copyright": "Copyright (c) 2016 Jerome Froelich",
+  "files_sha256": {
+    "Cargo.toml": "6793f04c18d4308c4a9b3a586720302cb2f5a01a20540d3d0ede7ca6e138412b",
+    "LICENSE": "061dc50af2cd9340703daf61978af3200cf681b12ea67a323c33ba109a23a45e",
+    "README.md": "2b2de17fdd9c5da775b0b7e6934b46b4675f9036afd5712a485cdd3ffe4b515e",
+    "src/lib.rs": "06d9834d3477d2c5e45c3cb77dd7a9beda3aad052c7d53f22f2159134af7a3b1"
+  },
+  "license": "MIT",
+  "license_url": "https://github.com/jeromefroe/lru-rs/blob/f1e972197053a6814e77b77afacb51f03fc03170/LICENSE",
+  "native_initial_typecheck": {
+    "claim": "syntax and type validity only; external_body transitions are not verified implementations",
+    "errors": 0,
+    "returncode": 0,
+    "verified": 0
+  },
+  "source_correspondence": {
+    "get": {
+      "lines": [
+        444,
+        477
+      ],
+      "model": "spec/initial.rs::get",
+      "note": "return value content (reference identity abstracted), hit promotion, miss preservation",
+      "path": "src/lib.rs"
+    },
+    "links": {
+      "lines": [
+        1812,
+        1828
+      ],
+      "note": "detach preserves other order; attach promotes to front",
+      "path": "src/lib.rs"
+    },
+    "order": {
+      "lines": [
+        1716,
+        1743
+      ],
+      "note": "iter publicly exposes MRU-to-LRU order",
+      "path": "src/lib.rs"
+    },
+    "pop": {
+      "lines": [
+        1274,
+        1321
+      ],
+      "model": "spec/initial.rs::pop",
+      "note": "map removal, unlinking, value return; normally returning u64 instantiation excludes destructor panics",
+      "path": "src/lib.rs"
+    },
+    "put": {
+      "lines": [
+        325,
+        441
+      ],
+      "model": "spec/initial.rs::put",
+      "note": "put, capturing_put, replace_or_create_node: replacement return, MRU promotion, capacity eviction; capture=false suppresses eviction return",
+      "path": "src/lib.rs"
+    }
+  },
+  "url": "https://github.com/jeromefroe/lru-rs",
+  "version": "0.18.5"
+}

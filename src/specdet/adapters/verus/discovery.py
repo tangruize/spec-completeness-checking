@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import posixpath
 from dataclasses import dataclass
 from pathlib import PurePosixPath
 from typing import Callable
@@ -65,33 +66,24 @@ def _cfg(expression: str, features: tuple[str, ...], test: bool) -> bool | None:
 
 
 def _attribute_contract(attribute, data: bytes, features: tuple[str, ...], test: bool):
-    wrapper = next(
-        (child for child in attribute.named_children if child.type == "verus_spec_attribute"),
-        None,
-    )
-    if wrapper is None:
+    from .native.extract.extractor import Unsupported, _textual_verus_spec
+    from .native.syntax import LexicalError, verus_spec_payload
+
+    try:
+        parts = verus_spec_payload(_text(data, attribute))
+    except LexicalError:
+        return None, True
+    if parts is None:
         return None
-    payload = next(
-        (child for child in wrapper.named_children
-         if child.type in {"verus_spec_attr", "cfg_attr_verus_spec"}),
-        None,
-    )
-    if payload is None:
-        return None
-    active: bool | None = True
-    if payload.type == "cfg_attr_verus_spec":
-        condition = next((child for child in payload.named_children if child.type == "identifier"), None)
-        active = (
-            _cfg(_text(data, condition), features, test)
-            if condition is not None and not payload.has_error else None
-        )
-        payload = next(
-            (child for child in payload.named_children if child.type == "verus_spec_attr"), None,
-        )
-    qualifier = next(
-        (child for child in payload.named_children if child.type == "fn_qualifier"), None,
-    ) if payload is not None else None
-    return qualifier, active
+    condition, _ = parts
+    active = True if condition is None else _cfg(condition, features, test)
+    if active is not True:
+        return False, active
+    try:
+        parsed = _textual_verus_spec(attribute)
+    except Unsupported:
+        return None, active
+    return bool(parsed and parsed[2]), active
 
 
 def source_for_features(
@@ -103,7 +95,7 @@ def source_for_features(
     diagnostics: list[str] = []
 
     def walk(node) -> None:
-        if node.type == "declaration_with_attrs":
+        if node.type in {"declaration_with_attrs", "attribute_expression"}:
             disabled = False
             for attribute in node.named_children:
                 if attribute.type != "attribute_item":
@@ -259,22 +251,42 @@ def scan_source(
             )
             modifiers = next((c for c in node.named_children if c.type == "function_modifiers"), None)
             unsupported = ""
-            if node.has_error or wrapper.has_error:
+            body = node.child_by_field_name("body")
+
+            def header_has_error(part) -> bool:
+                if part == body:
+                    return False
+                return part.type == "ERROR" or part.is_missing or any(
+                    header_has_error(child) for child in part.children
+                )
+
+            if header_has_error(wrapper):
                 unsupported = "Target declaration contains parser recovery nodes"
             elif modifiers is not None and re.search(r"\basync\b", _text(data, modifiers)):
                 unsupported = "Async executable contracts are not supported"
+            elif node.has_error or wrapper.has_error:
+                partial(node, "Implementation body has parser recovery; signature and contract remain source-parsed")
             qualifiers = [child for child in node.named_children if child.type == "fn_qualifier"]
+            attribute_has_contract = False
+            active_contracts = 0
             for attribute in wrapper.named_children:
                 if attribute.type != "attribute_item":
                     continue
                 attribute_contract = _attribute_contract(attribute, data, features, test)
                 if attribute_contract is not None:
-                    qualifier, active = attribute_contract
+                    has_postconditions, active = attribute_contract
                     if active is None:
                         unsupported = "Conditional contract attribute has an unresolved compilation context"
-                    elif active and qualifier is not None:
-                        qualifiers.append(qualifier)
+                    elif active and has_postconditions is None:
+                        unsupported = "Contract attribute cannot be parsed without recovery"
+                    elif active:
+                        active_contracts += 1
+                        attribute_has_contract = attribute_has_contract or has_postconditions
+            if active_contracts > 1:
+                unsupported = "Multiple active contract attributes on one declaration"
             has_contract = (
+                attribute_has_contract
+                or
                 any(child.type == "ensures_clause" for child in node.named_children)
                 or any(
                     child.type == "ensures_clause"
@@ -327,7 +339,7 @@ def project_modules(
         if relative in modules:
             if modules[relative] != qualified:
                 diagnostics.append(Diagnostic(
-                    Stage.DISCOVER, "partial_discovery",
+                    Stage.DISCOVER, "ambiguous_module",
                     "A source file is included under multiple module identities", "warning",
                     {"file": relative},
                 ))
@@ -337,7 +349,7 @@ def project_modules(
         root = parser().parse(data).root_node
 
         def walk(node, parts: tuple[str, ...], child_dir: PurePosixPath) -> None:
-            if node.type == "declaration_with_attrs":
+            if node.type in {"declaration_with_attrs", "attribute_expression"}:
                 for attr in node.named_children:
                     if attr.type == "attribute_item":
                         text = _text(data, attr)
@@ -371,7 +383,32 @@ def project_modules(
                         {"file": relative, "module": "::".join((*parts, value))},
                     ))
                 else:
-                    visit(found[0], (*parts, value), child_dir / value)
+                    resolved = PurePosixPath(found[0])
+                    directory = resolved.parent if resolved.name == "mod.rs" else resolved.with_suffix("")
+                    visit(found[0], (*parts, value), directory)
+                return
+            if node.type == "macro_invocation":
+                macro = node.child_by_field_name("macro")
+                if macro is None or _text(data, macro) != "include":
+                    return
+                tokens = next((c for c in node.named_children if c.type == "token_tree"), None)
+                arguments = [
+                    c for c in tokens.named_children
+                    if c.type not in {"line_comment", "block_comment"}
+                ] if tokens is not None else []
+                literal = _text(data, arguments[0]) if len(arguments) == 1 else ""
+                match = re.fullmatch(r'"([^"\\]+)"', literal)
+                included = posixpath.normpath(
+                    str(PurePosixPath(relative).parent / match[1])
+                ) if match else ""
+                if not included or included not in project.files or included.startswith(("/", "../")):
+                    diagnostics.append(Diagnostic(
+                        Stage.DISCOVER, "partial_discovery",
+                        "Only literal include! paths within the source snapshot are supported", "warning",
+                        {"file": relative, "line": node.start_point.row + 1},
+                    ))
+                else:
+                    visit(included, parts, PurePosixPath(included).parent)
                 return
             if node.type not in {"function_item", "impl_item", "trait_item", "macro_invocation"}:
                 for child in node.named_children:

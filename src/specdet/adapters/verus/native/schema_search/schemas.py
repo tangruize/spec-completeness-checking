@@ -30,6 +30,7 @@ unsupported rather than an artificial UNSAT slice.
 from __future__ import annotations
 
 import re
+from copy import deepcopy
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional
@@ -504,7 +505,27 @@ def enumerate_schemas(det_spec: DetCheckSpec) -> list[SchemaBinding]:
         if sym.name in seen_vars:
             continue
         seen_vars.add(sym.name)
-        _emit(sym.name, sym.type, [], schemas, seen_tags, projections_by_type)
+        search_type = sym.type
+        if sym.phase != "input" and det_spec.equal_policy.get("errs_equivalent", False):
+            # Only the search catalog is projected; the frozen contract and
+            # equality still use the complete source types.
+            search_type = deepcopy(sym.type)
+
+            def omit_error_payloads(ty: TypeInfo) -> None:
+                if ty.kind == TypeKind.RESULT and len(ty.type_args) > 1:
+                    ty.type_args[1] = TypeInfo(TypeKind.UNIT, "()")
+                    for variant in ty.variants:
+                        if variant.name == "Err":
+                            variant.inner = None
+                for child in [
+                    *ty.type_args, *(field.type for field in ty.fields),
+                    *(variant.inner for variant in ty.variants if variant.inner is not None),
+                    *([ty.spec_view] if ty.spec_view is not None else []),
+                ]:
+                    omit_error_payloads(child)
+
+            omit_error_payloads(search_type)
+        _emit(sym.name, search_type, [], schemas, seen_tags, projections_by_type)
 
     schemas.append(SchemaBinding(
         id="neq_tuple",

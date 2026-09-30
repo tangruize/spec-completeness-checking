@@ -1,0 +1,43 @@
+schema_version = 1
+offline = true
+
+[project]
+root = "spec"
+
+[language]
+name = "verus"
+
+[targets]
+include = ["initial.rs"]
+select = ["initial.rs:put", "initial.rs:get", "initial.rs:pop"]
+visibility = "public"
+
+[build]
+adapter = "verus.single_file"
+
+[analysis]
+kind = "concrete_determinism"
+observation_policy = "verus-strict-v1"
+
+[analysis.proof_generation]
+strategies = ["baseline", "rules"]
+max_attempts = 2
+
+[analysis.counterexamples]
+max_candidates = 16
+
+[limits]
+verifier_timeout_seconds = 20
+solver_timeout_ms = 1000
+max_search_rounds = 8
+max_container_depth = 2
+seed = 0
+
+[adapters.verus]
+rust_toolchain = "1.95.0-x86_64-unknown-linux-gnu"
+
+[artifacts]
+output_dir = "runs/checker"
+
+[assistance]
+mode = "off"

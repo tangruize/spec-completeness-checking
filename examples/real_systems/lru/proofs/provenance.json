@@ -1,0 +1,22 @@
+{
+  "compatible_spec_sha256": "df520aab2bd8217bd0f0f87ef7232c1bf760680be5e437ff5d5a08af4ba30d5c",
+  "control_problem_id": "f4bdbe98e312c7a226bf446e7224571a16237d85f14b00fc2517d764d083d62f",
+  "control_spec_sha256": "67ff6ccf3f7e0a1eef199e41a03cfc9123420f4516cd0c0f9c6c582eb94fd8c4",
+  "determinism_proof_sha256": "6870e5ea07eef53e9ff8992f2b23fe19e3888892493043fcbcd4b93a789fb184",
+  "known_omission_witness_is_user_supplied": true,
+  "known_omission_witness_sha256": "4971a6b9062f6768b261fb60cebac57caf63cae1bd6fbf455bb4c8536033cba9",
+  "method": "Replay frozen general determinism templates. Concrete sample/witness proofs assert original preconditions and both postconditions; the known control additionally asserts original observation inequality. Concrete proofs have no preconditions, assumptions, admissions, or target calls.",
+  "satisfiability_cases": [
+    "put_empty",
+    "put_nonfull",
+    "put_update_full",
+    "put_evict",
+    "put_capacity_one",
+    "get_hit",
+    "get_miss",
+    "pop_hit",
+    "pop_miss"
+  ],
+  "satisfiability_proof_sha256": "975ba83313df592e165ce8a3f5a09395fbffef63fb1cba6541ea6a26cfe8380a",
+  "scope": "General contract determinism, sampled feasibility, and a supplied witness for the known mutation; not refinement of the original Rust implementation."
+}

@@ -1,0 +1,823 @@
+{
+  "schema_version": 1,
+  "raw_artifacts_root": "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/mimalloc-evidence",
+  "summary": "final-venv-four/checker/20260930T011738Z-17ad095ec7/summary.json",
+  "summary_sha256": "a30fbaf26cd78424431c54b3dbd3baaa9a85dd77a09808aa8642220872704f1a",
+  "elapsed_seconds": 66.91192044969648,
+  "semantic_exit_code": 3,
+  "original_sources_unchanged": true,
+  "checker_base_revision": "af2ce8931ca778b9c3b13ebd0115f5e72c1e3169",
+  "checker_core_files": {
+    "src/specdet/__init__.py": "837936484f8a7eedeb012d8925a162dbaa373068f31fad0dd43c764c4a3146bd",
+    "src/specdet/__main__.py": "4f4a4aaca3bddde7b016bf3ebd1aa8593988dce35d078fb13ae0d7aca1058a4f",
+    "src/specdet/adapters/__init__.py": "334a79ee3736b8adce675716b9190948cd97d3b0acffb56b2afdd44212b14320",
+    "src/specdet/adapters/verus/__init__.py": "dc8779e79eef07d1fd55ea0bad1c583fa4469370351e4a2f214a0ea5caefea4d",
+    "src/specdet/adapters/verus/abstract.py": "6be0bec8d0973b6c748459a84e46b103f241b3caf6e9911880d5caa231cc5d65",
+    "src/specdet/adapters/verus/backend.py": "5654086224453cf6660c192bd147e307b25526cb92d321fe34a8c3bf1967cf43",
+    "src/specdet/adapters/verus/counterexamples.py": "4b98596313d36d8b2dd45126581c7cbc83ddf0cf6a85f768d8b7b2861926a330",
+    "src/specdet/adapters/verus/discovery.py": "7c5c7495b517e8aace33bbd40643f51d799f2139aaccf993bc3b919faf33e8ac",
+    "src/specdet/adapters/verus/execution.py": "9927d7ef99567f233a77f370f176b58f78ce25b28b9a5fc5fb908a9d45eac486",
+    "src/specdet/adapters/verus/native/__init__.py": "bf22d1b05c8795b4b4ccd8de6940c66b73b0b2136043fb9e1a46cd79c2d7fe33",
+    "src/specdet/adapters/verus/native/codegen/__init__.py": "af3e9dbd09634a9f1f8c4c7fe6b8d13ebd0597db0259931745b3630c3d4c17c1",
+    "src/specdet/adapters/verus/native/codegen/equal_policy.py": "ccb2c9674abca6ce1d71241f04621109e0ed8839d14245df17609f398b456387",
+    "src/specdet/adapters/verus/native/codegen/expressions.py": "36057ec1c802354429f03c255a959ae56fb70282132239087f70611dcd846da7",
+    "src/specdet/adapters/verus/native/codegen/gen_det.py": "7b1e74df546d289228fbe6f3dc74f8f52f77c92f62cf920d24eb5ec41a14acf1",
+    "src/specdet/adapters/verus/native/codegen/pairing.py": "299e154b9c7beccf365dfcc0908091e624151db958253509c74b2ca312027994",
+    "src/specdet/adapters/verus/native/extract/__init__.py": "3dcf4f904781c1578ff0b0a5c0127540851baca9233d1e1988dcafbe6e6d3ba1",
+    "src/specdet/adapters/verus/native/extract/array_bounds.py": "dcc6c707459ca56118a2d74376e9e6c4e57b393ea00cc3c412dc9489d166a10b",
+    "src/specdet/adapters/verus/native/extract/attrs.py": "49a7dd0a993040f1523f9f8cad194aab935a03efb51589de3e054df4125746b8",
+    "src/specdet/adapters/verus/native/extract/extractor.py": "51755015fdee1a268438d3c5177a4ba39c016da7cb9cac11f419ad99640fa3b4",
+    "src/specdet/adapters/verus/native/extract/narrow.py": "ad121c8978925de96aeda015fe8de9375a59dcb93d3fc464c4596ec12923c0cc",
+    "src/specdet/adapters/verus/native/extract/predicates.py": "8ff1169f7fef04bde0524861ab971dc2a2cc765c26da2c7292cf0533fd51382e",
+    "src/specdet/adapters/verus/native/extract/type_registry.py": "d83bb06570168a592ed3ba5600475a0a294ecb3eb0c3ed098f0e170be3d74cd0",
+    "src/specdet/adapters/verus/native/extract/types.py": "2db279c55f41e30bba4890215f88f1a5734cecfd72a7ae0a099cd3268ae9bef7",
+    "src/specdet/adapters/verus/native/proof_validation.py": "3312b7e59b21ee4795b10b9789f31f7bfc23449cd0bffbeb3c723a4e2ac660ac",
+    "src/specdet/adapters/verus/native/schema_search/__init__.py": "f7bf123aea7fd75d676cce4ee6ccc754434222a94bb4b8f9feca94f86d5ec9ab",
+    "src/specdet/adapters/verus/native/schema_search/schemas.py": "d33f520d8ff637995752729974856b92decf76cbf64ecb8b770d6ce583657482",
+    "src/specdet/adapters/verus/native/schema_search/search.py": "72af27a4cbdad8518ee806399512bc9ca539bf7f777565813fbad1ffb29939ed",
+    "src/specdet/adapters/verus/native/schema_search/transcript.py": "b8d27d1224bc34fe7ae5cd0766c34c7aed73a7bb272a7fdca113812ddea55214",
+    "src/specdet/adapters/verus/native/source.py": "f21f4d2833d25cdc53896a8176f6ec793c0cc0e59310980bd01738733e070647",
+    "src/specdet/adapters/verus/native/spec_helpers.py": "3ea2ab45835cadeeed23662d65ccaaf28bd9c69158da43cd829172834db0cc71",
+    "src/specdet/adapters/verus/native/syntax.py": "ffa6952938c722de4744bd334951eb9026b0a8dd2c1de08d32c8559e9a716e62",
+    "src/specdet/adapters/verus/native/view/__init__.py": "459696eb12e4d67a856f91308a19936a72792e3d21f0542e1410bf088ade26d5",
+    "src/specdet/adapters/verus/native/view/impl_scanner.py": "2f736c069e9afb79cd42698891cb089d278494e6eaf6bf3df14e2db85b206fa1",
+    "src/specdet/adapters/verus/native/view/prelude.py": "56cde3cb909fb6c7dcbd02c715b54b39d65b84ee1ecf0cb9e0de887d5a34c4a4",
+    "src/specdet/adapters/verus/native/view/registry.py": "742c245a3609085f9bf1772ca31a07d14e68b1eb345520106f297b3ab715d0fb",
+    "src/specdet/adapters/verus/proof_hints.py": "16d02da7d7da22ff127ac8c698dac979a3426b384bff5b059e6f16b486be8a6e",
+    "src/specdet/adapters/verus/proposal_validation.py": "3e0bdb3db7478946b87a33e701268132f891e85f8d8dd3ca1906f3d20f404b0f",
+    "src/specdet/adapters/verus/type_context.py": "324e19b1fc2e45bca242a07a10af4e471c17bf75366e7663e6aee7120e84c752",
+    "src/specdet/adapters/verus/witness_constants.py": "1235090e38b932da490f01e8978e7c9fb9094d5956f58573cbd23b10185ba89f",
+    "src/specdet/adapters/verus/witness_replay.py": "161eec97172f573502de705f158820d56c772df6a53aedd8f4f06058d74c4e01",
+    "src/specdet/adapters/verus/witness_values.py": "84fbb500fc10cb1d7a6f6496df388d6eda8d26cb1ba3feed82c386f708449a3b",
+    "src/specdet/analysis/__init__.py": "7982d848cbcec0037843f6a1e3c25af24420f7f15bea3b5fdc1006a7f8d9dce2",
+    "src/specdet/analysis/pipeline.py": "042b9c79278dc2bd081803ad6e2ced558b9b3e1af4b1daa732691a8a4c4e0617",
+    "src/specdet/analysis/verdicts.py": "f7b7b86a52a05950f19be96da9221a3db8c8ba09ae127e488b50401abf02138b",
+    "src/specdet/api.py": "1ccd96575c57bb9d1d92e806a99a01dbfa951a7563c09d6ac819fd5aa5510d4b",
+    "src/specdet/assistance/__init__.py": "b5313085344adcecb545d196a0ae65f87881adeb7430dea1829b2e7b70160191",
+    "src/specdet/assistance/budget.py": "8e788204d4e3361c4d3fc872d7394db0feb3e8b0b6e1dec1f678be5a49598907",
+    "src/specdet/assistance/controller.py": "3649445a9d36e7ddcce5de678a2f78021044d52a9e746b8dc6e26b3ca064914b",
+    "src/specdet/assistance/prompts.py": "8c46a98057e11f2ba78ca1b305a0a9ceaf5ab024d38c21aa17243f4c5cb54d39",
+    "src/specdet/assistance/records.py": "84887d54eb25187b1a220e3e620f1ac714d69d1f37b07c47e16a24ce88231af6",
+    "src/specdet/assistance/settings.py": "a2b3ef2b6e01426ba82ec6a75ae84b3d633108a87f5a2fb55cb1a579d8d1ed9e",
+    "src/specdet/assistance/workflow.py": "7c685c6382af97f8a3061f5b17d80af50fba920bccd25ed3483ade07cc743a26",
+    "src/specdet/cli/__init__.py": "02a3ee62407a0c76919a3eacccde17f5c729ac97b42f5861fd7e162dd6be322e",
+    "src/specdet/cli/main.py": "be35d275073cc016eb03d698f0d45e57ea2b3c594f7250e6eecfa3d8337b9ce6",
+    "src/specdet/config.py": "6b1714d4ccd9b1be414d4b2a53867c342a01e5d36df5244e7e14aa311e0db33d",
+    "src/specdet/domain/__init__.py": "4f5469d6ba3124ba7a0230b6a9051a95a47b0727c67b002617bfcc9d6ad38312",
+    "src/specdet/domain/capabilities.py": "0107d1f8d93cd2c99ec6b63df5d98882f20b26fc1f47be307dd8433ecc5e6211",
+    "src/specdet/domain/models.py": "df41dadf759a18820f2b8ecc8563c350f3a6969c17c3b0b8f80f796cd50c2af5",
+    "src/specdet/domain/proposals.py": "71865f6b9dde313aec2746ed4c5055632dbf735a663a233dbf811bd16c5bab70",
+    "src/specdet/ports/__init__.py": "3c08e86a8e7cf179123506f14aa2e08beef761f8b419f0203a25766f613de597",
+    "src/specdet/ports/assistance.py": "111a08156fe9138032991481e6e433e0fd3b895701b9d0492b627002bdeb617c",
+    "src/specdet/ports/language.py": "981f9356df8313601bf974b88376551f504731a99f7d64ef3b1c3e651544f2c6",
+    "src/specdet/providers/__init__.py": "17e712d036c1cd1632bebcf6f59f786e993e6d53381f9fec437b5e40b513a9ed",
+    "src/specdet/providers/_transport.py": "2c82df5b5e67682927b6d46694f4156557d17d5554c8d7579d0902f61e58d644",
+    "src/specdet/providers/copilot.py": "2ad895ed8b60c27c4e2f16208f0353d908f888d1888bea7ad7d57cd8d696bb94",
+    "src/specdet/providers/errors.py": "d60575d5705039354def6e342d64370dc09869727e3fc2c56b958ec362d9a491",
+    "src/specdet/providers/replay.py": "bd4c9ce3f307fa4d87e30f722600aff8e3e1383944ab515c6010b45309c2461b",
+    "src/specdet/providers/subprocess.py": "777c61bbc6b1f4472a45cdcbc5fd8301b73adcfcb186060e7d96a857e9e8945f",
+    "src/specdet/storage/__init__.py": "c44f3f695021b0002b81a2d484106851ea489eafa5a0f0c54bc405cdd5bfb867",
+    "src/specdet/storage/artifacts.py": "7fd019bc8f874bfcb7867fdd95064acc30f09cf4eb82ed162494d976e0d38a6f",
+    "src/specdet/storage/workspace.py": "9affa4f53a085cdc0811d1cf62b2411061280b8c1367820afeb0de78f43f9b60"
+  },
+  "toolchain": {
+    "verifier": "/home/ruize/argus-improvement/openvmm-restore-onboarding/toolchain/verus-src.pinned-c22087b/source/target-verus/release/rust_verify",
+    "verifier_sha256": "99fea6cbc9b14b6840912e97a258a53180846af41d5be0ef1a9358a9d99edf1b",
+    "rust_toolchain": "1.98.1",
+    "z3": "/home/ruize/argus-improvement/openvmm-restore-onboarding/toolchain/verus-src.pinned-c22087b/source/z3",
+    "z3_sha256": "e583c4186a45e72411fa2cb2048401eed03f0f8e5f24694676a8f6271a50b765",
+    "libc": "/home/ruize/mimalloc-argus-run/.build/verifier/debug/deps/liblibc-9cd8a66bfd45f04e.rlib",
+    "libc_sha256": "33a06a6daac34f8b162e209c688ff5b4d69b218fdc1de9943067e96bab728bfb"
+  },
+  "limits": {
+    "verifier_timeout_seconds": 30,
+    "solver_timeout_ms": 1000,
+    "max_search_rounds": 4,
+    "counterexample_candidates": 0,
+    "max_proof_attempts": 2,
+    "proof_strategies": [
+      "baseline",
+      "rules"
+    ],
+    "assistance": "off",
+    "offline": true
+  },
+  "results": [
+    {
+      "function": "clear",
+      "status": "completed",
+      "verdict": "deterministic",
+      "problem_id": "e697e5d83c2f3b702eaea33a870cd2364a2dc826ae5da43410d2c9f0d118808e",
+      "trusted_translation": true,
+      "ignored_dimensions": [],
+      "baseline": {
+        "problem_id": "e697e5d83c2f3b702eaea33a870cd2364a2dc826ae5da43410d2c9f0d118808e",
+        "status": "unsat",
+        "role": "baseline",
+        "query_digest": "67ecc1403e0b4c9065b056d19dbaa979abe7954d3fdde0a2ff363e5bf13face2",
+        "constraints": [],
+        "reason": "",
+        "duration_ms": 2.8935736045241356,
+        "artifact": "final-venv-four/checker/20260930T011738Z-17ad095ec7/targets/0059ac55495ec37974ce24cd/attempts/000-c955ce63909c/query/originalC.smt2"
+      },
+      "proofs": [
+        {
+          "status": "verified",
+          "verified_goals": 1,
+          "duration_ms": 11853.935022838414,
+          "problem_id": "e697e5d83c2f3b702eaea33a870cd2364a2dc826ae5da43410d2c9f0d118808e"
+        }
+      ],
+      "search": [],
+      "counterexample": null,
+      "verifier_processes": [
+        {
+          "artifact": "final-venv-four/checker/20260930T011738Z-17ad095ec7/targets/0059ac55495ec37974ce24cd/attempts/000-c955ce63909c/verifier/process.json",
+          "sha256": "ae9b13976e9c174a017213999ca4f7385f8711d80e4971cc8fe78fe213c68de2",
+          "command": [
+            "/home/ruize/argus-improvement/openvmm-restore-onboarding/toolchain/verus-src.pinned-c22087b/source/target-verus/release/rust_verify",
+            "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/mimalloc-evidence/final-venv-four/checker/20260930T011738Z-17ad095ec7/targets/0059ac55495ec37974ce24cd/attempts/000-c955ce63909c/worktree/lib.rs",
+            "--crate-type",
+            "lib",
+            "--edition=2021",
+            "--extern",
+            "libc=/home/ruize/mimalloc-argus-run/.build/verifier/debug/deps/liblibc-9cd8a66bfd45f04e.rlib",
+            "--log-all",
+            "--log-dir",
+            "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/mimalloc-evidence/final-venv-four/checker/20260930T011738Z-17ad095ec7/targets/0059ac55495ec37974ce24cd/attempts/000-c955ce63909c/verifier/logs",
+            "--verify-only-module",
+            "commit_mask",
+            "--verify-function",
+            "__specdet_0059ac55495ec37974ce24cd"
+          ],
+          "returncode": 0,
+          "duration_ms": 11425.95425248146,
+          "timed_out": false,
+          "stdout": "verification results:: 1 verified, 0 errors (partial verification with `--verify-*`)\n"
+        }
+      ]
+    },
+    {
+      "function": "set",
+      "status": "completed",
+      "verdict": "deterministic",
+      "problem_id": "a9d82c5d0d1e7c0cbdb5e5d7f63090c3f9aa05c817b6b341d588d478a6630138",
+      "trusted_translation": true,
+      "ignored_dimensions": [],
+      "baseline": {
+        "problem_id": "a9d82c5d0d1e7c0cbdb5e5d7f63090c3f9aa05c817b6b341d588d478a6630138",
+        "status": "unsat",
+        "role": "baseline",
+        "query_digest": "6bd7757ac8b891eea33d6e4a7e6ad8a783925645680dbb14b064b181130072a4",
+        "constraints": [],
+        "reason": "",
+        "duration_ms": 3.5321954637765884,
+        "artifact": "final-venv-four/checker/20260930T011738Z-17ad095ec7/targets/70de586112d6995b41d68342/attempts/000-8ead133f02bc/query/originalC.smt2"
+      },
+      "proofs": [
+        {
+          "status": "verified",
+          "verified_goals": 1,
+          "duration_ms": 13301.227647811174,
+          "problem_id": "a9d82c5d0d1e7c0cbdb5e5d7f63090c3f9aa05c817b6b341d588d478a6630138"
+        }
+      ],
+      "search": [],
+      "counterexample": null,
+      "verifier_processes": [
+        {
+          "artifact": "final-venv-four/checker/20260930T011738Z-17ad095ec7/targets/70de586112d6995b41d68342/attempts/000-8ead133f02bc/verifier/process.json",
+          "sha256": "2918d55804a1ca8238ea32b3c7f1f60ae3a1b5acdd5689f026ed9f75fbd151b8",
+          "command": [
+            "/home/ruize/argus-improvement/openvmm-restore-onboarding/toolchain/verus-src.pinned-c22087b/source/target-verus/release/rust_verify",
+            "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/mimalloc-evidence/final-venv-four/checker/20260930T011738Z-17ad095ec7/targets/70de586112d6995b41d68342/attempts/000-8ead133f02bc/worktree/lib.rs",
+            "--crate-type",
+            "lib",
+            "--edition=2021",
+            "--extern",
+            "libc=/home/ruize/mimalloc-argus-run/.build/verifier/debug/deps/liblibc-9cd8a66bfd45f04e.rlib",
+            "--log-all",
+            "--log-dir",
+            "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/mimalloc-evidence/final-venv-four/checker/20260930T011738Z-17ad095ec7/targets/70de586112d6995b41d68342/attempts/000-8ead133f02bc/verifier/logs",
+            "--verify-only-module",
+            "commit_mask",
+            "--verify-function",
+            "__specdet_70de586112d6995b41d68342"
+          ],
+          "returncode": 0,
+          "duration_ms": 11845.118675380945,
+          "timed_out": false,
+          "stdout": "verification results:: 1 verified, 0 errors (partial verification with `--verify-*`)\n"
+        }
+      ]
+    },
+    {
+      "function": "create",
+      "status": "completed",
+      "verdict": "inconclusive",
+      "problem_id": "6b538ec9fb5379f903541a4273994c03e5f6be71f7e3bfdedac283de080b0a9f",
+      "trusted_translation": true,
+      "ignored_dimensions": [],
+      "baseline": {
+        "problem_id": "6b538ec9fb5379f903541a4273994c03e5f6be71f7e3bfdedac283de080b0a9f",
+        "status": "unknown",
+        "role": "baseline",
+        "query_digest": "1d7abae60ca911d38891940d9c1106bb21b04a355ae172746533d031d7c7f578",
+        "constraints": [],
+        "reason": "(incomplete quantifiers)",
+        "duration_ms": 4.158442839980125,
+        "artifact": "final-venv-four/checker/20260930T011738Z-17ad095ec7/targets/a0cbb18282e7f2c0e11dbf7d/attempts/000-ee4e7fd05b2b/query/originalC.smt2"
+      },
+      "proofs": [
+        {
+          "status": "unproved",
+          "verified_goals": 0,
+          "duration_ms": 10265.932916663587,
+          "problem_id": "6b538ec9fb5379f903541a4273994c03e5f6be71f7e3bfdedac283de080b0a9f"
+        }
+      ],
+      "search": [
+        {
+          "status": "unknown",
+          "role": "baseline",
+          "constraints": [],
+          "reason": "(incomplete quantifiers)"
+        },
+        {
+          "status": "unknown",
+          "role": "refinement",
+          "constraints": [
+            {
+              "schema_id": "pre_self__mask_0__rng",
+              "bindings": {
+                "k_pre_self__mask_0__rng_hi": 16,
+                "k_pre_self__mask_0__rng_lo": 0
+              },
+              "variable": "pre_self_.mask[0]",
+              "expression": "pre_self_.mask[0] as int >= 0 && pre_self_.mask[0] as int <= 16",
+              "predicate": {
+                "kind": "scalar_range",
+                "variant": null,
+                "bool_value": null,
+                "str_value": null,
+                "bindings": {
+                  "k_pre_self__mask_0__rng_hi": 16,
+                  "k_pre_self__mask_0__rng_lo": 0
+                }
+              },
+              "parent_chain": []
+            }
+          ],
+          "reason": "(incomplete quantifiers)"
+        },
+        {
+          "status": "unknown",
+          "role": "refinement",
+          "constraints": [
+            {
+              "schema_id": "pre_self__mask_0__rng",
+              "bindings": {
+                "k_pre_self__mask_0__rng_hi": 8,
+                "k_pre_self__mask_0__rng_lo": 0
+              },
+              "variable": "pre_self_.mask[0]",
+              "expression": "pre_self_.mask[0] as int >= 0 && pre_self_.mask[0] as int <= 8",
+              "predicate": {
+                "kind": "scalar_range",
+                "variant": null,
+                "bool_value": null,
+                "str_value": null,
+                "bindings": {
+                  "k_pre_self__mask_0__rng_hi": 8,
+                  "k_pre_self__mask_0__rng_lo": 0
+                }
+              },
+              "parent_chain": []
+            }
+          ],
+          "reason": "(incomplete quantifiers)"
+        },
+        {
+          "status": "unknown",
+          "role": "refinement",
+          "constraints": [
+            {
+              "schema_id": "pre_self__mask_0__rng",
+              "bindings": {
+                "k_pre_self__mask_0__rng_hi": 4,
+                "k_pre_self__mask_0__rng_lo": 0
+              },
+              "variable": "pre_self_.mask[0]",
+              "expression": "pre_self_.mask[0] as int >= 0 && pre_self_.mask[0] as int <= 4",
+              "predicate": {
+                "kind": "scalar_range",
+                "variant": null,
+                "bool_value": null,
+                "str_value": null,
+                "bindings": {
+                  "k_pre_self__mask_0__rng_hi": 4,
+                  "k_pre_self__mask_0__rng_lo": 0
+                }
+              },
+              "parent_chain": []
+            }
+          ],
+          "reason": "(incomplete quantifiers)"
+        }
+      ],
+      "counterexample": null,
+      "verifier_processes": [
+        {
+          "artifact": "final-venv-four/checker/20260930T011738Z-17ad095ec7/targets/a0cbb18282e7f2c0e11dbf7d/attempts/000-ee4e7fd05b2b/verifier/process.json",
+          "sha256": "45fafbcc46ef6580c4247a1d172ab7b227e6ab0395c1621290fac0d174ef82b8",
+          "command": [
+            "/home/ruize/argus-improvement/openvmm-restore-onboarding/toolchain/verus-src.pinned-c22087b/source/target-verus/release/rust_verify",
+            "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/mimalloc-evidence/final-venv-four/checker/20260930T011738Z-17ad095ec7/targets/a0cbb18282e7f2c0e11dbf7d/attempts/000-ee4e7fd05b2b/worktree/lib.rs",
+            "--crate-type",
+            "lib",
+            "--edition=2021",
+            "--extern",
+            "libc=/home/ruize/mimalloc-argus-run/.build/verifier/debug/deps/liblibc-9cd8a66bfd45f04e.rlib",
+            "--log-all",
+            "--log-dir",
+            "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/mimalloc-evidence/final-venv-four/checker/20260930T011738Z-17ad095ec7/targets/a0cbb18282e7f2c0e11dbf7d/attempts/000-ee4e7fd05b2b/verifier/logs",
+            "--verify-only-module",
+            "commit_mask",
+            "--verify-function",
+            "__specdet_a0cbb18282e7f2c0e11dbf7d"
+          ],
+          "returncode": 1,
+          "duration_ms": 9731.59029521048,
+          "timed_out": false,
+          "stdout": "verification results:: 0 verified, 1 errors (partial verification with `--verify-*`)\n"
+        }
+      ]
+    },
+    {
+      "function": "next_run",
+      "status": "completed",
+      "verdict": "inconclusive",
+      "problem_id": "6a477a8e58ebac18b924bb937a1a66b33ee5bb7e856752da03afc1c38acc80a3",
+      "trusted_translation": true,
+      "ignored_dimensions": [],
+      "baseline": {
+        "problem_id": "6a477a8e58ebac18b924bb937a1a66b33ee5bb7e856752da03afc1c38acc80a3",
+        "status": "unknown",
+        "role": "baseline",
+        "query_digest": "a9231cdadf51928b585ed642f76a98e30497a155f712b155b5428ed8f96c466c",
+        "constraints": [],
+        "reason": "(incomplete quantifiers)",
+        "duration_ms": 3.4493692219257355,
+        "artifact": "final-venv-four/checker/20260930T011738Z-17ad095ec7/targets/54c9eb91a3d947d008fcfd3e/attempts/000-3e7a1455c883/query/originalC.smt2"
+      },
+      "proofs": [
+        {
+          "status": "unproved",
+          "verified_goals": 0,
+          "duration_ms": 9869.89934090525,
+          "problem_id": "6a477a8e58ebac18b924bb937a1a66b33ee5bb7e856752da03afc1c38acc80a3"
+        }
+      ],
+      "search": [
+        {
+          "status": "unknown",
+          "role": "baseline",
+          "constraints": [],
+          "reason": "(incomplete quantifiers)"
+        },
+        {
+          "status": "unknown",
+          "role": "refinement",
+          "constraints": [
+            {
+              "schema_id": "self__mask_0__rng",
+              "bindings": {
+                "k_self__mask_0__rng_hi": 16,
+                "k_self__mask_0__rng_lo": 0
+              },
+              "variable": "self_.mask[0]",
+              "expression": "self_.mask[0] as int >= 0 && self_.mask[0] as int <= 16",
+              "predicate": {
+                "kind": "scalar_range",
+                "variant": null,
+                "bool_value": null,
+                "str_value": null,
+                "bindings": {
+                  "k_self__mask_0__rng_hi": 16,
+                  "k_self__mask_0__rng_lo": 0
+                }
+              },
+              "parent_chain": []
+            }
+          ],
+          "reason": "(incomplete quantifiers)"
+        },
+        {
+          "status": "unknown",
+          "role": "refinement",
+          "constraints": [
+            {
+              "schema_id": "self__mask_0__rng",
+              "bindings": {
+                "k_self__mask_0__rng_hi": 8,
+                "k_self__mask_0__rng_lo": 0
+              },
+              "variable": "self_.mask[0]",
+              "expression": "self_.mask[0] as int >= 0 && self_.mask[0] as int <= 8",
+              "predicate": {
+                "kind": "scalar_range",
+                "variant": null,
+                "bool_value": null,
+                "str_value": null,
+                "bindings": {
+                  "k_self__mask_0__rng_hi": 8,
+                  "k_self__mask_0__rng_lo": 0
+                }
+              },
+              "parent_chain": []
+            }
+          ],
+          "reason": "(incomplete quantifiers)"
+        },
+        {
+          "status": "unknown",
+          "role": "refinement",
+          "constraints": [
+            {
+              "schema_id": "self__mask_0__rng",
+              "bindings": {
+                "k_self__mask_0__rng_hi": 4,
+                "k_self__mask_0__rng_lo": 0
+              },
+              "variable": "self_.mask[0]",
+              "expression": "self_.mask[0] as int >= 0 && self_.mask[0] as int <= 4",
+              "predicate": {
+                "kind": "scalar_range",
+                "variant": null,
+                "bool_value": null,
+                "str_value": null,
+                "bindings": {
+                  "k_self__mask_0__rng_hi": 4,
+                  "k_self__mask_0__rng_lo": 0
+                }
+              },
+              "parent_chain": []
+            }
+          ],
+          "reason": "(incomplete quantifiers)"
+        }
+      ],
+      "counterexample": null,
+      "verifier_processes": [
+        {
+          "artifact": "final-venv-four/checker/20260930T011738Z-17ad095ec7/targets/54c9eb91a3d947d008fcfd3e/attempts/000-3e7a1455c883/verifier/process.json",
+          "sha256": "ba94a017b5b858058457a56e4f5523c0a668b8c0c1a19c0254ac1f8625cfac04",
+          "command": [
+            "/home/ruize/argus-improvement/openvmm-restore-onboarding/toolchain/verus-src.pinned-c22087b/source/target-verus/release/rust_verify",
+            "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/mimalloc-evidence/final-venv-four/checker/20260930T011738Z-17ad095ec7/targets/54c9eb91a3d947d008fcfd3e/attempts/000-3e7a1455c883/worktree/lib.rs",
+            "--crate-type",
+            "lib",
+            "--edition=2021",
+            "--extern",
+            "libc=/home/ruize/mimalloc-argus-run/.build/verifier/debug/deps/liblibc-9cd8a66bfd45f04e.rlib",
+            "--log-all",
+            "--log-dir",
+            "/home/ruize/.copilot/session-state/0425e1d7-cb84-4dc1-874e-8f88c03d424b/files/mimalloc-evidence/final-venv-four/checker/20260930T011738Z-17ad095ec7/targets/54c9eb91a3d947d008fcfd3e/attempts/000-3e7a1455c883/verifier/logs",
+            "--verify-only-module",
+            "commit_mask",
+            "--verify-function",
+            "__specdet_54c9eb91a3d947d008fcfd3e"
+          ],
+          "returncode": 1,
+          "duration_ms": 9462.165025994182,
+          "timed_out": false,
+          "stdout": "verification results:: 0 verified, 1 errors (partial verification with `--verify-*`)\n"
+        }
+      ]
+    }
+  ],
+  "native_implementation_verification": {
+    "command": [
+      "/home/ruize/argus-improvement/openvmm-restore-onboarding/toolchain/verus-src.pinned-c22087b/source/target-verus/release/rust_verify",
+      "/home/ruize/mimalloc-argus-run/src/lib.rs",
+      "--crate-type",
+      "lib",
+      "--edition=2021",
+      "--extern",
+      "libc=/home/ruize/mimalloc-argus-run/.build/verifier/debug/deps/liblibc-9cd8a66bfd45f04e.rlib",
+      "--verify-module",
+      "commit_mask",
+      "--time",
+      "--num-threads",
+      "2"
+    ],
+    "returncode": 0,
+    "duration_ms": 8889.254971407354,
+    "timed_out": false,
+    "stdout": "verification results:: 38 verified, 0 errors (partial verification with `--verify-*`)\n(use --output-json for machine-readable output)\nverus-build-info\nVerus\n  Version: 0.2026.09.18.c22087b\n  Profile: release\n  Platform: linux_x86_64\n  Toolchain: 1.98.1-x86_64-unknown-linux-gnu (overridden by environment variable RUSTUP_TOOLCHAIN)\n\ntotal-time:            8329 ms\n    rust-time:                4223 ms\n        init-and-types:           2640 ms\n        trait-conflicts:            72 ms\n        compile-time:             1510 ms\n    verification-time:        3389 ms\n        vir-time:                 2518 ms\n            hir-time:                  505 ms\n            import-time:               155 ms\n            rust-to-vir:               654 ms\n        verify-crate-time:         871 ms\n    unaccounted-time:          716 ms\n\nverify-crate-time-breakdown\n    total verify-time:            418 ms   (1 threads)\n        total air-time:               140 ms   (1 threads)\n        total smt-time:               188 ms   (1 threads)\n            total smt-init:                 2 ms,    11168 rlimit (1 threads)\n            total smt-run:                186 ms,   971991 rlimit (1 threads)\n",
+    "status": "verified",
+    "verified_goals": 38,
+    "stderr_sha256": "01c344bf86f9aa671849b0c624b44143e15cf849ae8e51537837548edf97c9f2",
+    "artifact": "final-venv-four/implementation.json",
+    "scope": "Only the original commit_mask module; not full allocator completion"
+  },
+  "historical_blockers": [
+    {
+      "run": "native-original",
+      "elapsed_seconds": 37.81779169756919,
+      "semantic_exit_code": 2,
+      "issue": "Comma-separated quantified attribute clauses were merged: clear 2 instead of 3 ensures; set 2 instead of 4; create 2 instead of 3 requires. Parent-owned common-core repair resolves this in the final native run."
+    },
+    {
+      "run": "native-original",
+      "issue": "Native next_run reached Verus but unpinned Z3 was 4.12.5; c22087b requires 4.16.0. Explicit VERUS_Z3_PATH to the project solver resolves the toolchain problem."
+    },
+    {
+      "run": "native-pinned-next-run",
+      "elapsed_seconds": 18.536981464363635,
+      "semantic_exit_code": 3,
+      "issue": "Actual native next_run remains bounded inconclusive, not nondeterministic."
+    }
+  ],
+  "remaining_limitations": [
+    "Fixed arrays with symbolic or unevaluated constant extents are skipped with a diagnostic; known literal arrays use at most the existing eight precompiled element slots. Variable-length sequences, slices, and Vec Views keep their original length search.",
+    "create and next_run baseline queries are UNKNOWN (incomplete quantifiers); no source-confirmed counterexample was produced, and counterexample candidates were explicitly disabled.",
+    "Partial discovery warnings remain for unrelated attribute/macro syntax. The four selected original contract clause counts and frozen native goals were inspected.",
+    "This checks concrete shared-input utility-function determinism, not malloc address placement or the TOP tracked-resource contracts."
+  ],
+  "runner_validation": {
+    "artifact_directory": "final-venv-four",
+    "semantic_exit_code": 3,
+    "runner_exit_code": 3,
+    "checker_elapsed_seconds": 66.91192044969648,
+    "original_sources_unchanged": true,
+    "checker_core_unchanged": true,
+    "implementation_status": "verified",
+    "implementation_verified_goals": 38,
+    "implementation_duration_ms": 8889.254971407354,
+    "target_verdicts": {
+      "clear": "deterministic",
+      "set": "deterministic",
+      "create": "inconclusive",
+      "next_run": "inconclusive"
+    },
+    "runner_sha256": "cc972cd389aee8b25a7d077bb32e4bea2a63e91b9f7fdb4bfe33a453b63b37bf",
+    "all_original_contract_clause_counts_and_digests_preserved": true,
+    "all_output_observation_templates_preserved": true
+  },
+  "runner_exit_code": 3,
+  "checker_core_unchanged": true,
+  "publication_policy": "No copied local source, contract, proof, or diagnostic source excerpts. Full private input snapshots and contract artifacts remain local.",
+  "fixed_array_refinement_repair": {
+    "before_artifact_directory": "stable-core-four",
+    "after_artifact_directory": "fixed-array-four",
+    "before_elapsed_seconds": 105.22545595373958,
+    "after_elapsed_seconds": 95.7720782412216,
+    "all_original_contract_clauses_preserved": true,
+    "all_frozen_goal_ids_preserved": true,
+    "all_baseline_query_digests_preserved": true,
+    "changed_queries": [
+      {
+        "function": "create",
+        "before": [
+          {
+            "status": "unsat",
+            "expressions": [
+              "pre_self_.mask.len() == 0"
+            ]
+          },
+          {
+            "status": "unsat",
+            "expressions": [
+              "pre_self_.mask.len() == 1"
+            ]
+          },
+          {
+            "status": "unsat",
+            "expressions": [
+              "pre_self_.mask.len() == 2"
+            ]
+          }
+        ],
+        "after": [
+          {
+            "status": "unknown",
+            "expressions": [
+              "pre_self_.mask[0] as int >= 0 && pre_self_.mask[0] as int <= 16"
+            ]
+          },
+          {
+            "status": "unknown",
+            "expressions": [
+              "pre_self_.mask[0] as int >= 0 && pre_self_.mask[0] as int <= 8"
+            ]
+          },
+          {
+            "status": "unknown",
+            "expressions": [
+              "pre_self_.mask[0] as int >= 0 && pre_self_.mask[0] as int <= 4"
+            ]
+          }
+        ]
+      },
+      {
+        "function": "next_run",
+        "before": [
+          {
+            "status": "unsat",
+            "expressions": [
+              "self_.mask.len() == 0"
+            ]
+          },
+          {
+            "status": "unsat",
+            "expressions": [
+              "self_.mask.len() == 1"
+            ]
+          },
+          {
+            "status": "unsat",
+            "expressions": [
+              "self_.mask.len() == 2"
+            ]
+          }
+        ],
+        "after": [
+          {
+            "status": "unknown",
+            "expressions": [
+              "self_.mask[0] as int >= 0 && self_.mask[0] as int <= 16"
+            ]
+          },
+          {
+            "status": "unknown",
+            "expressions": [
+              "self_.mask[0] as int >= 0 && self_.mask[0] as int <= 8"
+            ]
+          },
+          {
+            "status": "unknown",
+            "expressions": [
+              "self_.mask[0] as int >= 0 && self_.mask[0] as int <= 4"
+            ]
+          }
+        ]
+      }
+    ],
+    "interpretation": "The six impossible array-length slices were replaced by six type-valid first-word bound queries. They remain UNKNOWN, not SAT evidence or new determinism proofs. Shared-host timings are observations, not an isolated performance benchmark.",
+    "tests": {
+      "commands": [
+        {
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "tests/test_fixed_array_narrowing.py",
+            "tests/test_native_search.py"
+          ],
+          "returncode": 0,
+          "duration_seconds": 0.4502433082088828,
+          "stdout": "..................................... [ 72%]\n..............                                                           [100%]\n51 passed, 35 subtests passed in 0.19s\n",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "command": [
+            "python",
+            "-m",
+            "specdet.adapters.verus.native.extract.narrow",
+            "test"
+          ],
+          "returncode": 0,
+          "duration_seconds": 0.05511990189552307,
+          "stdout": "All narrow self-tests passed.\n",
+          "stderr_sha256": "3dbfee62b2cd36bae2aa99a0ecd412b6e74383525353bad3a68485bf6967f906"
+        }
+      ],
+      "source_files": {
+        "src/specdet/adapters/verus/native/extract/array_bounds.py": "dcc6c707459ca56118a2d74376e9e6c4e57b393ea00cc3c412dc9489d166a10b",
+        "src/specdet/adapters/verus/native/extract/narrow.py": "ad121c8978925de96aeda015fe8de9375a59dcb93d3fc464c4596ec12923c0cc",
+        "tests/test_fixed_array_narrowing.py": "ca7de89263fb9de5948ad8d7fa38a6be785a09aa0e7859cafbbf2c06da8840de"
+      }
+    },
+    "concurrent_core_changes": {
+      "files": [
+        "src/specdet/adapters/verus/witness_replay.py",
+        "src/specdet/adapters/verus/witness_values.py"
+      ],
+      "note": "Parent edits occurred during the run. Constructive counterexamples were disabled. All four frozen goal IDs and original baseline query digests exactly match the preceding stable-core run. No all-core-unchanged claim is made."
+    }
+  },
+  "python_environment": {
+    "python_executable": "/home/ruize/argus-spec-work/sources/spec-completeness-checking/.venv/bin/python",
+    "python_version": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+    "virtualenv_prefix": "/home/ruize/argus-spec-work/sources/spec-completeness-checking/.venv",
+    "distributions": {
+      "tree-sitter": "0.25.2",
+      "tree-sitter-verus": "0.23.2",
+      "z3-solver": "5.1.0.0"
+    },
+    "grammar_vcs_info": {
+      "commit_id": "8639c4e4196ce36dd8a40c57fbad6200735bd2d1",
+      "requested_revision": "8639c4e4196ce36dd8a40c57fbad6200735bd2d1",
+      "vcs": "git"
+    },
+    "grammar_package_path": "/home/ruize/argus-spec-work/sources/spec-completeness-checking/.venv/lib/python3.12/site-packages/tree_sitter_verus/__init__.py",
+    "z3_python_version": "5.1.0",
+    "sealed_source_files_matched": 32,
+    "source_bytes_unchanged": true
+  },
+  "runner_command": [
+    "/home/ruize/argus-spec-work/sources/spec-completeness-checking/.venv/bin/python",
+    "/home/ruize/argus-spec-work/sources/spec-completeness-checking/examples/real_systems/mimalloc/run.py",
+    "--source-root",
+    "/home/ruize/mimalloc-argus-run",
+    "--source-seal",
+    "/home/ruize/argus-spec-work/sources/spec-completeness-checking/examples/real_systems/mimalloc/source-seal.json",
+    "--out",
+    "final-venv-four",
+    "--verus",
+    "/home/ruize/.cache/argus-verus-c22087b/source/target-verus/release/rust_verify",
+    "--rust-toolchain",
+    "1.98.1",
+    "--z3",
+    "/home/ruize/.cache/argus-verus-c22087b/source/z3",
+    "--libc",
+    "/home/ruize/mimalloc-argus-run/.build/verifier/debug/deps/liblibc-9cd8a66bfd45f04e.rlib",
+    "--verify-implementation"
+  ],
+  "final_integration_validation": {
+    "artifact_directory": "final-venv-four",
+    "started_at": "2026-09-30T01:17:29.395450+00:00",
+    "reference_artifact_directory": "fixed-array-four",
+    "budgets_unchanged": true,
+    "source_seal_matched_before_and_after": true,
+    "targets": {
+      "clear": {
+        "original_clause_counts": {
+          "requires": 0,
+          "ensures": 3
+        },
+        "original_clause_digests_match": true,
+        "original_source_digest_matches": true,
+        "template_sha256": "5711c1cf77a6216d925789c0c94e8e5a1723ebba190ceaf08195d2168bdb4291",
+        "template_identical_to_previous": true,
+        "frozen_goal_id_identical_to_previous": true,
+        "ignored_dimensions": [],
+        "trusted_translation": true,
+        "baseline_query_identical_to_previous": true,
+        "refinement_count": 0,
+        "no_fixed_array_length_refinements": true
+      },
+      "set": {
+        "original_clause_counts": {
+          "requires": 0,
+          "ensures": 4
+        },
+        "original_clause_digests_match": true,
+        "original_source_digest_matches": true,
+        "template_sha256": "e405a7b10dc77c8344f4a1c91af68eeb35d44bf54c8fcff31bab5bb2ee94e71a",
+        "template_identical_to_previous": true,
+        "frozen_goal_id_identical_to_previous": true,
+        "ignored_dimensions": [],
+        "trusted_translation": true,
+        "baseline_query_identical_to_previous": true,
+        "refinement_count": 0,
+        "no_fixed_array_length_refinements": true
+      },
+      "create": {
+        "original_clause_counts": {
+          "requires": 3,
+          "ensures": 1
+        },
+        "original_clause_digests_match": true,
+        "original_source_digest_matches": true,
+        "template_sha256": "84549cc2c4f28d9b82564b7a5a375a2c17b56d576b950c9ef371eac5261e86cf",
+        "template_identical_to_previous": true,
+        "frozen_goal_id_identical_to_previous": true,
+        "ignored_dimensions": [],
+        "trusted_translation": true,
+        "baseline_query_identical_to_previous": true,
+        "refinement_count": 3,
+        "no_fixed_array_length_refinements": true
+      },
+      "next_run": {
+        "original_clause_counts": {
+          "requires": 1,
+          "ensures": 1
+        },
+        "original_clause_digests_match": true,
+        "original_source_digest_matches": true,
+        "template_sha256": "a4cdf6568f12703d5a3b56ac6f5e56cdf10df8de32039a0c6bb10c566d664b73",
+        "template_identical_to_previous": true,
+        "frozen_goal_id_identical_to_previous": true,
+        "ignored_dimensions": [],
+        "trusted_translation": true,
+        "baseline_query_identical_to_previous": true,
+        "refinement_count": 3,
+        "no_fixed_array_length_refinements": true
+      }
+    },
+    "checker_core_unchanged": true
+  }
+}

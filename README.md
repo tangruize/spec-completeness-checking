@@ -12,11 +12,15 @@ Verus ASTs, Z3 objects, or an LLM provider. See
 [`ARCHITECTURE.md`](ARCHITECTURE.md), currently in Chinese, for the design and
 migration constraints.
 
+For system-proof agents, see the compact [evidence guide](docs/agent-evidence.md), [reusable skill](.github/skills/specdet-evidence/SKILL.md), and [HFS/Nanvix/mimalloc/LRU profiles](examples/real_systems/README.md). They distinguish native proofs, sealed extracts, authored models and conditional claims; they do not assign specification-quality verdicts.
+
 ## Installation and basic usage
 
 Python 3.11 or later is required. Verus is an external tool: configure it
 explicitly or make it available on `PATH`. The tool does not implicitly look
 for a Nanvix or VeruSAGE installation.
+
+Installing the Verus extra also requires Git and a C compiler: its grammar is pinned to a public source revision rather than an unavailable PyPI release.
 
 ```bash
 python -m venv .venv

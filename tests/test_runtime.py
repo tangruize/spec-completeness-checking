@@ -189,6 +189,13 @@ class ProcessTests(unittest.TestCase):
         self.assertEqual(classify_process(ProcessResult((), 1, "", "postcondition not satisfied", 1))[0], "unproved")
         self.assertEqual(classify_process(ProcessResult((), -1, "", "", 1, True))[0], "timeout")
 
+    def test_dependency_verification_does_not_count_as_a_selected_target_proof(self):
+        dependency = "verification results:: 1902 verified, 0 errors\n"
+        empty_target = "verification results:: 0 verified, 0 errors (partial verification)\n"
+        target = "verification results:: 1 verified, 0 errors (partial verification)\n"
+        self.assertEqual(classify_process(ProcessResult((), 0, dependency + empty_target, "", 1)), ("error", 0))
+        self.assertEqual(classify_process(ProcessResult((), 0, dependency + target, "", 1)), ("verified", 1))
+
 
 if __name__ == "__main__":
     unittest.main()

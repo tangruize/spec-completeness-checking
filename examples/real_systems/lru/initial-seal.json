@@ -1,0 +1,11 @@
+{
+  "before_first_specdet_run": true,
+  "native_preseal_repair": "Removed illegal pub visibility from View trait implementation; no contract semantics changed.",
+  "sealed_files": {
+    "initial-assumptions.json": "59611b9586c1bb5af235bf96f717d6eeb51fbf526709f60e936319216d0179cb",
+    "source.json": "6238ef7ce3b79ea1f0c534013e8a7ac27f019e8c6f954d06dd6a814a0bfeecbd",
+    "spec/initial.rs": "6fa7a2f6819a030139a6a63d27832ac9076b2be8b0707dca0bd67a7f5683ea87",
+    "specdet.toml": "c9c044eece427e5f6af25e1b615ebee60fff69b6557ab9ae352318295a4bf193"
+  },
+  "sealed_utc": "2026-09-29T23:35:03.629084+00:00"
+}

@@ -1,0 +1,28 @@
+{
+  "phase": "written before the first specdet run",
+  "upstream": "https://github.com/jeromefroe/lru-rs",
+  "commit": "f1e972197053a6814e77b77afacb51f03fc03170",
+  "operations": ["put", "get", "pop"],
+  "model_scope": {
+    "instantiation": "LruCache<u64, u64>, normally returning operations",
+    "state": "positive capacity, finite key-to-value map, duplicate-free MRU-to-LRU key sequence with exactly the map domain",
+    "input": "the complete old logical state and operation arguments",
+    "observation": "return Option<u64> and complete new logical state (capacity, contents, MRU order)",
+    "representation": "Ghost map/order are an abstraction of the Rust hash map and doubly-linked list; no physical address, allocation, hasher, or sentinel state is modeled"
+  },
+  "source_reading": {
+    "put": "Existing keys return the old value and move to MRU; absent keys return None, including when inserting at capacity and evicting the LRU.",
+    "get": "A hit returns the stored value and promotes the key to MRU; a miss returns None and preserves all state.",
+    "pop": "A hit removes the key and returns its old value; a miss returns None; surviving entries retain their relative recency order.",
+    "capacity": "All three operations preserve capacity.",
+    "ordering": "iter() publicly exposes MRU-to-LRU order, and the order determines future eviction; it is not treated as hidden state."
+  },
+  "prior_expectation": "All three contracts should be observationally deterministic. I have included all state frames and complete survivor order, and have not knowingly inserted an underconstraint.",
+  "not_claimed": [
+    "No proof that the original unsafe Rust code refines this model.",
+    "No claim about generic keys with distinguishable equal representations, custom hashers, panicking Drop/Hash/Eq, allocation failure, timing, raw pointers, or reference identity.",
+    "Determinism would not by itself prove satisfiability, intent adequacy, memory safety, termination, or equivalence to the implementation.",
+    "A later intentionally removed clause must be labeled a known mutation control, not an unanticipated discovery."
+  ],
+  "revision_policy": "Preserve the sealed first candidate and first result. Revise a contract only for a source-supported semantic reason or a documented, separately hashed encoding repair. Keep the same complete observation across comparisons."
+}

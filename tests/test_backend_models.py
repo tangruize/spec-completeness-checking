@@ -129,6 +129,21 @@ class NativeBackendModelTests(unittest.TestCase):
             backend.observations(project, contract)
         self.assertEqual(raised.exception.diagnostic.code, "source_model_mismatch")
 
+    def test_derived_type_cache_cannot_mutate_or_replace_the_frozen_contract(self):
+        backend, project, target = self.project(
+            "pub fn f(x: bool) -> (r: bool) ensures true, { x }",
+        )
+        contract = backend.extract(project, target)
+        first = backend._resolved_function(contract)
+        first.ensures[:] = ["false"]
+        self.assertEqual(backend._resolved_function(contract).ensures, ["true"])
+        plan = backend.observations(project, contract)
+        self.assertEqual(backend.observations(project, contract).id, plan.id)
+        contract.native["function_spec"]["ensures"] = ["false"]
+        with self.assertRaises(StageError) as raised:
+            backend.observations(project, contract)
+        self.assertEqual(raised.exception.diagnostic.code, "source_model_mismatch")
+
     def test_same_name_methods_extract_by_exact_source_line(self):
         declaration = """struct A {}
 struct B {}

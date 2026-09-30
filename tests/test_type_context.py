@@ -75,6 +75,46 @@ fn f(x: &Packet) -> (ret: Address) ensures ret == 0, {}
         self.assertEqual(result.return_type.fields[0].type.kind, TypeKind.U8)
         self.assertEqual(result.return_type.fields[0].type.name, "Number")
 
+    def test_explicit_module_graph_resolves_imports_without_filename_guessing(self):
+        sources = {
+            "src/api.rs": "use crate::internal::state::State; fn f() -> (ret: State) ensures true, {}",
+            "unusual/shared.inc.rs": "pub struct State { value: int }",
+        }
+        modules = {"src/api.rs": "api", "unusual/shared.inc.rs": "internal::state"}
+        result = resolve_function_types(extract_spec(sources["src/api.rs"], "f"), sources, modules=modules)
+        self.assertEqual(result.return_type.kind, TypeKind.STRUCT)
+        self.assertEqual(result.return_type.fields[0].type.kind, TypeKind.INT)
+
+    def test_included_declarations_share_imports_with_their_owner(self):
+        sources = {
+            "owner.rs": "use crate::state::State;",
+            "included.rs": "fn f() -> (ret: State) ensures true, {}",
+            "state.rs": "pub struct State { value: int }",
+        }
+        modules = {"owner.rs": "api", "included.rs": "api", "state.rs": "state"}
+        result = resolve_function_types(extract_spec(sources["included.rs"], "f"), sources, modules=modules)
+        self.assertEqual(result.return_type.kind, TypeKind.STRUCT)
+
+    def test_source_identity_replaces_fields_recovered_by_short_name(self):
+        source = """verus! {
+mod first { pub struct State {} }
+mod second { pub struct State { pub value: u8, pub preserved: bool } }
+mod api {
+    use crate::second::State;
+    pub fn f() -> (r: State) ensures true, {}
+}
+}"""
+        original = extract_spec(source, "f")
+        original.return_type = TypeInfo(TypeKind.STRUCT, "State", fields=[])
+        resolved = resolve_function_types(original, [source])
+        self.assertEqual([field.name for field in resolved.return_type.fields], ["value", "preserved"])
+        self.assertEqual(resolved.return_type.fields[1].type.kind, TypeKind.BOOL)
+
+    def test_direct_generic_enum_payloads_are_instantiated_from_their_source(self):
+        source = "verus! { enum E<T> { Value(T), Empty } fn f() -> (r: E<u8>) ensures true, {} }"
+        resolved = resolve_function_types(extract_spec(source, "f"), [source])
+        self.assertEqual(resolved.return_type.variants[0].inner.kind, TypeKind.U8)
+
     def test_alias_materialization_preserves_opaque_and_ext_equal_attributes(self):
         source = "#[verifier::ext_equal] struct Model { n: u8 } type Alias = Model;"
         result = resolve_function_types(function("Alias", ""), [source])

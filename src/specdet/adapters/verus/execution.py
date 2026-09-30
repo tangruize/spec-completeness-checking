@@ -135,7 +135,9 @@ def classify_process(result: ProcessResult) -> tuple[str, int]:
         return "timeout", 0
     output = result.stdout + "\n" + result.stderr
     counts = re.findall(r"(\d+)\s+verified,\s+(\d+)\s+errors?", output)
-    verified = sum(int(ok) for ok, _ in counts)
+    # Cargo may print dependency summaries before the selected root crate.
+    # Dependency proofs cannot make a zero-goal target a successful check.
+    verified = int(counts[-1][0]) if counts else 0
     if result.returncode == 0 and counts and verified > 0 and all(int(err) == 0 for _, err in counts):
         return "verified", verified
     if "postcondition not satisfied" in output or "assertion failed" in output.lower():
@@ -143,4 +145,3 @@ def classify_process(result: ProcessResult) -> tuple[str, int]:
     if result.returncode != 0:
         return "compile_error", verified
     return "error", verified
-

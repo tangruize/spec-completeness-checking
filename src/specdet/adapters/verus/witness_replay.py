@@ -15,6 +15,7 @@ from .discovery import parser
 from .execution import classify_process
 from .witness_constants import constant_hints
 from .native.codegen.expressions import identifiers_in_text, is_identifier
+from .native.syntax import mask_noncode
 
 
 class UnsupportedWitness(ValueError):
@@ -30,6 +31,42 @@ class WitnessGoal:
     generics: tuple[tuple[str, str, str], ...] = ()
     generics_decl: str = ""
     where_decl: str = ""
+    postconditions: tuple[str, ...] = ()
+    equality_hints: tuple[str, ...] = ()
+
+
+def _expression_type(node, symbols: dict[str, dict]) -> dict | None:
+    if node.type == "identifier":
+        return symbols.get(node.text.decode())
+    if node.type == "parenthesized_expression" and len(node.named_children) == 1:
+        return _expression_type(node.named_children[0], symbols)
+    if node.type == "field_expression":
+        value, field = node.child_by_field_name("value"), node.child_by_field_name("field")
+        owner = _expression_type(value, symbols) if value is not None else None
+        if owner is not None and field is not None:
+            return next((item["type"] for item in owner.get("fields", [])
+                         if item["name"] == field.text.decode()), None)
+    if node.type == "view_expression":
+        value = node.child_by_field_name("value")
+        owner = _expression_type(value, symbols) if value is not None else None
+        if owner is not None:
+            if owner.get("spec_view") is not None:
+                return owner["spec_view"]
+            if owner.get("kind") in {"Ghost", "Tracked"} and owner.get("type_args"):
+                return owner["type_args"][0]
+            if owner.get("kind") == "Seq":
+                return owner
+    if node.type == "call_expression":
+        function = node.child_by_field_name("function")
+        if function is not None and function.type == "field_expression":
+            value, field = function.child_by_field_name("value"), function.child_by_field_name("field")
+            owner = _expression_type(value, symbols) if value is not None else None
+            if owner is not None and field is not None and (
+                (owner.get("kind") == "Map" and field.text == b"dom")
+                or (owner.get("kind") == "Seq" and field.text == b"to_set")
+            ):
+                return {"kind": "Set"}
+    return None
 
 
 def witness_goal(obligation: Obligation) -> WitnessGoal:
@@ -98,12 +135,37 @@ def witness_goal(obligation: Obligation) -> WitnessGoal:
     right = implication.child_by_field_name("right")
     if left is None or right is None or data[left.end_byte:right.start_byte].strip() != b"==>":
         raise UnsupportedWitness("The frozen goal is not a contract implication")
+    post_nodes = [left]
+    block = left
+    while block.type in {"parenthesized_expression", "block", "expression_statement"}:
+        children = [c for c in block.named_children if c.type not in {"line_comment", "block_comment"}]
+        if len(children) != 1:
+            break
+        block = children[0]
+    if block.type == "big_and_expression":
+        post_nodes = [
+            child for child in block.named_children
+            if child.type not in {"line_comment", "block_comment"}
+        ]
+    equality_hints = []
+    symbols = {entry["name"]: entry["type"] for entry in obligation.native["det_spec"]["symbols"]}
+    for clause in post_nodes:
+        while clause.type == "parenthesized_expression" and len(clause.named_children) == 1:
+            clause = clause.named_children[0]
+        if clause.type == "binary_expression":
+            lhs = clause.child_by_field_name("left")
+            rhs = clause.child_by_field_name("right")
+            if lhs is not None and rhs is not None and data[lhs.end_byte:rhs.start_byte].strip() == b"==":
+                typ = _expression_type(lhs, symbols)
+                if typ is not None and typ.get("kind") in {"Map", "Set", "Seq"}:
+                    equality_hints.append(f"({lhs.text.decode()}) =~= ({rhs.text.decode()})")
     return WitnessGoal(
         tuple(parameters),
         tuple(node.text.decode() for node in clauses["requires_clause"]),
         left.text.decode(), f"!({right.text.decode()})",
         tuple(generic_parameters), generics.text.decode() if generics is not None else "",
         next((node.text.decode() for node in function.named_children if node.type == "where_clause"), ""),
+        tuple(node.text.decode() for node in post_nodes), tuple(equality_hints),
     )
 
 
@@ -173,6 +235,27 @@ class _Values:
                 self.reserved.add(name)
                 return name
 
+    @staticmethod
+    def constructor_path(text: JsonValue) -> str:
+        if not isinstance(text, str) or not text:
+            raise UnsupportedWitness("A constructor must name a source type")
+        root = _type_node(text)
+        if root.type not in {"type_identifier", "scoped_type_identifier", "generic_type"}:
+            raise UnsupportedWitness("A constructor must name a source type")
+        pending = [root]
+        while pending:
+            node = pending.pop()
+            if node.type in {"macro_invocation", "block", "call_expression"}:
+                raise UnsupportedWitness("Witness constructor types cannot contain executable expressions")
+            pending.extend(node.named_children)
+        if root.type == "generic_type":
+            head = root.child_by_field_name("type")
+            arguments = root.child_by_field_name("type_arguments")
+            if head is None or arguments is None:
+                raise UnsupportedWitness("Generic constructor type is incomplete")
+            return head.text.decode() + "::" + arguments.text.decode()
+        return root.text.decode()
+
     def expression(self, value: JsonValue, expected: str = "", depth: int = 0) -> str:
         if depth > 12:
             raise UnsupportedWitness("Witness constructor nesting limit exceeded")
@@ -188,13 +271,30 @@ class _Values:
         if type(value) is bool:
             return "true" if value else "false"
         if type(value) is int:
-            return str(value) if value >= 0 else f"({value})"
+            suffix = ""
+            if expected:
+                node = _type_node(expected)
+                if node.text.decode() in {"int", "nat"}:
+                    suffix = node.text.decode()
+            if suffix == "nat" and value < 0:
+                raise UnsupportedWitness("nat witnesses cannot be negative")
+            literal = f"{abs(value)}{suffix}"
+            return literal if value >= 0 else f"(-{literal})"
         if value is None:
             return "()"
         if not isinstance(value, dict):
             raise UnsupportedWitness("Witness values must be typed constructors, integers, booleans or unit")
         kind = value.get("kind")
-        if kind in {"tuple", "array", "vec", "seq"}:
+        if kind == "spec_integer":
+            if set(value) != {"kind", "type", "value"}:
+                raise UnsupportedWitness("Spec integer constructors require type and value")
+            if value["type"] not in {"int", "nat"} or type(value["value"]) is not int:
+                raise UnsupportedWitness("Invalid spec integer constructor")
+            if value["type"] == "nat" and value["value"] < 0:
+                raise UnsupportedWitness("nat witnesses cannot be negative")
+            literal = f"{abs(value['value'])}{value['type']}"
+            return literal if value["value"] >= 0 else f"(-{literal})"
+        if kind in {"tuple", "array", "vec", "seq", "set"}:
             if set(value) != {"kind", "items"} or not isinstance(value["items"], list):
                 raise UnsupportedWitness("Sequence constructors require an items array")
             if len(value["items"]) > 1024:
@@ -206,11 +306,26 @@ class _Values:
                 return "[" + ", ".join(items) + "]"
             if kind == "seq":
                 return "Seq::empty()" + "".join(f".push({item})" for item in items)
+            if kind == "set":
+                return "Set::empty()" + "".join(f".insert({item})" for item in items)
             name = self.fresh()
             annotation = f": {expected}" if expected else ""
             self.statements.append(f"let mut {name}{annotation} = Vec::new();")
             self.statements.extend(f"{name}.push({item});" for item in items)
             return name
+        if kind == "map":
+            if set(value) != {"kind", "entries"} or not isinstance(value["entries"], list):
+                raise UnsupportedWitness("Map constructors require an entries array")
+            if len(value["entries"]) > 1024:
+                raise UnsupportedWitness("Witness constructor length limit exceeded")
+            entries = []
+            for entry in value["entries"]:
+                if not isinstance(entry, dict) or set(entry) != {"key", "value"}:
+                    raise UnsupportedWitness("Map entries require exactly a key and value")
+                key = self.expression(entry["key"], depth=depth + 1)
+                item = self.expression(entry["value"], depth=depth + 1)
+                entries.append(f".insert({key}, {item})")
+            return "Map::empty()" + "".join(entries)
         if kind == "repeat_array":
             if set(value) != {"kind", "value", "count"} or type(value["count"]) is not int:
                 raise UnsupportedWitness("Repeat arrays require value and integer count")
@@ -225,36 +340,45 @@ class _Values:
             self.statements.append(f"let ghost {name} = {expression};")
             return f"Ghost({name})"
         if kind == "variant":
-            if set(value) != {"kind", "name", "items"} or value["name"] not in {"Ok", "Err", "Some", "None"}:
+            if set(value) not in (
+                {"kind", "name", "items"}, {"kind", "type", "name", "items"},
+            ):
                 raise UnsupportedWitness("Unsupported witness variant")
+            if not isinstance(value["name"], str) or not is_identifier(value["name"]):
+                raise UnsupportedWitness("Invalid witness variant name")
             items = value["items"]
-            if not isinstance(items, list) or len(items) != (0 if value["name"] == "None" else 1):
-                raise UnsupportedWitness("Variant payload arity mismatch")
-            return str(value["name"]) + (
-                "(" + self.expression(items[0], depth=depth + 1) + ")" if items else ""
+            if not isinstance(items, list) or len(items) > 1024:
+                raise UnsupportedWitness("Variant payload must be an items array")
+            constructor = value["name"]
+            if "type" in value:
+                constructor = self.constructor_path(value["type"]) + "::" + constructor
+            else:
+                arities = {"Ok": 1, "Err": 1, "Some": 1, "None": 0}
+                if constructor not in arities or len(items) != arities[constructor]:
+                    raise UnsupportedWitness("Invalid prelude variant or payload arity")
+            return constructor + (
+                "(" + ", ".join(self.expression(item, depth=depth + 1) for item in items) + ")"
+                if items else ""
             )
+        if kind == "variant_struct":
+            if set(value) != {"kind", "type", "name", "fields"}:
+                raise UnsupportedWitness("Struct variants require type, name and fields")
+            if not isinstance(value["name"], str) or not is_identifier(value["name"]) or not isinstance(value["fields"], dict):
+                raise UnsupportedWitness("Invalid struct variant constructor")
+            constructor = self.constructor_path(value["type"]) + "::" + value["name"]
+            fields = []
+            for name, item in value["fields"].items():
+                if not is_identifier(name):
+                    raise UnsupportedWitness("Invalid witness field name")
+                fields.append(f"{name}: {self.expression(item, depth=depth + 1)}")
+            return constructor + " { " + ", ".join(fields) + " }"
         if kind == "struct":
             if set(value) - {"kind", "fields", "type"} or not isinstance(value.get("fields"), dict):
                 raise UnsupportedWitness("Struct constructor requires named fields")
             constructor = value.get("type", expected)
             if not isinstance(constructor, str) or not constructor:
                 raise UnsupportedWitness("Struct constructor requires a source type")
-            constructor_node = _type_node(constructor)
-            if constructor_node.type not in {"type_identifier", "scoped_type_identifier", "generic_type"}:
-                raise UnsupportedWitness("Struct constructor must name a type")
-            constructor = constructor_node.text.decode()
-            pending = [constructor_node]
-            while pending:
-                node = pending.pop()
-                if node.type in {"macro_invocation", "block", "call_expression"}:
-                    raise UnsupportedWitness("Witness constructor types cannot contain executable expressions")
-                pending.extend(node.named_children)
-            if constructor_node.type == "generic_type":
-                head = constructor_node.child_by_field_name("type")
-                arguments = constructor_node.child_by_field_name("type_arguments")
-                if head is None or arguments is None:
-                    raise UnsupportedWitness("Generic constructor type is incomplete")
-                constructor = head.text.decode() + "::" + arguments.text.decode()
+            constructor = self.constructor_path(constructor)
             fields = []
             for name, item in value["fields"].items():
                 if not is_identifier(name):
@@ -271,12 +395,27 @@ def _value_facts(expression: str, value: JsonValue) -> list[str]:
     if not isinstance(value, dict):
         return []
     kind = value.get("kind")
+    if kind == "spec_integer":
+        literal = f"{abs(value['value'])}{value['type']}"
+        if value["value"] < 0:
+            literal = f"(-{literal})"
+        return [f"{expression} == {literal}"]
     if kind in {"vec", "seq"}:
         base = f"({expression})@" if kind == "vec" else expression
         items = value["items"]
         facts = [f"({base}).len() == {len(items)}"]
         for index, item in enumerate(items):
             facts.extend(_value_facts(f"({base})[{index}]", item))
+        literal_items = []
+        for item in items:
+            renderer = _Values(set())
+            literal = renderer.expression(item)
+            if renderer.statements:
+                break
+            literal_items.append(literal)
+        else:
+            elements = "Set::empty()" + "".join(f".insert({item})" for item in literal_items)
+            facts.append(f"({base}).to_set() =~= {elements}")
         return facts
     if kind == "tuple":
         return [
@@ -290,7 +429,55 @@ def _value_facts(expression: str, value: JsonValue) -> list[str]:
         ]
     if kind == "ghost":
         return _value_facts(f"({expression})@", value["value"])
+    if kind in {"map", "set"}:
+        items = value["entries"] if kind == "map" else value["items"]
+        keys = []
+        for item in items:
+            renderer = _Values(set())
+            key = renderer.expression(item["key"] if kind == "map" else item)
+            keys.append(None if renderer.statements else key)
+        base = f"({expression}).dom()" if kind == "map" else f"({expression})"
+        facts = [f"{base}.is_empty()"] if not items else []
+        if all(key is not None for key in keys):
+            domain = "Set::empty()" + "".join(f".insert({key})" for key in keys)
+            facts.append(f"{base} =~= {domain}")
+        for index, key in enumerate(keys):
+            if key is None:
+                continue
+            facts.append(f"{base}.contains({key})")
+            if kind == "map" and all(later is not None for later in keys[index + 1:]):
+                guard = " && ".join(f"({key}) != ({later})" for later in keys[index + 1:])
+                for fact in _value_facts(f"({expression})[{key}]", items[index]["value"]):
+                    facts.append(f"({guard}) ==> ({fact})" if guard else fact)
+        return facts
     return []
+
+
+def _container_hints(bindings: JsonObject, source: str) -> list[str]:
+    kinds = set()
+
+    def walk(value: JsonValue) -> None:
+        if isinstance(value, dict):
+            if isinstance(value.get("kind"), str):
+                kinds.add(value["kind"])
+            for item in value.values():
+                walk(item)
+        elif isinstance(value, list):
+            for item in value:
+                walk(item)
+
+    walk(bindings)
+    groups = []
+    if "map" in kinds:
+        groups.append("vstd::map::group_map_axioms")
+    if kinds & {"map", "set", "seq", "vec"}:
+        groups.append("vstd::set::group_set_axioms")
+    if kinds & {"seq", "vec"}:
+        groups.extend(("vstd::seq_lib::group_seq_properties", "vstd::seq_lib::group_seq_lib_default"))
+    hints = [f"broadcast use {group};" for group in groups]
+    if kinds & {"seq", "vec"} and ".filter" in mask_noncode(source):
+        hints.append("reveal_with_fuel(vstd::seq::Seq::<_>::filter, 5);")
+    return hints
 
 
 def render_witness_replay(
@@ -322,15 +509,18 @@ def render_witness_replay(
     facts: list[str] = []
     for parameter, typ in goal.parameters:
         expression = values.expression(bindings[parameter], typ)
-        values.statements.append(f"let {parameter}: {typ} = {expression};")
+        values.statements.append(f"let ghost {parameter}: {typ} = {expression};")
         base = f"*({parameter})" if _type_node(typ).type == "reference_type" else parameter
         facts.extend(_value_facts(base, bindings[parameter]))
     assertions = [
+        *_container_hints(bindings, str(obligation.native["source"])),
         *(f"assert({fact});" for fact in facts),
         *constant_hints(
             str(obligation.native["source"]), (*goal.requires, goal.posts, goal.distinctness),
         ),
         *(f"assert({clause});" for clause in goal.requires),
+        *(f"assert({hint});" for hint in goal.equality_hints),
+        *(f"assert({clause});" for clause in goal.postconditions if clause != goal.posts),
         f"assert({goal.posts});",
         f"reveal({obligation.native['equal_fn']});",
         f"assert({goal.distinctness});",

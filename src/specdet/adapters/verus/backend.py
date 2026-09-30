@@ -9,6 +9,10 @@ import time
 import tomllib
 from dataclasses import replace
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .native.view.registry import ViewRegistry
 
 from specdet.config import Config
 from specdet.domain.models import (
@@ -74,6 +78,8 @@ class VerusBackend:
         self._frozen: dict[str, str] = {}
         self._known_contracts: set[str] = set()
         self._profile_trace: list[JsonObject] = []
+        self._resolved_types: dict[tuple[str, bool], JsonObject] = {}
+        self._view_registries: dict[tuple[str, bool, str], ViewRegistry] = {}
 
     @property
     def executor(self) -> VerusExecutor:
@@ -465,15 +471,20 @@ class VerusBackend:
 
     def _type_sources(self, project: PreparedProject, target: TargetRef) -> list[JsonObject]:
         names = set(self.config.type_sources)
+        modules: dict[str, str] = {}
         if self.config.build.adapter in {"verus.native", "verus.cargo"}:
-            modules, _ = project_modules(
+            modules, diagnostics = project_modules(
                 self._discovery_config(project, target), project,
                 lambda relative: self._source(project, relative, target),
             )
+            ambiguous = [as_object(item) for item in diagnostics if item.code == "ambiguous_module"]
+            if ambiguous:
+                _fail(Stage.EXTRACT, "module_context_gap",
+                      "A source file has multiple module identities", details={"diagnostics": ambiguous})
             names.update(modules)
         names.discard(target.file)
         return [
-            {"file": name, "source": self._source(project, name, target),
+            {"file": name, "module": modules.get(name, ""), "source": self._source(project, name, target),
              "digest": text_digest(self._source(project, name, target))}
             for name in sorted(names)
         ]
@@ -700,22 +711,41 @@ class VerusBackend:
             for entry in sources
         }
 
+    def _context_modules(self, contract: Contract) -> dict[str, str]:
+        return {
+            contract.target.file: str(contract.native["source_context"]["module"]),
+            **{str(entry["file"]): str(entry.get("module", ""))
+               for entry in contract.native["type_sources"]},
+        }
+
     def _resolved_function(self, contract: Contract):
-        from .native.extract import function_spec_from_dict
+        from .native.extract import function_spec_from_dict, function_spec_to_dict
         from .type_context import TypeContextError, resolve_function_types
 
+        key = contract.id, "--test" in self.config.build.extra_args
+        if key in self._resolved_types:
+            return function_spec_from_dict(_copy(self._resolved_types[key]))
         function = function_spec_from_dict(_copy(contract.native["function_spec"]))
         try:
-            return resolve_function_types(function, self._context_sources(contract))
+            resolved = resolve_function_types(
+                function, self._context_sources(contract), modules=self._context_modules(contract),
+            )
         except TypeContextError as error:
             _fail(Stage.OBSERVATIONS, "type_gap", str(error), recoverable=True)
+        self._resolved_types = {key: _copy(function_spec_to_dict(resolved))}
+        return resolved
 
     def _registry(self, contract: Contract, function=None):
+        from .native.extract import function_spec_to_dict
         from .native.extract.type_registry import build_registry
         from .native.view.impl_scanner import ImplScan, scan_source as scan_views
         from .native.view.registry import ViewRegistry
         from .type_context import TypeContextError, bound_views
 
+        function = function if function is not None else self._resolved_function(contract)
+        key = contract.id, "--test" in self.config.build.extra_args, digest(function_spec_to_dict(function))
+        if key in self._view_registries:
+            return self._view_registries[key]
         types: dict = {}
         merged = ImplScan("<prepared-project>")
         diagnostics: list[str] = []
@@ -742,21 +772,24 @@ class VerusBackend:
                 merged.eqs.setdefault(name, []).extend(definitions)
         try:
             bindings = bound_views(
-                function if function is not None else self._resolved_function(contract),
+                function,
                 self._context_sources(contract),
+                modules=self._context_modules(contract),
             )
         except TypeContextError as error:
             _fail(Stage.OBSERVATIONS, "input_view_gap", str(error), recoverable=True)
-        return ViewRegistry(
+        registry = ViewRegistry(
             types, merged, accepted_views={}, diagnostics=diagnostics, bound_views=bindings,
         )
+        self._view_registries = {key: registry}
+        return registry
 
     def observations(
         self, project: PreparedProject, contract: Contract,
         *, analysis_kind: str | None = None,
     ) -> ObservationPlan:
         from .native.codegen.equal_policy import EqualPolicy
-        from .native.codegen.gen_det import build_equal_expr
+        from .native.codegen.gen_det import _typeinfo_to_typeexpr, build_equal_expr
         from .native.extract import function_spec_from_dict
         from .native.extract.extractor import Unsupported
         from .native.extract.types import TypeKind
@@ -801,6 +834,23 @@ class VerusBackend:
                 if not policy.compare_raw_pointers:
                     ignored.append(f"{path}.pointer_identity")
                 return
+            if ty.kind in {TypeKind.STRUCT, TypeKind.UNKNOWN} and ty.spec_view is None:
+                try:
+                    resolved_view = registry.resolve(_typeinfo_to_typeexpr(ty))
+                except (TypeError, ValueError) as error:
+                    _fail(Stage.OBSERVATIONS, "observation_gap", str(error),
+                          recoverable=True, details={"dimension": path})
+                if resolved_view.layer in {"L2", "L3", "L4", "source-bound"}:
+                    from .native.codegen.gen_det import _try_view_registry_equal
+
+                    projected = resolved_view.view_expr("__specdet_view_probe")
+                    equality = _try_view_registry_equal(
+                        registry, ty, "__specdet_view_probe", "__specdet_other_probe",
+                        caller_generics=" ".join([function.generics_decl, function.where_decl]),
+                    )
+                    if projected != "__specdet_view_probe" and equality is not None:
+                        ignored.append(f"{path}.representation_beyond_view")
+                        return
             if ty.kind == TypeKind.UNKNOWN:
                 name = ty.name.strip()
                 if name not in generic_names | defined_names | known_unknowns and ty.spec_view is None:

@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "source_root": "/home/ruize/mimalloc-argus-run",
+  "source_revision": "b0445a794f78802e065629af472a26b7d279d161",
+  "working_tree_note": "Dirty source working tree. The SHA256 manifest, not HEAD alone, identifies the tested input.",
+  "source_files": {
+    "alloc_fast.rs": "890a1f843dc68d0b7c50e6cd19c4b6fd4866618f153b924cf16b68fab78ec55f",
+    "alloc_generic.rs": "ff5985564a65b541b0842c1df308e098570b298e8985ebb51c805c264497c005",
+    "allocator.proof.rs": "7676fd1a5ab200599867564694bc50baf3aaaa661c7511caa9d02a2bbf307546",
+    "allocator.spec.rs": "8ebad4163d40f113cd7eba0bc61b7ccf22c42a919bd73194ec10503e593251c3",
+    "arena.rs": "8ef0dca8e959bab1422326679dd720dbf2ef37ca420a2f0c665c5cdab5905fb4",
+    "bin_sizes.rs": "40ad2eb0e293ff873b3ffeb5b72e7f39b868f1eb56abe6eadfbb469994fa5d65",
+    "bitmap.rs": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "commit_mask.rs": "27b752574d51f1620f925cf573ef810d4fa0c6b7d5bf623be226f2f6ae288dbd",
+    "commit_segment.rs": "f2b624c8a1b7f13cb40b4196941df67712dd0086da1d7469a7711c46c94d1a93",
+    "config.rs": "392d43f37722dd455673f0f7b7e7331d8eefa868eec114ee14548f353ad118e8",
+    "dealloc_token.rs": "2686c682365b4c5eb56a3777a401be68474a1a2123522ae01b6255e1743e96c7",
+    "flags.rs": "e1711078d425b70c69ba4104de2ec459df1b94fd0b7962fc2a148040bccf3f1e",
+    "free.rs": "f6964d161bb62eee46cc53a4b08753ec1f58f9bbad2364b2f3257b69d92ec156",
+    "init.rs": "2b655d3d7131b16d2b2ad11021fc486cbff339786986ea8bcdad94fc5aca6aa7",
+    "layout.rs": "06685e1e65ac50bdaa4481ace921983f1484a8ed1ac687173f1a545204def126",
+    "lib.rs": "ccf4b645ccfa69f9500fb1e5e503d80112c0ee3b79fb6899dc726715f16fae32",
+    "linked_list.rs": "ebcc42373cbe703d54c78f5cfd16fe762942ce24f52a872a6ce877ec2abd32f3",
+    "main.rs": "df0b3ee968dc0e8b070e539fee3adaee4e6143ca3bcf836597b829d038bc78e1",
+    "os_alloc.rs": "58184777906665f6d168ca801a5f226d0b35cf9eb215770181238c9222eb6693",
+    "os_commit.rs": "7bfa78a5d27843ce0d897d1011723b866416a6adc4cde72f4d0f399d48b5f236",
+    "os_mem.rs": "6d14bea4da335e20d453ba630199e9cc3bc61d258a065eb31760bdf1540790c0",
+    "os_mem_util.rs": "76d09113d0e7c9d5bec2238e251c6411291132d1eeb1017eb68a83fc343952e8",
+    "page.rs": "91214a4c1567b6c1cf3b6a434e41adfef75f227d5438eb6bad6227f0b4d4dff7",
+    "page_organization.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "pigeonhole.rs": "d8ea82f9315c06ee45f63eb5e621308d72e982f3157829488aff4d294657efb5",
+    "queues.rs": "2e5823b1bb3b5f4c5f26a4ebbade26cfe4b8f9d6b0967eb247ac59380c6f9e55",
+    "realloc.rs": "6c5b6cefcc7f16eb117aa758a6a234f21cfcd3cd436269bcd89bf7b831d492d5",
+    "runtime.rs": "09df7e00738eb440332a45b54ff5d2d45d5099e2d30348df14aad50dbb909309",
+    "segment.rs": "1688fff6ff660847a3ef92b1da14f02aca328c2f3b8918c9759f87c681df2945",
+    "thread.rs": "a2eed1e4ff042f4de184f493185c3b1fbc575b67cd34727d410c1b36ede993a3",
+    "tokens.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "types.rs": "9b2460870e42f280070d74af6a8dca69647ac9398145596aef81b94bb0851224"
+  },
+  "selected_declarations": [
+    {
+      "function": "clear",
+      "file": "commit_mask.rs",
+      "start_line": 127,
+      "end_line": 161,
+      "start_byte": 3462,
+      "end_byte_exclusive": 4714,
+      "sha256": "9ab65ff7eb022926b3b39b8482ce87fca89f5f36842d94c1129ad26b27fc639b",
+      "contract_clause_counts": {
+        "requires": 0,
+        "ensures": 3
+      },
+      "contract_clause_sha256": {
+        "requires": [],
+        "ensures": [
+          "502d063bce504f2c084b4bde2fbe49610f47045a1cfcbf37648c0b707d5246ac",
+          "19be1c20e3716608280b26ae2e6f5e46298a492c72380887d770403aa099132e",
+          "6ce97b177b810d100d41e5e9a96a09b1540dcf4acfbf98ae159f98f792f8d449"
+        ]
+      }
+    },
+    {
+      "function": "set",
+      "file": "commit_mask.rs",
+      "start_line": 163,
+      "end_line": 199,
+      "start_byte": 4720,
+      "end_byte_exclusive": 6117,
+      "sha256": "8d717ecf6cf6c8744d81e7e9b1fb7607a186b31226c545c748fb06a4a1b44a9b",
+      "contract_clause_counts": {
+        "requires": 0,
+        "ensures": 4
+      },
+      "contract_clause_sha256": {
+        "requires": [],
+        "ensures": [
+          "502d063bce504f2c084b4bde2fbe49610f47045a1cfcbf37648c0b707d5246ac",
+          "f210c7ca6bd8e5654d9edaf079396faf958ad630d02a2c44b9416a9c5ac11507",
+          "e1df9f282f240d0d16c6516268e871802af33bcb9657e15972c8d3669ded1a98",
+          "80e2bad095d747401b6f641db70dc10c0caec07e63584961c4b68d1ee6949968"
+        ]
+      }
+    },
+    {
+      "function": "create",
+      "file": "commit_mask.rs",
+      "start_line": 201,
+      "end_line": 286,
+      "start_byte": 6123,
+      "end_byte_exclusive": 9656,
+      "sha256": "f6d5e24eb85a12743be1cdc301476b15022997b5a6b35bd55a9ff39bbdf749c0",
+      "contract_clause_counts": {
+        "requires": 3,
+        "ensures": 1
+      },
+      "contract_clause_sha256": {
+        "requires": [
+          "e76b1eafe781f9b7ba48ca260eed734418b25959306095adc056d306fe6bca95",
+          "8d397fadcae4ebeec1f1f58aa98628c4c481e51ca263b2b73dc4484b885e647c",
+          "8a331329174be10393603c40820687b35f67ed8bc773ec33b0d4fbe7d29a0dba"
+        ],
+        "ensures": [
+          "ca3088f1e1c21f7ee5730b264771c5ed86101bb60ea289625c955c21e6321bd2"
+        ]
+      }
+    },
+    {
+      "function": "next_run",
+      "file": "commit_mask.rs",
+      "start_line": 335,
+      "end_line": 532,
+      "start_byte": 10910,
+      "end_byte_exclusive": 19636,
+      "sha256": "1e1f99ca0114935a69ca41365d0fbf0146eb43519b78743595fcc945de92273c",
+      "contract_clause_counts": {
+        "requires": 1,
+        "ensures": 1
+      },
+      "contract_clause_sha256": {
+        "requires": [
+          "e76b1eafe781f9b7ba48ca260eed734418b25959306095adc056d306fe6bca95"
+        ],
+        "ensures": [
+          "babe7ae4af5cd61d08a0ba299a770ab4e3e0518e247fe5a8df6547e3a57f3b4d"
+        ]
+      }
+    }
+  ],
+  "source_transformations": [],
+  "implementation_bodies_stubbed": [],
+  "snapshot_scope": "All 32 original src/*.rs files, byte-for-byte; full native lib.rs module context; no research/build/target tree copied.",
+  "publication_policy": "Hashes, ranges, and counts only. Original contracts and all native input snapshots remain in local/private run artifacts.",
+  "last_validation": {
+    "artifact_directory": "final-venv-four",
+    "started_at": "2026-09-30T01:17:29.395450+00:00",
+    "summary_sha256": "a30fbaf26cd78424431c54b3dbd3baaa9a85dd77a09808aa8642220872704f1a",
+    "observed_source_revision": "b0445a794f78802e065629af472a26b7d279d161",
+    "all_source_file_hashes_unchanged": true,
+    "all_clause_hashes_unchanged": true,
+    "all_output_observation_templates_unchanged": true
+  }
+}

@@ -1,0 +1,10 @@
+/source-checkout/
+/runs/
+/history/
+/.cache/
+/__pycache__/
+/*.rlib
+/encoding_equivalence
+/known_omission_witness
+/model_determinism
+/model_satisfiability

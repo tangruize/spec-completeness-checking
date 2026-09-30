@@ -1,0 +1,39 @@
+schema_version = 1
+offline = true
+
+[project]
+root = "."
+
+[language]
+name = "verus"
+
+[targets]
+include = ["mutable_return.rs"]
+select = ["missing_return"]
+
+[build]
+adapter = "verus.single_file"
+
+[analysis]
+observation_policy = "verus-strict-v1"
+
+[analysis.proof_generation]
+strategies = ["baseline", "rules"]
+max_attempts = 2
+
+[analysis.counterexamples]
+max_candidates = 16
+
+[adapters.verus]
+rust_toolchain = "1.95.0-x86_64-unknown-linux-gnu"
+
+[limits]
+verifier_timeout_seconds = 20
+solver_timeout_ms = 1000
+max_search_rounds = 8
+
+[artifacts]
+output_dir = "../runs/blockers"
+
+[assistance]
+mode = "off"

@@ -3,8 +3,11 @@ from __future__ import annotations
 import unittest
 
 from specdet.adapters.verus.native.schema_search.schemas import (
-    SchemaBinding, SchemaKind, render_schema_expression,
+    SchemaBinding, SchemaKind, enumerate_schemas, render_schema_expression,
 )
+from specdet.adapters.verus.native.codegen.equal_policy import EqualPolicy
+from specdet.adapters.verus.native.codegen.gen_det import build_det_check_spec
+from specdet.adapters.verus.native.extract.extractor import extract_spec
 
 
 class SchemaRenderingTests(unittest.TestCase):
@@ -34,6 +37,21 @@ class SchemaRenderingTests(unittest.TestCase):
     def test_distinctness_uses_only_the_frozen_equal_call(self):
         schema = SchemaBinding("neq", SchemaKind.NOT_EQUAL_FN, "__tuple__", "!{equal_fn_call}", "g_neq")
         self.assertEqual(render_schema_expression(schema, "goal_equal(r1, r2)", bindings={}), "!goal_equal(r1, r2)")
+
+    def test_ignored_output_errors_do_not_generate_payload_refinements(self):
+        source = "verus! { fn f(x: Result<u8,u8>) -> (r: Result<u8,u8>) ensures true, { x } }"
+        function = extract_spec(source, "f")
+        for ignored in (True, False):
+            with self.subTest(ignored=ignored):
+                det = build_det_check_spec(function, equal_policy=EqualPolicy(errs_equivalent=ignored))
+                before = det.to_json()
+                schemas = enumerate_schemas(det)
+                self.assertEqual(det.to_json(), before)
+                self.assertTrue(any(schema.rust_var == "x->Err_0" for schema in schemas))
+                self.assertEqual(
+                    any(schema.rust_var == "r1->Err_0" for schema in schemas), not ignored,
+                )
+                self.assertTrue(any(schema.rust_var == "r1" and schema.variant == "Err" for schema in schemas))
 
 
 if __name__ == "__main__":

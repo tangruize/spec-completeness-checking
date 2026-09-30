@@ -6,9 +6,13 @@
 
 Verus 是首个语言后端；核心编排不依赖 Verus AST、Z3 对象或 LLM provider。设计和迁移约束见 [`ARCHITECTURE.md`](ARCHITECTURE.md)。
 
+面向 system proof agent 的简明用法见 [evidence guide](docs/agent-evidence.md)、[可复用 skill](.github/skills/specdet-evidence/SKILL.md) 和 [HFS/Nanvix/mimalloc/LRU profiles](examples/real_systems/README.md)。它们说明工具提供什么证据，区分原生证明、源码提取、手写模型和条件性结论，不代替 agent 判断规格是否足够。
+
 ## 安装与基本使用
 
 需要 Python 3.11+。Verus 是外部工具，必须显式配置或放进 PATH；不默认查找 Nanvix / VeruSAGE。
+
+安装 Verus extra 还需要 Git 和 C 编译器：Verus grammar 固定到公开仓库的具体 revision，不依赖当前不可用的 PyPI 包发布。
 
 ```bash
 python -m venv .venv

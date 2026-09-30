@@ -270,10 +270,11 @@ class _FunctionSite:
 
 
 class _Sources:
-    def __init__(self, sources: Sources):
+    def __init__(self, sources: Sources, modules: Mapping[str, str] | None = None):
         if isinstance(sources, str):
             sources = (sources,)
-        entries = sources.items() if isinstance(sources, Mapping) else (
+        mapped = isinstance(sources, Mapping)
+        entries = sources.items() if mapped else (
             (f"<source:{i}>", text) for i, text in enumerate(sources)
         )
         self.declarations: dict[str, list[_Declaration]] = {}
@@ -281,11 +282,13 @@ class _Sources:
         self.imports: dict[_Site, dict[str, list[str]]] = {}
         self.globs: dict[_Site, list[str]] = {}
         self.functions: list[_FunctionSite] = []
+        self.explicit_modules = modules is not None
         for label, text in entries:
             if not isinstance(label, str) or not isinstance(text, str):
                 raise TypeContextError("Sources must be source strings, not paths or file objects")
             tree = _parser.parse(text.encode())
-            self.walk(tree.root_node, _Site(label))
+            module = tuple(part for part in (modules or {}).get(label, "").split("::") if part)
+            self.walk(tree.root_node, _Site(label, module))
 
     def use(self, node: ts.Node, site: _Site, prefix: str = "") -> None:
         text = node.text.decode()
@@ -391,6 +394,11 @@ class _Sources:
             return "::".join(module + parts)
         return path.removeprefix("::")
 
+    def same_scope(self, first: _Site, second: _Site | None) -> bool:
+        return first == second or bool(
+            self.explicit_modules and second is not None and first.module == second.module
+        )
+
     def lookup(
         self, path: str, site: _Site | None, seen: frozenset[tuple[_Site | None, str]] = frozenset(),
     ) -> tuple[str, _Declaration | None]:
@@ -405,7 +413,10 @@ class _Sources:
             qualified = "::".join((*site.module, path)) if site else path
             candidates = self.declarations.get(qualified, [])
             first, *rest = path.split("::")
-            imports = self.imports.get(site, {}).get(first, [])
+            imports = [
+                path for owner, names in self.imports.items() if self.same_scope(owner, site)
+                for path in names.get(first, [])
+            ]
             if imports:
                 if candidates or len(set(imports)) != 1:
                     raise TypeContextError(f"Ambiguous source import for {path}")
@@ -415,7 +426,10 @@ class _Sources:
                 return self.lookup("::" + target, site, seen)
             if not candidates and site:
                 globbed = []
-                for glob in self.globs.get(site, []):
+                for glob in (
+                    path for owner, paths in self.globs.items() if self.same_scope(owner, site)
+                    for path in paths
+                ):
                     target = self.absolute(glob, site) + "::" + path
                     if target in self.declarations or target in _CANONICAL_VIEW:
                         globbed.append(target)
@@ -552,8 +566,19 @@ class _TypeResolver:
         if declaration and declaration.type_def and declaration.type_def.kind in {"struct", "enum"}:
             if declaration.identity in nominal:
                 return TypeInfo(TypeKind.UNKNOWN, info.name, type_args=result.type_args)
-            if info.kind == TypeKind.UNKNOWN:
+            if info.kind in {TypeKind.UNKNOWN, TypeKind.STRUCT, TypeKind.ENUM}:
                 result = self.materialize(declaration, info.name, args, nominal, site)
+                if info.spec_view is not None:
+                    if len(self.sources.short.get(declaration.name, [])) != 1:
+                        raise TypeContextError(
+                            f"Cannot associate recovered View with one source type: {info.name}"
+                        )
+                    bindings = _instantiate(
+                        declaration, args, context=self.sources, site=site,
+                        protected=self.generics | set(generic_names),
+                    )
+                    viewed_type = _substitute_type(info.spec_view.name, bindings)
+                    result.spec_view = _parse_type_node(_type_node(viewed_type))
             nominal = nominal | {declaration.identity}
             site = declaration.site
             generic_names = generic_names | {p.name for p in declaration.parameters}
@@ -609,14 +634,16 @@ class _TypeResolver:
                         is_ext_equal=attributes.is_ext_equal)
 
 
-def resolve_function_types(function: FunctionSpec, sources: Sources) -> FunctionSpec:
+def resolve_function_types(
+    function: FunctionSpec, sources: Sources, *, modules: Mapping[str, str] | None = None,
+) -> FunctionSpec:
     """Return a detached model with recursively resolved alias kinds.
 
     Parameter, field, return and container annotations retain their alias
     spelling, so generated Rust still refers to the exact original sources.
     Clauses, generics and parameter modes are not rewritten.
     """
-    context = _Sources(sources)
+    context = _Sources(sources, modules)
     resolver = _TypeResolver(context, function)
     result = deepcopy(function)
     for param in result.params:
@@ -750,14 +777,16 @@ def _bound_candidates(
     return candidates
 
 
-def bound_views(function: FunctionSpec, sources: Sources) -> dict[str, SourceBoundView]:
+def bound_views(
+    function: FunctionSpec, sources: Sources, *, modules: Mapping[str, str] | None = None,
+) -> dict[str, SourceBoundView]:
     """Establish callable ``.view()`` methods from actual source bounds.
 
     A custom trait method stays a custom method: this does not add ``T: View``
     or manufacture an impl. Canonical View supertraits are followed
     transitively, including instantiated generic supertraits.
     """
-    context = _Sources(sources)
+    context = _Sources(sources, modules)
     site = context.function_site(function)
     header = _function_header(function)
     protected = frozenset(

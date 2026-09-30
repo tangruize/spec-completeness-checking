@@ -1,0 +1,41 @@
+schema_version = 1
+offline = true
+
+[project]
+root = "inputs/sealed"
+
+[language]
+name = "verus"
+
+[targets]
+include = ["bitmap_contract.rs"]
+exclude = ["target/**", ".git/**", "__pycache__/**"]
+select = ["number_of_bits", "usage", "alloc", "set"]
+
+[build]
+adapter = "verus.native"
+entrypoint = "bitmap_contract.rs"
+extra_args = ["--crate-type=lib"]
+
+[analysis]
+kind = "concrete_determinism"
+observation_policy = "verus-observable-v1"
+
+[analysis.proof_generation]
+strategies = ["baseline", "rules"]
+max_attempts = 2
+
+[analysis.counterexamples]
+max_candidates = 8
+
+[limits]
+verifier_timeout_seconds = 30
+solver_timeout_ms = 1000
+max_search_rounds = 4
+seed = 0
+
+[artifacts]
+output_dir = "results"
+
+[assistance]
+mode = "off"

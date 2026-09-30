@@ -25,7 +25,7 @@ from .attrs import (
     parse_item_attrs,
     propagate_attrs_to_type_defs,
 )
-from ..syntax import mask_noncode
+from ..syntax import LexicalError, mask_noncode, verus_spec_payload
 
 logger = logging.getLogger(__name__)
 
@@ -675,6 +675,63 @@ def _find_verus_spec_sibling(fn_node: ts.Node) -> Optional[tuple[Optional[str], 
             return result
 
     return None
+
+
+def _textual_verus_spec(attribute: ts.Node) -> Optional[tuple[Optional[str], list[str], list[str]]]:
+    """Parse opaque attribute tokens as native clauses, never split expressions."""
+    try:
+        parts = verus_spec_payload(_text(attribute))
+    except LexicalError as error:
+        raise Unsupported(str(error)) from error
+    if parts is None:
+        return None
+    _, payload = parts
+    binding = None
+    if arrow := re.match(r"\s*((?:r#)?[A-Za-z_][A-Za-z0-9_]*)\s*=>\s*", mask_noncode(payload)):
+        binding = arrow[1]
+        payload = payload[arrow.end():]
+    prefix = "fn __specdet_attribute() "
+    parsed = _parser.parse((prefix + payload + "\n{}").encode())
+    functions = _find_function_items(parsed)
+    if parsed.root_node.has_error or len(functions) != 1:
+        raise Unsupported("Contract attribute cannot be parsed as native Verus clauses")
+    fn = functions[0]
+    body = fn.child_by_field_name("body")
+    if body is None or body.start_byte != len((prefix + payload + "\n").encode()):
+        raise Unsupported("Unexpected declaration or body in contract attribute")
+    requires, ensures = [], []
+
+    def clauses(node: ts.Node) -> None:
+        for child in node.named_children:
+            if child.type == "fn_qualifier":
+                clauses(child)
+            elif child.type == "requires_clause":
+                requires.extend(_clause_expressions(child))
+            elif child.type == "ensures_clause":
+                ensures.extend(_clause_expressions(child))
+            elif child.type not in {"identifier", "parameters", "block", "line_comment", "block_comment"}:
+                raise Unsupported(f"Unsupported contract attribute clause: {child.type}")
+
+    clauses(fn)
+    if not requires and not ensures:
+        raise Unsupported("Contract attribute has no supported clauses")
+    return binding, requires, ensures
+
+
+def _find_textual_verus_spec_sibling(
+    fn_node: ts.Node,
+) -> Optional[tuple[Optional[str], list[str], list[str]]]:
+    parent = fn_node.parent
+    if parent is None or parent.type != "declaration_with_attrs":
+        return None
+    found = []
+    for sibling in parent.children:
+        if sibling.type == "attribute_item":
+            if result := _textual_verus_spec(sibling):
+                found.append(result)
+    if len(found) > 1:
+        raise Unsupported("Multiple active contract attributes on one declaration")
+    return found[0] if found else None
 
 
 def _extract_from_verus_spec_attr_node(
@@ -1359,8 +1416,13 @@ def extract_spec(
     ensures_raw: list[str] = []
     result_binding = ret_binding  # from named return type
 
-    spec_info = _find_verus_spec_for_fn(fn_node, tree)
-    if spec_info is not None:
+    textual_spec = _find_textual_verus_spec_sibling(fn_node)
+    spec_info = _find_verus_spec_for_fn(fn_node, tree) if textual_spec is None else None
+    if textual_spec is not None:
+        attr_binding, requires_raw, ensures_raw = textual_spec
+        if attr_binding:
+            result_binding = attr_binding
+    elif spec_info is not None:
         attr_binding, fq_node = spec_info
         if attr_binding:
             result_binding = attr_binding

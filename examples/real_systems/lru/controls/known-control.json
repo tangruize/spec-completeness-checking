@@ -1,0 +1,12 @@
+{
+  "kind": "deliberate mutation control, NOT an unanticipated omission",
+  "created_after": "The preserved initial and compatible runs",
+  "source": "pop_return_omitted.rs",
+  "base": "../spec/compatible.rs::pop",
+  "change": "Delete result == lookup(old(cache), key); preserve the full state transition and observation.",
+  "known_before_run": "The return value becomes unconstrained. The empty capacity-one cache and key zero admit both None and Some(0), with identical empty post-states.",
+  "source_intent": "lru-rs pop returns None on a miss. This control knowingly omits that API requirement.",
+  "expectation": "Nondeterministic in the mathematical contract; an unknown/no-witness tool result must remain inconclusive.",
+  "observation": "Unchanged verus-strict-v1: Option<u64> plus complete capacity/map/order View.",
+  "purpose": "Measure whether the tool can recognize a known missing clause in a nontrivial real-API-derived state model."
+}

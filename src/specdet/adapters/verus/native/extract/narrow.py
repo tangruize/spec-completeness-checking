@@ -11,6 +11,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Callable, Optional, Protocol
 
+from .array_bounds import fixed_array_extent
 from .types import (
     TypeKind, TypeInfo, FieldInfo, Param,
     FunctionSpec, Assume, VerifyResult, Witness,
@@ -505,7 +506,7 @@ def _bisect_contains(var: str, lo: int, hi: int, node: AssumeNode, ctx: "SearchC
 
 @strategy_for(TypeKind.SEQ)
 def narrow_seq(ty: TypeInfo, var: str, node: AssumeNode, ctx: "SearchContext"):
-    """Narrow Seq<T>: length first, then elements.
+    """Narrow sequences by length; fixed arrays go directly to valid elements.
 
     ISSUES #14 — when ``ty.spec_view`` is set (Vec<T> tagged with a
     synthetic Seq<T> view by the extractor, signalling "Verus needs
@@ -515,8 +516,19 @@ def narrow_seq(ty: TypeInfo, var: str, node: AssumeNode, ctx: "SearchContext"):
     [T; N] / slice [T] keep spec_view=None and use the bare accessor.
     """
     accessor = f"{var}@" if ty.spec_view else var
-    len_node = node.get_or_create("len")
-    length = _narrow_length(accessor, len_node, ctx)
+    fixed, length = fixed_array_extent(ty.name) if not ty.spec_view else (False, None)
+    if fixed:
+        if length is None:
+            message = f"Skipping fixed array {var}: unresolved constant extent in {ty.name}"
+            logger.info(message)
+            if hasattr(ctx, "diagnostics"):
+                ctx.diagnostics.append(message)
+            return
+        # Only the first eight element slots have precompiled sequence schemas.
+        length = min(length, 8)
+    else:
+        len_node = node.get_or_create("len")
+        length = _narrow_length(accessor, len_node, ctx)
 
     if length is None:
         return
@@ -922,13 +934,12 @@ def _run_self_tests() -> int:
         kind=TypeKind.SEQ, name="[u32; 4]",
         type_args=[TypeInfo(kind=TypeKind.U32, name="u32")],
     )
-    # replies: len: 0=F, 1=F, 2=F, 3=F, 4=T  → length committed to 4
-    ctx = _StubCtx(replies=[False, False, False, False, True])
+    ctx = _StubCtx()
     narrow(arr_u32, "self_.mask", AssumeNode(key="self_.mask"), ctx)
     joined = " | ".join(expr for (_, expr) in ctx.recorded)
-    if "self_.mask.len()" not in joined:
+    if "self_.mask.len()" in joined:
         failures.append(
-            "Array-as-SEQ: narrow must probe self_.mask.len(); "
+            "Array-as-SEQ: fixed array length must not consume search queries; "
             f"recorded:\n  {joined}"
         )
     if "self_.mask[0]" not in joined:
@@ -988,30 +999,29 @@ def _run_self_tests() -> int:
 
     # ISSUES #14 — full memory-allocator::CommitMask::next_run shape
     # regression. The composite test combines STRUCT-with-array-field
-    # for `self: CommitMask { mask: [usize; N] }`. The actual next_run
-    # uses N=8, but length 8 lies in narrow's bisect phase and would
-    # require ~20 scripted replies — to keep this self-test focused
-    # we model `mask: [usize; 2]` (Phase-1 exact-probe range). If this
+    # for `self: CommitMask { mask: [usize; N] }`. Fixed extents no
+    # longer need scripted length-search replies. If this
     # STRUCT-then-array path regresses, the next_run witness reverts
     # to the useless 2-assume "just r1 != r2" form (no self.mask state,
     # no per-position tuple probes).
-    arr_usize_2 = TypeInfo(
-        kind=TypeKind.SEQ, name="[usize; 2]",
+    arr_usize_8 = TypeInfo(
+        kind=TypeKind.SEQ, name="[usize; 8]",
         type_args=[TypeInfo(kind=TypeKind.USIZE, name="usize")],
     )
     commit_mask = TypeInfo(
         kind=TypeKind.STRUCT, name="CommitMask",
-        fields=[FieldInfo(name="mask", type=arr_usize_2)],
+        fields=[FieldInfo(name="mask", type=arr_usize_8)],
     )
-    # mask.len() probes: 0=F, 1=F, 2=T → commit length=2
-    ctx = _StubCtx(replies=[False, False, True])
+    ctx = _StubCtx()
     narrow(commit_mask, "self_", AssumeNode(key="self_"), ctx)
     joined = " | ".join(expr for (_, expr) in ctx.recorded)
-    for needle in ("self_.mask.len()", "self_.mask[0]", "self_.mask[1]"):
+    for needle in ("self_.mask[0]", "self_.mask[1]", "self_.mask[7]"):
         if needle not in joined:
             failures.append(
                 f"CommitMask regression: missing {needle!r}; recorded:\n  {joined}"
             )
+    if "self_.mask.len()" in joined:
+        failures.append("CommitMask regression: fixed array length was searched")
 
     # Bug A — struct-form enum with field name shared across variants
     # must NOT emit per-field assumes for the ambiguous variants (Verus
