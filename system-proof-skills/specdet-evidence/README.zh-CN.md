@@ -17,7 +17,7 @@ P(input) && Q(input, output1) && Q(input, output2) && !E(output1, output2)
 | 术语 | 含义 |
 |---|---|
 | 全局（global） | 对选定契约与观察关系下的所有允许输入而言，不是整个系统，也不包括未建模的 heap。 |
-| View / 观察策略 | 源码定义的抽象及用于比较输出的等价关系；View 以外的表示状态不会自动纳入观察。 |
+| 观察关系 | 由 caller 语义论证的输出与 post-state 等价关系；必须明确哪些维度被比较、抽象或忽略。 |
 | Concrete / abstract determinism | 默认固定具体输入；可选的 abstract 分析比较 View 相同的输入，这是另一个问题，通常先要求 concrete 确定性成立。 |
 | Witness / counterexample（见证/反例） | 一个输入与两个满足原契约但可观测不同的输出；这种非确定性可能符合设计意图。 |
 | 源级构造性见证 | Verus 验证具体构造、原始条件和输出不等价；这是证书，不是把原始 SMT UNKNOWN 改写为 SAT。 |
@@ -26,7 +26,7 @@ P(input) && Q(input, output1) && Q(input, output2) && !E(output1, output2)
 | Frame condition | 规定哪些状态保持不变的条款；返回值固定不代表 heap 未被改变。 |
 | UNKNOWN / inconclusive | 当前证明、翻译和搜索没有决定该问题；不是 bug 报告，也不是 completeness 证书。 |
 
-默认 `verus-observable-v1` 合并 `Err` payload、忽略裸指针身份，并使用可用的 View。`verus-strict-v1` 比较错误 payload 和指针身份，但仍尊重 View。切换策略会改变问题；两者都不等于“全部系统状态”。
+任何内置 comparison profile 都不是普遍正确的“相同输出”定义。解释结果前，必须从 direct caller 或系统性质推导观察关系，并记录所有被忽略的维度。Profile 名称只是工具配置，不是可以直接写进 proof map 的语义结论。改变观察关系就是改变问题，因此不能把一个关系下的证据当成另一个关系下的证据。
 
 ## 它在 system proof agent 中能提供什么帮助
 
@@ -45,7 +45,7 @@ candidate contract
 - **攻击暂定规格：** 当 result 或 frame 可能遗漏时，生成一对可重放、都满足原契约的不同输出。
 - **区分候选：** 证明某个 revision 仍允许 caller-relevant freedom，或另一个 revision 在同一观察关系下获得唯一性支持。
 - **把 proof feedback 转成规格问题：** 区分“证明缺一个 lemma”和“契约本身允许多个结果”。
-- **让局部证据可审计：** 将结论绑定到 source hashes、`problem_id`、观察策略、proof/witness 证书和预算，再回到 direct caller，而不是把局部结果直接计成 top-level closure。
+- **让局部证据可审计：** 将结论绑定到 source hashes、`problem_id`、经论证的观察关系、proof/witness 证书和预算，再回到 direct caller，而不是把局部结果直接计成 top-level closure。
 - **支持自主迭代：** 保存失败、超时和旧 witness，使 agent 可以先修订并 replay，减少不必要的 Human 同步等待。
 - **压缩 Human review：** 有机械证据后，剩余问题可缩小为“这个自由度对 caller 是否有意”，而不是让 Human 重新审查整份规格。
 
@@ -56,7 +56,7 @@ candidate contract
 | 限制 | 对 agent 的含义 |
 |---|---|
 | 确定性比 adequacy 窄 | 唯一输出仍可能是错误行为、缺少必须成功的要求，或依赖不可行前提。 |
-| 结果依赖观察关系 | 粗粒度 View/policy 可能合并 caller 关心的差异；过严策略也可能把有意隐藏的表示自由暴露出来。 |
+| 结果依赖观察关系 | 粗粒度关系可能合并 caller 关心的差异；过度具体的关系也可能把系统有意抽象的表示自由暴露出来。 |
 | 单个契约不是 protocol | Cross-operation preservation、生命周期、并发、callback、failure compensation 和跨 `await` 性质需要其他分析。 |
 | 契约证据不是实现符合性 | 确定的 postcondition 不证明实现满足它；原生实现验证是另一份证据。 |
 | Source、extract、model 的 trust 不同 | Sealed extract 必须记录省略/stub；authored model 需要独立的 source-to-model correspondence。 |

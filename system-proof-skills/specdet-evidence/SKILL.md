@@ -69,7 +69,7 @@ If the intended observations are unknown, stop and resolve that ambiguity first.
 active_goal:
 direct_caller / blocking_edge:
 candidate_revision + provenance:
-attack_question + observation_policy:
+attack_question + justified_observation_relation:
 status / verdict / raw_baseline:
 decisive evidence or blocker:
 source_digest / problem_id / run_dir:
@@ -88,7 +88,7 @@ Stop after the named caller question has one replayable result, after the budget
 
 - Determinism is only one dimension of underconstraint; a deterministic contract can be wrong, too strong or infeasible.
 - “Global” means all admissible modeled inputs for this frozen target and observation relation, not the whole system or unmentioned heap.
-- Views and observation policies can hide representation differences; changing them changes the question.
+- Observation relations and abstractions can hide representation differences; changing them changes the question.
 - Native, extract and model evidence have different trust boundaries; model correspondence is separate work.
 - Local/refinement UNSAT is not a global proof. A conditional alternative without input feasibility is not an unconditional witness.
 - Async contracts, arbitrary opaque ownership/resource construction, some macros and quantifier-heavy problems may remain unsupported or UNKNOWN.

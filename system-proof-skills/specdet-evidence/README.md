@@ -17,7 +17,7 @@ P(input) && Q(input, output1) && Q(input, output2) && !E(output1, output2)
 | Term | Meaning |
 |---|---|
 | Global | All admissible modeled inputs for this selected contract and observation relation; not the entire system or unmentioned heap. |
-| View / observation policy | A source-defined abstraction and the equality used to compare outputs. State outside a View is not automatically observed. |
+| Observation relation | The caller-justified equivalence used to compare outputs and post-state. It must state which dimensions are compared, abstracted or ignored. |
 | Concrete / abstract determinism | The default fixes concrete inputs. Optional abstract analysis compares inputs with equal selected Views; this is a different question and normally requires a concrete-determinism prerequisite. |
 | Witness / counterexample | One input and two distinct outputs that satisfy the original contract. Nondeterminism may be intentional. |
 | Source-verified constructive witness | Verus checks concrete constructors, original conditions and output distinctness. This is a certificate, not a fabricated SMT SAT result. |
@@ -26,7 +26,7 @@ P(input) && Q(input, output1) && Q(input, output2) && !E(output1, output2)
 | Frame condition | A clause specifying what state remains unchanged. A fixed return does not establish an unchanged heap. |
 | UNKNOWN / inconclusive | The available proof, translation and search did not decide the question. It is neither a defect report nor a completeness certificate. |
 
-The default `verus-observable-v1` merges `Err` payloads, ignores raw-pointer identity and uses available Views. `verus-strict-v1` compares error payloads and pointer identity but still honors Views. Changing the policy changes the question; neither policy means “all system state.”
+No built-in comparison profile is a universally correct notion of “same output.” Before interpreting a result, derive the observation relation from the direct caller or system property and record every ignored dimension. A profile name is only tool configuration, not a semantic claim suitable for a proof map. Changing the relation changes the question, so evidence obtained under one relation must not be presented as evidence for another.
 
 ## Where it helps the system proof agent
 
@@ -45,7 +45,7 @@ Its useful roles are:
 - **Attack provisional specifications:** produce a replayable pair of contract-permitted outputs when a result or frame may be missing.
 - **Discriminate candidates:** show that one revision still permits a caller-relevant freedom, or that another has uniqueness support under the same observation relation.
 - **Turn proof feedback into a spec question:** separate “the proof needs a lemma” from “the contract itself permits multiple results.”
-- **Make local evidence auditable:** bind the claim to source hashes, `problem_id`, observation policy, proof/witness certificate and budgets, then return it to the direct caller rather than counting a local result as top-level closure.
+- **Make local evidence auditable:** bind the claim to source hashes, `problem_id`, the justified observation relation, proof/witness certificate and budgets, then return it to the direct caller rather than counting a local result as top-level closure.
 - **Support autonomous iteration:** preserve failed attempts, timeouts and old witnesses so the agent can revise and replay before asking a Human.
 - **Compress Human review:** when mechanical evidence is decisive, the remaining question can become “is this freedom intentional for the caller?” rather than an unstructured request to review the whole specification.
 
@@ -56,7 +56,7 @@ This tool does not choose the candidate, decide intent or update the proof map b
 | Limitation | Consequence for the agent |
 |---|---|
 | Determinism is narrower than adequacy | A unique output can still be the wrong behavior, omit required success, or rely on an infeasible precondition. |
-| The result is observation-relative | A coarse View/policy may merge differences the caller cares about; a strict policy may expose representation freedom that is intentionally abstracted. |
+| The result is observation-relative | A coarse relation may merge differences the caller cares about; an overly concrete relation may expose representation freedom that the system intentionally abstracts. |
 | One contract is not a protocol | Cross-operation preservation, lifecycle, concurrency, callbacks, failure compensation and `await`-spanning properties need other analysis. |
 | Contract evidence is not implementation conformance | A deterministic postcondition does not prove the implementation satisfies it; a native implementation verification is separate evidence. |
 | Source, extract and model have different trust | A sealed extract records omissions/stubs; an authored model needs an independent source-to-model correspondence argument. |

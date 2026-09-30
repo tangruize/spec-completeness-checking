@@ -69,7 +69,7 @@ description: "当 system-proof 的某条 caller edge 可能依赖一个 Verus �
 active_goal:
 direct_caller / blocking_edge:
 candidate_revision + provenance:
-attack_question + observation_policy:
+attack_question + justified_observation_relation:
 status / verdict / raw_baseline:
 decisive evidence or blocker:
 source_digest / problem_id / run_dir:
@@ -88,7 +88,7 @@ next authoritative check:
 
 - 确定性只是欠约束的一个维度；确定的契约仍可能错误、过强或不可行。
 - “Global”只指冻结 target 与观察关系下的全部允许建模输入，不是整个系统或未提及的 heap。
-- View 和观察策略可能隐藏表示差异；改变策略就是改变问题。
+- 观察关系和抽象可能隐藏表示差异；改变它们就是改变问题。
 - Native、extract 和 model 证据有不同 trust boundary；模型对应关系需要另行建立。
 - 局部/refinement UNSAT 不是全局证明；没有输入可行性的条件性替代不是无条件 witness。
 - Async 契约、任意 opaque ownership/resource 构造、部分宏和量词密集问题可能仍不支持或返回 UNKNOWN。
