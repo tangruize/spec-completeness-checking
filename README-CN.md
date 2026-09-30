@@ -8,6 +8,8 @@ Verus 是首个语言后端；核心编排不依赖 Verus AST、Z3 对象或 LLM
 
 面向 system proof agent 的简明用法见 [evidence guide](docs/agent-evidence.md)、[可复用 skill](.github/skills/specdet-evidence/SKILL.md) 和 [HFS/Nanvix/mimalloc/LRU profiles](examples/real_systems/README.md)。它们说明工具提供什么证据，区分原生证明、源码提取、手写模型和条件性结论，不代替 agent 判断规格是否足够。
 
+当本 checkout 嵌入 `system-proof-agent` 时，以 host vertical 收集后的 specification-judgment 与 `specdet-evidence` skill 作为 agent 的规范入口。本仓库自身的 skill 和 profile 是集成来源与 standalone 参考，不能替代 campaign goal、由 caller 论证的 observation relation 或独立的规格判断。
+
 ## 安装与基本使用
 
 需要 Python 3.11+。Verus 是外部工具，必须显式配置或放进 PATH；不默认查找 Nanvix / VeruSAGE。

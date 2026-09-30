@@ -75,7 +75,7 @@ If the intended observations are unknown, stop and resolve that ambiguity first.
 3. **Run one bounded target.**
 
    ```bash
-   /home/ruize/system-proof-agent/spec-completeness-checking/.venv/bin/python -m specdet analyze \
+   specdet analyze \
      --config /path/to/specdet.toml --target 'src/component.rs:operation' \
      --verus /path/to/verus --llm-fallback off --offline \
      --run-timeout 60 --out /path/to/evidence --compact-json

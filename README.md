@@ -14,6 +14,8 @@ migration constraints.
 
 For system-proof agents, see the compact [evidence guide](docs/agent-evidence.md), [reusable skill](.github/skills/specdet-evidence/SKILL.md), and [HFS/Nanvix/mimalloc/LRU profiles](examples/real_systems/README.md). They distinguish native proofs, sealed extracts, authored models and conditional claims; they do not assign specification-quality verdicts.
 
+When this checkout is embedded in `system-proof-agent`, the host vertical's collected specification-judgment and `specdet-evidence` skills are the normative agent entry points. This repository's skills and profiles remain integration sources and standalone references; they do not replace the campaign goal, caller-derived observation relation or independent specification judgment.
+
 ## Installation and basic usage
 
 Python 3.11 or later is required. Verus is an external tool: configure it

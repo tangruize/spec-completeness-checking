@@ -68,7 +68,7 @@ candidate contract
 
 使用[维护中的 fork](https://github.com/tangruize/spec-completeness-checking/tree/improve-real-system-evidence)，分支为 `improve-real-system-evidence`。需要 Python 3.11+、Git、用于编译固定 grammar 的 C 编译器，以及另外安装的、与目标项目匹配的 Verus 工具链。
 
-本说明对应提交 [`3585e71`](https://github.com/tangruize/spec-completeness-checking/commit/3585e713ac1bbfd6eca53cdfa6118d93fac2b452)，包含精简证据输出和默认整次运行超时。
+本说明对应由嵌入系统记录的 pinned checkout revision，并要求保留精简证据输出和默认整次运行超时。
 
 ```bash
 cd /path/to/spec-completeness-checking
@@ -78,7 +78,7 @@ python3 -m venv .venv
 git rev-parse HEAD
 ```
 
-本工作区的新版本位于 `/home/ruize/system-proof-agent/spec-completeness-checking`；`tools/spec-completeness-checking` 是另外一份旧副本。请使用新 checkout 的 `.venv/bin/python`，或在自己的环境中安装 fork。
+嵌入 `system-proof-agent` 时，使用 host vertical 固定的 checker 与收集后的指南／skill。Standalone 使用时，应在隔离环境中安装本 checkout，不要依赖某台机器上的固定源码路径。
 
 ## 运行
 

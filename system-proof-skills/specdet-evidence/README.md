@@ -68,7 +68,7 @@ This tool does not choose the candidate, decide intent or update the proof map b
 
 Use the [maintained fork](https://github.com/tangruize/spec-completeness-checking/tree/improve-real-system-evidence), branch `improve-real-system-evidence`. Installation requires Python 3.11+, Git and a C compiler for the pinned grammar, plus a separately installed, project-compatible Verus toolchain.
 
-These instructions match commit [`3585e71`](https://github.com/tangruize/spec-completeness-checking/commit/3585e713ac1bbfd6eca53cdfa6118d93fac2b452), including compact evidence output and the default whole-run deadline.
+These instructions match the pinned checkout revision recorded by the embedding system. They require compact evidence output and the default whole-run deadline.
 
 ```bash
 cd /path/to/spec-completeness-checking
@@ -78,7 +78,7 @@ python3 -m venv .venv
 git rev-parse HEAD
 ```
 
-In this workspace, the maintained checkout is `/home/ruize/system-proof-agent/spec-completeness-checking`; `tools/spec-completeness-checking` is a separate older copy. Use the maintained checkout's `.venv/bin/python`, or install the fork in your own environment.
+When embedded in `system-proof-agent`, use the host vertical's pinned checker and collected guide/skill. For standalone use, install this checkout in an isolated environment rather than relying on a machine-specific source path.
 
 ## Run
 

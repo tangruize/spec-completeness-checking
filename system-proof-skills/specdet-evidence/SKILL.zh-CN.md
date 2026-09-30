@@ -75,7 +75,7 @@ System-proof agent 通常先从 caller、实现和周围 invariant 得到一个�
 3. **运行一个有预算的目标。**
 
    ```bash
-   /home/ruize/system-proof-agent/spec-completeness-checking/.venv/bin/python -m specdet analyze \
+   specdet analyze \
      --config /path/to/specdet.toml --target 'src/component.rs:operation' \
      --verus /path/to/verus --llm-fallback off --offline \
      --run-timeout 60 --out /path/to/evidence --compact-json
