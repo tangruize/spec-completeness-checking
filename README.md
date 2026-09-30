@@ -22,7 +22,7 @@ Python 3.11 or later is required. Verus is an external tool: configure it
 explicitly or make it available on `PATH`. The tool does not implicitly look
 for a Nanvix or VeruSAGE installation.
 
-Installing the Verus extra also requires the Tangruize grammar fork at `568c38d2b23c8db245fe6765715db2dcae532a8e` and a C compiler. The unified checkout builds that source through `tools/bootstrap_toolchains.py grammar`; standalone installations must install the same fork revision before this extra.
+Installing the Verus extra also requires the Tangruize grammar fork at `6435c4c0d7a953e39dfd4eec381e51f5dd7a1928` and a C compiler. The unified checkout builds that source through `tools/bootstrap_toolchains.py grammar`; standalone installations must install the same fork revision before this extra. The source is intentionally selected by the embedding checkout rather than this package so a local gitlink can override it without conflicting package-manager URLs.
 
 ```bash
 python -m venv .venv
