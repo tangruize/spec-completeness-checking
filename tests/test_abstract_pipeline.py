@@ -71,6 +71,9 @@ class AbstractPipelineTests(unittest.TestCase):
         self.assertNotEqual(session.report.problem_id, session.report.concrete_result["problem_id"])
         self.assertEqual(len(session.report.proofs), 1)
         self.assertEqual(len(session.report.concrete_result["proofs"]), 1)
+        self.assertEqual(session.report.resources["proof_attempts"]["used"], 2)
+        self.assertEqual(session.report.concrete_result["resources"]["proof_attempts"]["used"], 1)
+        self.assertEqual(session.report.resources["scope"], "target_all_phases_and_revisions")
 
     def test_unproved_concrete_result_prevents_abstract_claim(self):
         backend = ModeBackend({"concrete_determinism": SolverStatus.UNKNOWN})
@@ -116,4 +119,3 @@ class AbstractPipelineTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

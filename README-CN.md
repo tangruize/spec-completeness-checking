@@ -63,6 +63,22 @@ specdet analyze --config examples/basic/specdet.toml \
 
 执行状态和 verdict 分开保存。原始 baseline 不被后续 proof 覆盖；未确认的搜索约束与 SAT-confirmed 切片分开记录。项目 allowlist、`permitted` 标注和 LLM 自评不能改变 solver 结论。
 
+## 工具原生输出与用时
+
+默认的人类可读输出逐项显示 verdict、原始 baseline、决定性证据或实际阻塞原因、观测排除项、未检查的范围、实际预算消耗和用时；重复的恢复性解析警告不会挤掉不同的关键诊断。stdout 最后一行汇报整次分析的墙钟时间。
+
+`--compact-json` 提供版本化、限制展开量的证据摘要；`--json` 继续输出完整报告：
+
+```bash
+specdet analyze --config specdet.toml --verus /path/to/verus --compact-json
+specdet report --run /path/to/evidence/RUN_ID --compact-json
+specdet report --run /path/to/evidence/RUN_ID --json
+```
+
+`analyze`、`discover`、`report`、`replay` 和 `assist` 都支持 `--compact-json`，它与 `--json` 互斥。输出格式为 `specdet.summary.v1`，保留源码/问题身份、执行状态、语义结论、原始 baseline、证据与较小的见证值、覆盖边界、预算及 artifact 链接，不内嵌 verifier 日志或生成源码。长预览和额外诊断会明确标记截断或省略；总长度仍随所选目标数增加。完整报告和产物不截断，也没有增加 agent adapter 或模型调用。
+
+`duration_ms` 是包含准备阶段、但不包含最后报告序列化和 CLI 展示的分析墙钟时间；每个目标另有用时。`resources` 统计该目标所有阶段和 revision 的累计消耗，包括 abstract 分析前的 concrete prerequisite。verifier/solver 的单次超时**不是整次运行的总时限**。可处理的失败和中断会显示本次调用用时，compact 模式还返回结构化状态与退出码（中断为 `130`）。读取旧报告时不会虚构缺失的时间或预算。`report` 展示原分析的用时和语义退出码；读取命令自身成功仍返回 `0`。字段和解读见 [evidence guide](docs/agent-evidence.md)。
+
 ## 真实欠约束函数与具体反例
 
 0.3 增加有界的构造器搜索和源规格反例证书。它从冻结类型生成具体输入及两组输出，

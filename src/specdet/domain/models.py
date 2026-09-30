@@ -285,6 +285,9 @@ class AnalysisReport:
     analysis_kind: str = "concrete_determinism"
     concrete_result: JsonObject | None = None
     counterexample: CounterexampleEvidence | None = None
+    resources: JsonObject = field(default_factory=dict)
+    duration_ms: float | None = None
+    artifact_dir: str = ""
     schema_version: int = SCHEMA_VERSION
 
     def to_dict(self) -> JsonObject:

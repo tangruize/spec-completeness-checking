@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import fnmatch
+import time
 from pathlib import Path
 
 from specdet.config import Config
@@ -240,6 +241,7 @@ class AnalysisSession(_Session):
         target: TargetRef, run_dir: Path, run_id: str,
     ):
         super().__init__(backend, config, run_dir)
+        self._started = time.monotonic()
         self.project = project
         self.target = target
         self._budget_target_id = target.id
@@ -250,7 +252,10 @@ class AnalysisSession(_Session):
             else config.analysis_kind
         )
         self.stage = Stage.EXTRACT
-        self.report = AnalysisReport(target=target, run_id=run_id, analysis_kind=self._phase_kind)
+        self.report = AnalysisReport(
+            target=target, run_id=run_id, analysis_kind=self._phase_kind,
+            artifact_dir=str(self.run_dir.resolve()),
+        )
         self.observation_plan: ObservationPlan | None = None
         self._pending_proof: ProofCandidate | None = None
         self._baseline_check: ProofCheckEvidence | None = None
@@ -368,6 +373,7 @@ class AnalysisSession(_Session):
                     self.project, self.contract, analysis_kind=self._phase_kind,
                 )
                 self._artifact("observation-plan", "observation_plan", self.observation_plan)
+                self.report.coverage["observation_policy"] = self.observation_plan.policy
                 self.report.coverage["ignored_dimensions"] = list(self.observation_plan.ignored_dimensions)
                 self.report.coverage.update(self.observation_plan.coverage)
                 self.report.coverage["input_observations"] = list(self.observation_plan.inputs)
@@ -594,6 +600,20 @@ class AnalysisSession(_Session):
             result.diagnostics,
         ))
 
+    def _record_resources(self) -> None:
+        self.report.duration_ms = round((time.monotonic() - self._started) * 1000, 3)
+        self.report.resources = {
+            "scope": "target_all_phases_and_revisions",
+            "proof_attempts": {"used": self._proof_count, "limit": self._total_proof_limit},
+            "search_rounds": {"used": self._search_rounds, "limit": self.config.limits.max_search_rounds},
+            "counterexample_candidates": {
+                "used": self._witness_attempts, "limit": self.config.counterexample_candidates,
+            },
+            "verifier_timeout_seconds_per_call": self.config.limits.verifier_timeout_seconds,
+            "solver_timeout_ms_per_query": self.config.limits.solver_timeout_ms,
+            "wall_time_limit_seconds": None,
+        }
+
     def _finish(self) -> StageOutcome:
         trusted = (
             (self.contract is None or self.contract.trusted_translation)
@@ -622,6 +642,7 @@ class AnalysisSession(_Session):
             if any(item.code in unsupported for item in self.report.diagnostics):
                 self.report.status = "unsupported"
         self.report.assistance["accepted_proposals"] = list(self._accepted_ids)
+        self._record_resources()
         self.store.artifact("report.json", "analysis_report", self.report)
         self._finished = True
         return self._record(StageOutcome(Stage.REPORT, "produced"))
@@ -629,12 +650,13 @@ class AnalysisSession(_Session):
     def _finish_prerequisite(self) -> StageOutcome:
         self.report.status = "failed" if self._failed else "completed"
         self.report.assistance["accepted_proposals"] = list(self._accepted_ids)
+        self._record_resources()
         concrete = self.report.to_dict()
         self.store.artifact("concrete-report.json", "analysis_report", concrete)
         target, run_id = self.report.target, self.report.run_id
         self.report = AnalysisReport(
             target=target, run_id=run_id, analysis_kind="abstract_determinism",
-            concrete_result=concrete,
+            concrete_result=concrete, artifact_dir=str(self.run_dir.resolve()),
         )
         if concrete["status"] != "completed" or concrete["verdict"] != Verdict.DETERMINISTIC.value:
             self.report.status = "skipped"
@@ -643,6 +665,7 @@ class AnalysisSession(_Session):
                 "Abstract checking requires a proved concrete-input determinism result",
                 "warning", {"concrete_report": "concrete-report.json"},
             ))
+            self._record_resources()
             self.store.artifact("report.json", "analysis_report", self.report)
             self._finished = True
             return self._record(StageOutcome(Stage.LOWER, "skipped", tuple(self.report.diagnostics)))

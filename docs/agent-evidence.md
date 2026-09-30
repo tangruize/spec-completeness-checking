@@ -31,8 +31,8 @@ python -m specdet doctor --verus /path/to/verus
 python -m specdet analyze --config /path/to/specdet.toml \
   --target 'src/component.rs:operation' --verus /path/to/verus \
   --llm-fallback off --offline --timeout 30 --solver-timeout-ms 1000 \
-  --max-rounds 8 --counterexample-candidates 16 --out /path/to/evidence
-python -m specdet report --run /path/to/evidence/RUN_ID --json
+  --max-rounds 8 --counterexample-candidates 16 --out /path/to/evidence --compact-json
+python -m specdet report --run /path/to/evidence/RUN_ID --compact-json
 ```
 
 Use `verus.single_file` only for self-contained files, `verus.native` for an explicit crate entrypoint, and `verus.cargo` for a package with its real build features and injection file. See the [real-system profiles](../examples/real_systems/README.md). Discovery include patterns select targets, not the snapshot's entire contents: exclude build products, unrelated research copies and prior runs; do not use an artifacts directory as the project root.
@@ -40,6 +40,24 @@ Use `verus.single_file` only for self-contained files, `verus.native` for an exp
 `--timeout` limits **each verifier invocation**, not total wall time. Solver checks, constructor candidates, preparation and multiple proof attempts add to it. For a small first pass, set `[analysis.proof_generation] max_attempts = 1` and `strategies = ["baseline"]` in the profile. Record the actual elapsed time rather than describing this as a hard 30-second overall budget.
 
 The default `verus-observable-v1` merges all `Err` payloads, ignores raw pointer identity, and uses available source Views. `verus-strict-v1` compares error payloads and pointer identity but still honors Views. Neither means "all heap state." Changing the policy changes the question; do not present a coarser-policy result as a repair of the original spec.
+
+## Read the small output first
+
+The default human output is suitable for a first decision; `--compact-json` provides the same recorded facts in `specdet.summary.v1` without a model or adapter. It does not reclassify results or produce a specification-quality score. The command's stdout is one JSON object in either JSON mode; normal human output ends with whole-run elapsed time.
+
+| Compact field | Interpretation |
+|---|---|
+| `status`, `exit_code`, `counts` | Execution outcome and original semantic result, not merely whether report reading succeeded. |
+| `results[].target`, `problem_id` | Exact source identity and frozen question. |
+| `baseline`, `decisive_evidence`, `counterexample` | Original query status/reason/digest, the basis of a stored decisive verdict, and small witness bindings plus certificate digests/links. A proof artifact may be an attempt directory containing `check.json`; a witness links to its certificate. |
+| `coverage` | Actual policy, ignored dimensions, translation trust, input observations and feasibility/heap boundaries. This does not infer whether a caller supplied native source, an extract or a model. |
+| `resources`, `duration_ms` | Actual used/limit counters across target phases and revisions, per-call timeouts, and elapsed milliseconds. Top-level time includes preparation; target time is cumulative for that target. `wall_time_limit_seconds = null` means no whole-run deadline is enforced. |
+| `search` | Query counts and separately counted refined slices. Narrowed UNSAT is not a global proof. Zero constructor attempts with `unsupported_witness` is not an exhausted catalog; a zero candidate limit disables construction. |
+| `diagnostics`, `artifacts`, `full_report` | Up to three distinct significant diagnostic kinds, actionable compiler errors, latest revision's artifact paths/digests, and the unchanged full report. |
+
+Diagnostic messages are capped at 500 characters; witness values above 4,096 serialized characters are replaced by an explicit omission flag and their certificate link. Coverage previews include at most eight ignored dimensions and four input observations, with individual preview limits and omission counts. These are per-target preview limits, not a fixed total size for arbitrarily many targets. Use a target selector rather than sending a whole project into context.
+
+Follow only the needed artifact when details matter. `--json` still returns the complete unwrapped report; on-disk `summary.json` retains its digest-checked envelope. Normal and failed analyses persist timing metadata; interruption retains timing in the run manifest and completed partial results. Compact handled CLI errors/interruption include invocation time and status even if no run was created. Older reports leave unavailable fields empty/null rather than pretending zero usage. `report` and non-reexecuting `replay` show the recorded analysis duration, not the time to read the file.
 
 ## Evidence to attach to the proof map
 

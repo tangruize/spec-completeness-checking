@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import time
 import uuid
 from collections import Counter
 from datetime import datetime, timezone
@@ -42,6 +43,7 @@ def analyze(
     driver: SessionDriver | None = None, discover_only: bool = False, parent_run: str = "",
 ) -> tuple[JsonObject, int]:
     """Analyze a project, optionally driven by an explicit assistance controller."""
+    started = time.monotonic()
     config.validate()
     selected_backend = backend if backend is not None else create_backend(config)
     drive = driver if driver is not None else run_mechanical
@@ -82,6 +84,7 @@ def analyze(
                 results.append(session.report.to_dict())
                 store.artifact("partial-summary.json", "run_summary", {
                     **summary, "results": results, "status": "running",
+                    "duration_ms": round((time.monotonic() - started) * 1000, 3),
                 })
             summary.update({
                 "results": results, "status": "completed",
@@ -89,10 +92,12 @@ def analyze(
             })
             code = result_exit_code(results)
         summary["exit_code"] = code
+        summary["duration_ms"] = round((time.monotonic() - started) * 1000, 3)
         store.artifact("summary.json", "run_summary", summary)
         store.artifact("manifest.json", "run_manifest", {
             "run_id": run_id, "status": summary["status"], "parent_run": parent_run,
             "exit_code": code,
+            "duration_ms": summary["duration_ms"],
         })
         completed = True
         return summary, code
@@ -102,4 +107,5 @@ def analyze(
                 "run_id": run_id,
                 "status": "interrupted" if isinstance(sys.exception(), KeyboardInterrupt) else "failed",
                 "parent_run": parent_run, "completed_targets": len(results),
+                "duration_ms": round((time.monotonic() - started) * 1000, 3),
             })

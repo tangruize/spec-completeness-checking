@@ -95,6 +95,22 @@ not overwrite the raw baseline. Unconfirmed search constraints are recorded
 separately from SAT-confirmed slices. Project allowlists, `permitted`
 annotations, and LLM self-assessments cannot change solver conclusions.
 
+## Tool-native output and elapsed time
+
+The default human output shows each target's verdict, original baseline, decisive evidence or actionable blockers, observation exclusions, unchecked scope, actual budget usage and elapsed time. Repeated recovery warnings do not crowd out distinct failure causes. The final stdout line reports whole-run elapsed time.
+
+Use `--compact-json` for a versioned, bounded-detail evidence summary, or keep `--json` for the complete recorded report:
+
+```bash
+specdet analyze --config specdet.toml --verus /path/to/verus --compact-json
+specdet report --run /path/to/evidence/RUN_ID --compact-json
+specdet report --run /path/to/evidence/RUN_ID --json
+```
+
+`--compact-json` is available on `analyze`, `discover`, `report`, `replay` and `assist`; it is mutually exclusive with `--json`. Its `format` is `specdet.summary.v1`. It preserves source/problem identities, execution status, semantic verdict, raw baseline, evidence and small witness values, coverage, budgets and artifact links, without embedding verifier logs or generated source. Long previews and additional diagnostics are explicitly marked as truncated or omitted. Output still scales with the number of selected targets. Full reports and artifacts are never truncated. No agent adapter or extra model call is involved.
+
+`duration_ms` records analysis wall time, including preparation but excluding final report serialization and CLI presentation; each target also records its elapsed time. `resources` counts usage across all target phases and revisions, including a concrete prerequisite for abstract analysis. Per-verifier and per-query timeouts are **not a whole-run deadline**. Handled failures and interruptions report invocation elapsed time; compact mode also returns structured status and exit code (`130` for interruption). Reading an old report does not invent missing timings or budgets. `report` displays the stored analysis duration and semantic exit code, while the report-reading command itself returns `0` on success. See the [evidence guide](docs/agent-evidence.md) for fields and interpretation.
+
 ## Real underconstrained functions and concrete counterexamples
 
 Version 0.3 adds bounded constructor search and source-specification

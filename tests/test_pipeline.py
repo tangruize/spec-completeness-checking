@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+from dataclasses import replace
 from pathlib import Path
 
 from specdet.analysis.pipeline import AnalysisSession, ProjectSession, run_mechanical, select_targets
@@ -14,6 +15,7 @@ from specdet.domain.models import (
     digest, text_digest,
 )
 from specdet.domain.proposals import GenerationRequest, Proposal, ValidationRecord
+from specdet.storage.artifacts import ArtifactStore
 from specdet.storage.workspace import PreparedProject
 
 
@@ -120,13 +122,61 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(session.report.baseline.status, SolverStatus.UNSAT)
         self.assertEqual(len(backend.checked), 1)
         self.assertTrue((self.run_dir / "report.json").is_file())
+        self.assertEqual(session.report.coverage["observation_policy"], "test-policy")
+        self.assertEqual(session.report.resources["proof_attempts"]["used"], 1)
+        self.assertEqual(session.report.resources["counterexample_candidates"]["used"], 0)
+        self.assertIsNone(session.report.resources["wall_time_limit_seconds"])
+        self.assertGreaterEqual(session.report.duration_ms, 0)
 
     def test_public_api_accepts_a_non_verus_backend(self):
         before = self.project.source_path("input.formal").read_bytes()
         summary, code = analyze(self.config, backend=FakeBackend(SolverStatus.UNSAT))
         self.assertEqual(code, 0)
         self.assertEqual(summary["counts"], {"deterministic": 1})
+        self.assertGreaterEqual(summary["duration_ms"], summary["results"][0]["duration_ms"])
         self.assertEqual(self.project.source_path("input.formal").read_bytes(), before)
+        store = ArtifactStore(Path(summary["run_dir"]))
+        self.assertEqual(store.read_artifact("summary.json")["duration_ms"], summary["duration_ms"])
+        self.assertEqual(store.read_artifact("manifest.json")["duration_ms"], summary["duration_ms"])
+        target_report = summary["results"][0]
+        self.assertTrue((Path(target_report["artifact_dir"]) / "report.json").is_file())
+
+    def test_unsupported_target_still_records_whole_run_and_target_elapsed_time(self):
+        backend = FakeBackend()
+        backend.fail_extract = True
+        summary, code = analyze(self.config, backend=backend)
+        self.assertEqual(code, 2)
+        self.assertEqual(summary["results"][0]["status"], "unsupported")
+        self.assertGreaterEqual(summary["duration_ms"], summary["results"][0]["duration_ms"])
+        self.assertGreater(summary["duration_ms"], 0)
+
+    def test_interruption_and_unexpected_failure_retain_elapsed_time_and_completed_targets(self):
+        class TwoTargetsBackend(FakeBackend):
+            def discover(self, project):
+                targets, diagnostics = super().discover(project)
+                return [*targets, replace(targets[0], name="g", line=2)], diagnostics
+
+        for error, status in ((KeyboardInterrupt(), "interrupted"), (RuntimeError("failure"), "failed")):
+            with self.subTest(status=status):
+                before = set(self.config.output_dir.glob("*"))
+
+                def drive(session):
+                    if isinstance(session, AnalysisSession) and session.target.name == "g":
+                        raise error
+                    run_mechanical(session)
+
+                with self.assertRaises(type(error)):
+                    analyze(self.config, backend=TwoTargetsBackend(SolverStatus.UNSAT), driver=drive)
+                run_dir, = set(self.config.output_dir.glob("*")) - before
+                store = ArtifactStore(run_dir)
+                manifest = store.read_artifact("manifest.json")
+                partial = store.read_artifact("partial-summary.json")
+                self.assertEqual(manifest["status"], status)
+                self.assertEqual(manifest["completed_targets"], 1)
+                self.assertGreaterEqual(manifest["duration_ms"], partial["duration_ms"])
+                self.assertGreater(partial["duration_ms"], 0)
+                self.assertEqual(partial["results"][0]["target"]["name"], "f")
+                self.assertFalse((run_dir / "summary.json").exists())
 
     def test_unknown_does_not_become_witness(self):
         session = self.session(FakeBackend())

@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 from dataclasses import replace
 from pathlib import Path
 
@@ -12,6 +13,12 @@ from specdet.api import analyze, create_backend
 from specdet.config import BuildConfig, Config, Limits, ToolchainConfig, load_config
 from specdet.domain.models import JsonObject, StageError, as_object, require_text
 from specdet.storage.artifacts import ArtifactStore
+
+
+def _output_options(parser: argparse.ArgumentParser) -> None:
+    output = parser.add_mutually_exclusive_group()
+    output.add_argument("--json", action="store_true", help="Print the complete recorded report")
+    output.add_argument("--compact-json", action="store_true", help="Print a bounded evidence summary with artifact links")
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -35,21 +42,24 @@ def _parser() -> argparse.ArgumentParser:
         item.add_argument("--solver-timeout-ms", type=int)
         item.add_argument("--timeout", type=int)
         item.add_argument("--offline", action="store_true")
-        item.add_argument("--json", action="store_true")
+        if command == "doctor":
+            item.add_argument("--json", action="store_true")
+        else:
+            _output_options(item)
         item.add_argument("--llm-fallback", choices=["off", "live", "replay"])
         item.add_argument("--provider")
         item.add_argument("--model")
         item.add_argument("--responses", type=Path)
     report = commands.add_parser("report")
     report.add_argument("--run", type=Path, required=True)
-    report.add_argument("--json", action="store_true")
+    _output_options(report)
     replay = commands.add_parser("replay")
     replay.add_argument("--run", type=Path, required=True)
     replay.add_argument("--reexecute", action="store_true")
     replay.add_argument("--config", type=Path)
     replay.add_argument("--verus")
     replay.add_argument("--out", type=Path)
-    replay.add_argument("--json", action="store_true")
+    _output_options(replay)
     assist = commands.add_parser("assist")
     assist.add_argument("--run", type=Path, required=True)
     assist.add_argument("--task", required=True)
@@ -60,7 +70,7 @@ def _parser() -> argparse.ArgumentParser:
     assist.add_argument("--config", type=Path)
     assist.add_argument("--verus")
     assist.add_argument("--out", type=Path)
-    assist.add_argument("--json", action="store_true")
+    _output_options(assist)
     adopt = commands.add_parser("adopt")
     adopt.add_argument("--proposal", type=Path, required=True)
     adopt.add_argument("--validation", type=Path, required=True)
@@ -160,36 +170,29 @@ def _driver(config: Config):
     return drive
 
 
-def _summary_output(summary: JsonObject, *, json_output: bool) -> None:
-    if json_output:
-        print(json.dumps(summary, ensure_ascii=False, indent=2))
-        return
-    results = summary.get("results", [])
-    if isinstance(results, list):
-        for result in results:
-            if not isinstance(result, dict):
-                continue
-            target = result.get("target", {})
-            if not isinstance(target, dict):
-                continue
-            label = f"{target.get('file')}:{target.get('name')}@{target.get('line')}"
-            print(f"{str(result.get('verdict', 'not_evaluated')):18} {label}")
-            witness = result.get("counterexample")
-            if isinstance(witness, dict) and witness.get("status") == "verified":
-                print("  counterexample (source-verified): " + json.dumps(
-                    witness.get("bindings", {}), ensure_ascii=False, sort_keys=True,
-                ))
-                if witness.get("type_arguments"):
-                    print("  instantiation: " + json.dumps(witness["type_arguments"], sort_keys=True))
-                print(f"  replay: {witness.get('artifact', '')}")
-    print(f"Run: {summary.get('run_dir', '')}")
-    if summary.get("counts"):
-        print(json.dumps(summary["counts"], ensure_ascii=False, sort_keys=True))
-    diagnostics = summary.get("diagnostics", [])
-    if isinstance(diagnostics, list):
-        for diagnostic in diagnostics:
-            if isinstance(diagnostic, dict):
-                print(f"{diagnostic.get('code')}: {diagnostic.get('message')}", file=sys.stderr)
+def _summary_output(summary: JsonObject, *, json_output: bool, compact: bool = False) -> None:
+    from specdet.cli.output import print_summary
+
+    print_summary(summary, json_output=json_output, compact=compact)
+
+
+def _error_output(
+    args: argparse.Namespace, message: str, diagnostic: JsonObject | None = None,
+    *, started: float, exit_code: int = 2,
+) -> None:
+    duration_ms = round((time.monotonic() - started) * 1000, 3)
+    if getattr(args, "compact_json", False):
+        _summary_output({
+            "status": "interrupted" if exit_code == 130 else "failed",
+            "exit_code": exit_code, "results": [], "counts": {}, "duration_ms": duration_ms,
+            "diagnostics": [diagnostic or {
+                "stage": "cli", "code": "interrupted" if exit_code == 130 else "cli_error",
+                "severity": "warning" if exit_code == 130 else "error", "message": message,
+            }],
+        }, json_output=False, compact=True)
+    else:
+        print(message, file=sys.stderr)
+        print(f"Elapsed (invocation): {duration_ms / 1000:.3f}s", file=sys.stderr)
 
 
 def _run(config: Config, *, discover_only: bool = False, parent_run: str = "") -> tuple[JsonObject, int]:
@@ -283,6 +286,7 @@ def _adopt(args: argparse.Namespace) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
+    started = time.monotonic()
     parser = _parser()
     args = parser.parse_args(argv)
     try:
@@ -291,7 +295,7 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if args.command == "report" or (args.command == "replay" and not args.reexecute):
             summary = ArtifactStore(args.run).read_artifact("summary.json", expected_kind="run_summary")
-            _summary_output(summary, json_output=args.json)
+            _summary_output(summary, json_output=args.json, compact=args.compact_json)
             return 0
         if args.command in {"replay", "assist"}:
             config = _restore_config(args.run, args.config)
@@ -316,7 +320,7 @@ def main(argv: list[str] | None = None) -> int:
                 config = replace(config, assistance=settings)
             config.validate()
             summary, code = _run(config, parent_run=str(args.run.resolve()))
-            _summary_output(summary, json_output=args.json)
+            _summary_output(summary, json_output=args.json, compact=args.compact_json)
             return code
         config = _config(args)
         if args.command == "doctor":
@@ -324,21 +328,24 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(identity, ensure_ascii=False, indent=2))
             return 0
         summary, code = _run(config, discover_only=args.command == "discover")
-        if args.command == "discover" and not args.json:
+        if args.command == "discover" and not args.json and not args.compact_json:
             for item in summary.get("targets", []):
                 if isinstance(item, dict):
                     print(f"{item['file']}:{item['name']}@{item['line']}")
-        _summary_output(summary, json_output=args.json)
+        _summary_output(summary, json_output=args.json, compact=args.compact_json)
         return code
     except StageError as error:
-        print(f"{error.diagnostic.code}: {error.diagnostic.message}", file=sys.stderr)
+        _error_output(args, f"{error.diagnostic.code}: {error.diagnostic.message}",
+                      as_object(error.diagnostic), started=started)
         return 2
     except ModuleNotFoundError as error:
-        print(f"Missing dependency: {error.name}. Install the selected backend extra, e.g. pip install '.[verus]'.", file=sys.stderr)
+        _error_output(args, f"Missing dependency: {error.name}. Install the selected backend extra, e.g. pip install '.[verus]'.",
+                      started=started)
         return 2
     except (ValueError, OSError) as error:
-        print(f"specdet: {error}", file=sys.stderr)
+        _error_output(args, f"specdet: {error}", started=started)
         return 2
     except KeyboardInterrupt:
-        print("specdet: interrupted; completed artifacts have been retained", file=sys.stderr)
+        _error_output(args, "specdet: interrupted; completed artifacts have been retained",
+                      started=started, exit_code=130)
         return 130
