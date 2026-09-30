@@ -104,7 +104,8 @@ class VerusExecutor:
             flags.extend(["--verify-function", function])
         build = self.config.build
         if build.adapter == "verus.cargo":
-            command = ["cargo", "verus", "verify", "--fwd-verus-args-to", "roots"]
+            subcommand = "verify" if all_functions else "focus"
+            command = ["cargo", "verus", subcommand, "--fwd-verus-args-to", "roots"]
             if build.package:
                 command.extend(["-p", build.package])
             if build.features:

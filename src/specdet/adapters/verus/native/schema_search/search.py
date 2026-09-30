@@ -294,6 +294,7 @@ class SchemaSearchContext:
         self._schema_by_id = {schema.id: schema for schema in schema_ctx.schemas}
         self.max_rounds = max_rounds
         self.timeout_ms = timeout_ms
+        self.last_timeout_ms = timeout_ms
         self.seed = seed
         self.check_time_ms = 0.0
         self.confirmed_assumes: list[Assume] = []

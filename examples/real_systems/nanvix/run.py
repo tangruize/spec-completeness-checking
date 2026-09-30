@@ -23,6 +23,7 @@ def main() -> int:
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--source-root", type=Path, required=True, help="Read-only, hash-pinned Nanvix checkout")
     parser.add_argument("--target", action="append")
+    parser.add_argument("--run-timeout", type=int, default=60, help="Whole checker analysis budget in seconds")
     args = parser.parse_args()
     checker = HERE.parents[2]
     source = args.source_root.resolve()
@@ -46,6 +47,7 @@ def main() -> int:
         toolchain=ToolchainConfig(
             executable=str(args.verus.resolve()), rust_toolchain=args.rust_toolchain,
         ),
+        limits=replace(config.limits, run_timeout_seconds=args.run_timeout),
         selectors=tuple(args.target) if args.target else config.selectors,
     )
     def checker_hashes() -> dict[str, str]:

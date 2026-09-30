@@ -7,7 +7,7 @@ from unittest.mock import patch
 from uuid import uuid4
 
 from specdet.adapters.verus.backend import VerusBackend
-from specdet.adapters.verus.execution import ProcessResult
+from specdet.adapters.verus.execution import ProcessResult, VerusExecutor
 from specdet.config import BuildConfig, Config, Limits, ToolchainConfig
 from specdet.domain.models import Stage, StageError, canonical_json, digest, text_digest
 from specdet.storage.workspace import PreparedProject
@@ -128,6 +128,33 @@ class BackendProfileTests(unittest.TestCase):
             self.assertNotIn("SECRET_FOR_TEST", canonical_json(context))
             self.assertNotIn("API_TOKEN", canonical_json(context))
             self.assertIn("source.rs", context["project_files"])
+
+    def test_cargo_focused_verification_uses_focus_subcommand(self):
+        source = self.root / "project"
+        source.mkdir()
+        target = source / "source.rs"
+        target.write_text("fn main() {}")
+        verifier = self.root / "verus"
+        verifier.write_text("#!/bin/sh\n")
+        verifier.chmod(0o755)
+        executor = VerusExecutor(Config(
+            source,
+            self.root / "out",
+            build=BuildConfig(adapter="verus.cargo", package="example"),
+            toolchain=ToolchainConfig(executable=str(verifier)),
+        ))
+        result = ProcessResult(("cargo",), 0, "1 verified, 0 errors", "", 1)
+        with patch(
+            "specdet.adapters.verus.execution.run_process", return_value=result
+        ) as run:
+            executor.verify(
+                target, source, self.root / "focused", "target", module="module"
+            )
+            self.assertEqual(run.call_args.args[0][:3], ["cargo", "verus", "focus"])
+            executor.verify(
+                target, source, self.root / "whole", "target", all_functions=True
+            )
+            self.assertEqual(run.call_args.args[0][:3], ["cargo", "verus", "verify"])
 
     def test_solver_seed_is_checked_before_resolving_a_toolchain(self):
         source = self.root / "project"

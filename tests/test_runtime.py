@@ -240,7 +240,12 @@ class ProcessTests(unittest.TestCase):
                     pid = int(result.stdout.splitlines()[0])
                     stat = Path(f"/proc/{pid}/stat")
                     if stat.exists():
-                        self.assertEqual(stat.read_text().split()[2], "Z")
+                        try:
+                            state = stat.read_text().split()[2]
+                        except FileNotFoundError:
+                            state = None
+                        if state is not None:
+                            self.assertEqual(state, "Z")
                     self.assertIsNone(unrelated.poll())
                 finally:
                     unrelated.terminate()

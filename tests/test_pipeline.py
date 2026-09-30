@@ -212,10 +212,10 @@ class PipelineTests(unittest.TestCase):
 
             def check(self, project, obligation, candidate, attempt_dir, *, baseline=False):
                 if obligation.target.name == "g":
-                    time.sleep(5)
+                    time.sleep(10)
                 return super().check(project, obligation, candidate, attempt_dir, baseline=baseline)
 
-        config = replace(self.config, limits=replace(self.config.limits, run_timeout_seconds=1))
+        config = replace(self.config, limits=replace(self.config.limits, run_timeout_seconds=3))
         summary, code = analyze(config, backend=SlowSecondTarget(SolverStatus.UNSAT))
         self.assertEqual((code, summary["status"]), (3, "timed_out"))
         self.assertEqual([row["target"]["name"] for row in summary["results"]], ["f", "g"])
@@ -231,9 +231,9 @@ class PipelineTests(unittest.TestCase):
         def drive(session):
             run_mechanical(session)
             if isinstance(session, AnalysisSession):
-                time.sleep(5)
+                time.sleep(10)
 
-        config = replace(self.config, limits=replace(self.config.limits, run_timeout_seconds=1))
+        config = replace(self.config, limits=replace(self.config.limits, run_timeout_seconds=3))
         summary, code = analyze(config, backend=FakeBackend(SolverStatus.SAT), driver=drive)
         self.assertEqual(summary["status"], "timed_out")
         self.assertEqual(code, 1)

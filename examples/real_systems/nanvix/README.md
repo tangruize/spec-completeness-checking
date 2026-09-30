@@ -23,10 +23,11 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python examples/real_systems/
   --source-root /path/to/nanvix-checkout \
   --verus /path/to/verus/rust_verify \
   --rust-toolchain 1.95.0 \
+  --run-timeout 180 \
   --out examples/real_systems/nanvix/results
 ```
 
-Use the native non-mutating verifier, not a source-rewriting launcher. The runner supplies the Rust runtime toolchain through the checker. Change the paths/version for your installation. `--source-root` is required; all original source hashes are checked before and after analysis. Add `--target set` to select one function. No LLM or network access is used. Evidence written inside the checker checkout must be gitignored; evidence must not be written into the Nanvix source repository.
+Use the native non-mutating verifier, not a source-rewriting launcher. The runner supplies the Rust runtime toolchain through the checker. Change the paths/version for your installation. `--source-root` is required; all original source hashes are checked before and after analysis. Add `--target set` to select one function. `--run-timeout` changes only the whole-analysis budget and defaults to 60 seconds. No LLM or network access is used. Evidence written inside the checker checkout must be gitignored; evidence must not be written into the Nanvix source repository.
 
 `specdet.toml` also works with the normal checker CLI after generating the local inputs and configuring the verifier and Rust toolchain. It has an explicit small project root and only the four selected targets. `run.py` records extraction time, checker wall time, tool/source hashes, whether checker code changed during execution, observations, raw statuses, and evidence paths in each run's `measured-result.json`. Full verifier logs, generated obligations, snapshots, solver queries, and reports remain local in that run directory.
 
