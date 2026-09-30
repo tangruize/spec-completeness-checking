@@ -1,36 +1,94 @@
 ---
 name: specdet-evidence
-description: Collect bounded, source-linked Verus contract determinism evidence for a system proof agent; use for underconstraint checks and evidence on a caller/proof-map edge, not specification-quality decisions.
+description: "Use when a system-proof caller edge may depend on whether one Verus contract uniquely determines an observable return or post-state; run a bounded source-linked determinism attack, preserve proof/witness evidence, and return a caller-oriented result without deciding specification adequacy."
 ---
 
-# Collect contract determinism evidence
+# Test one candidate contract for observable underconstraint
 
-[中文](SKILL.zh-CN.md) · [Usage, evidence fields and terminology](README.md)
+[中文](SKILL.zh-CN.md) · [Full usage and terminology](README.md)
 
-Use `specdet` as a mechanical evidence tool. Do not start another agent, enable LLM assistance, or replace the source contract merely to run it.
+Use this skill for one named caller/proof-map question. It is not a mandatory scan for every reachable function and not a specification-completeness oracle.
 
-## Inputs
+## When to use
 
-Obtain the caller goal/proof-map edge, exact target and source revision with working-tree hashes, intended observations, checker revision, matching project profile and Verus toolchain, and a local evidence directory. Record whether the input is **native source**, a **sealed extract**, or an **authored model**; the tool cannot infer source-to-model correspondence.
+Use `specdet` when at least one of these can change the active caller edge:
 
-In this workspace use `/home/ruize/system-proof-agent/spec-completeness-checking/.venv/bin/python`, not the older copy under `tools/`. See the guide for portable installation.
+- a provisional or revised contract may leave the return value or mutable post-state unconstrained;
+- two candidate specifications need a concrete uniqueness distinction;
+- a proof failure suggests a missing frame or result relation rather than only a missing lemma;
+- an earlier witness should become a regression against a successor candidate;
+- a Human question can be compressed to “is this demonstrated freedom intentional?”
+
+Do not use it for a property spanning multiple operations, lifecycle phases, callbacks, concurrency or an interval across `await`; record that as a protocol/invariant obligation instead. Do not run it merely because a function is reachable.
+
+## Required context
+
+Record before invoking:
+
+- active top-level goal, direct caller and exact blocking edge;
+- exact target and preserved candidate revision;
+- which return/post-state differences matter to that caller;
+- native source, sealed extract or authored-model provenance;
+- source and dirty-worktree hashes, checker revision and matching Verus profile;
+- bounded output directory and budget.
+
+If the intended observations are unknown, stop and resolve that ambiguity first. A convenient policy is not authority for the caller's semantics.
 
 ## Procedure
 
-1. Preserve the candidate before checking it. Choose `verus.single_file`, `verus.native` or `verus.cargo` according to the actual build context; do not silently flatten a crate.
-2. Invoke `python -m specdet analyze` with the profile and target, `--compact-json --llm-fallback off --offline`, and explicit output storage. Use the [guide's command](README.md#run). The default whole-analysis budget is 60 seconds; `--run-timeout` overrides it, while `--timeout` remains per verifier call.
-3. Read execution `status` separately from semantic `verdict`. Preserve the original `baseline`, `problem_id`, actual observation policy, exclusions and feasibility/translation boundaries. Check `decisive_evidence` and `counterexample`, not just an exit code or a build's total proof count.
-4. Follow the relevant certificate, observation plan, query or diagnostic artifact only when necessary. Compact previews are not exhaustive; omitted/truncated markers point back to the complete report. Keep raw snapshots and logs local.
-5. Attach the evidence record below to the caller/proof-map edge. Keep completed results on timeout; retain the unfinished target and `pending_targets` without inventing conclusions.
+1. **Form the attack question.** State: “For the same admissible input, does this candidate permit two outputs that differ in `<caller-relevant observation>`?” If uniqueness would not help the caller, do not run.
+2. **Freeze the candidate and scope.** Use `verus.single_file`, `verus.native` or `verus.cargo` according to the real source context. Never silently replace native source with a model or change clauses to make the tool succeed.
+3. **Run one bounded target.**
 
-## Evidence handoff
+   ```bash
+   /home/ruize/system-proof-agent/spec-completeness-checking/.venv/bin/python -m specdet analyze \
+     --config /path/to/specdet.toml --target 'src/component.rs:operation' \
+     --verus /path/to/verus --llm-fallback off --offline \
+     --run-timeout 60 --out /path/to/evidence --compact-json
+   ```
+
+4. **Classify the recorded evidence, not the prose label alone.**
+
+   | Recorded result | System-proof use |
+   |---|---|
+   | `nondeterministic` with verified witness/SAT evidence | Challenges the candidate on the selected observation. Preserve the two outputs and certificate. It is not automatically a bug. |
+   | `deterministic` with complete proof/original UNSAT | Supports uniqueness for this frozen contract and observation relation. It does not establish adequacy, feasibility or implementation correctness. |
+   | `inconclusive` / `timed_out` | Does not decide the semantic question. Preserve partial evidence and the exact tool/solver/constructor blocker. |
+   | `not_evaluated`, `failed` or `unsupported` | Supplies no determinism conclusion. Correct the input/profile or record the unsupported boundary. |
+
+   Keep `status`, `verdict`, raw `baseline`, `problem_id`, `decisive_evidence`, coverage, exclusions and budgets separate. An UNKNOWN baseline can coexist with a verified constructive witness.
+5. **Return to the direct caller.** Classify the proof-map effect as:
+   - `challenges candidate`: the demonstrated freedom conflicts with a caller need;
+   - `supports uniqueness only`: evidence removes one ambiguity but does not close the caller edge;
+   - `does not decide`: the result is conditional, unsupported, timed out or inconclusive.
+6. **Choose the next authoritative step.** Depending on the caller question: retain intentional nondeterminism, revise the candidate and replay the witness, establish input feasibility, prove implementation conformance, investigate a cross-operation invariant, or request bounded Human intent review.
+
+## Handoff
 
 ```text
-Caller-supplied: caller_goal, proof_map_edge, native/extract/model scope,
-                source revision + working-tree hashes, checker revision, extraction/model assumptions
-Tool-supplied:  run_dir/full_report, target/source_digest, problem_id,
-                status/verdict, original baseline, proof/witness artifact + digest,
-                policy/exclusions/coverage, diagnostics, durations and budgets
+active_goal:
+direct_caller / blocking_edge:
+candidate_revision + provenance:
+attack_question + observation_policy:
+status / verdict / raw_baseline:
+decisive evidence or blocker:
+source_digest / problem_id / run_dir:
+ignored dimensions + feasibility/translation boundary:
+proof-map effect: challenges candidate | supports uniqueness only | does not decide
+next authoritative check:
 ```
 
-Do not convert `deterministic` into “adequate/correct,” `UNKNOWN` or a timeout into “bug,” a conditional alternative into an unconditional witness, or local UNSAT into a global proof. A verified constructive witness can coexist with an UNKNOWN baseline. Whether the demonstrated freedom matters to the caller, whether it is intentional, and whether to change the specification remain decisions for the system proof agent and project authority.
+Do not write “spec complete,” “goal closed,” or “bug found” as a tool result. The agent/project authority decides whether the freedom matters and whether the specification should change.
+
+## Stop conditions
+
+Stop after the named caller question has one replayable result, after the budget expires, or when the missing property is outside single-contract determinism. Do not broaden into unrelated targets or repeatedly increase budgets without a new caller-relevant hypothesis.
+
+## Hard limits
+
+- Determinism is only one dimension of underconstraint; a deterministic contract can be wrong, too strong or infeasible.
+- “Global” means all admissible modeled inputs for this frozen target and observation relation, not the whole system or unmentioned heap.
+- Views and observation policies can hide representation differences; changing them changes the question.
+- Native, extract and model evidence have different trust boundaries; model correspondence is separate work.
+- Local/refinement UNSAT is not a global proof. A conditional alternative without input feasibility is not an unconditional witness.
+- Async contracts, arbitrary opaque ownership/resource construction, some macros and quantifier-heavy problems may remain unsupported or UNKNOWN.

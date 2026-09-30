@@ -28,6 +28,42 @@ P(input) && Q(input, output1) && Q(input, output2) && !E(output1, output2)
 
 The default `verus-observable-v1` merges `Err` payloads, ignores raw-pointer identity and uses available Views. `verus-strict-v1` compares error payloads and pointer identity but still honors Views. Changing the policy changes the question; neither policy means “all system state.”
 
+## Where it helps the system proof agent
+
+The system-proof workflow needs both **specification judgment** and **proof-map-guided reintegration**. `specdet` contributes one bounded evidence source to that loop:
+
+```text
+candidate contract
+→ determinism attack
+→ proof/witness or explicit blocker
+→ caller/proof-map reintegration
+→ retain, revise or reject the candidate
+```
+
+Its useful roles are:
+
+- **Attack provisional specifications:** produce a replayable pair of contract-permitted outputs when a result or frame may be missing.
+- **Discriminate candidates:** show that one revision still permits a caller-relevant freedom, or that another has uniqueness support under the same observation relation.
+- **Turn proof feedback into a spec question:** separate “the proof needs a lemma” from “the contract itself permits multiple results.”
+- **Make local evidence auditable:** bind the claim to source hashes, `problem_id`, observation policy, proof/witness certificate and budgets, then return it to the direct caller rather than counting a local result as top-level closure.
+- **Support autonomous iteration:** preserve failed attempts, timeouts and old witnesses so the agent can revise and replay before asking a Human.
+- **Compress Human review:** when mechanical evidence is decisive, the remaining question can become “is this freedom intentional for the caller?” rather than an unstructured request to review the whole specification.
+
+This tool does not choose the candidate, decide intent or update the proof map by itself. The agent uses its output together with implementation proof, tests, source analysis, protocol invariants and bounded Human review. Because skills can also bias planning or add overhead, invoke this skill only for a named caller-relevant uniqueness question; skill-on/off ablation remains useful in experiments.
+
+## Potential limitations
+
+| Limitation | Consequence for the agent |
+|---|---|
+| Determinism is narrower than adequacy | A unique output can still be the wrong behavior, omit required success, or rely on an infeasible precondition. |
+| The result is observation-relative | A coarse View/policy may merge differences the caller cares about; a strict policy may expose representation freedom that is intentionally abstracted. |
+| One contract is not a protocol | Cross-operation preservation, lifecycle, concurrency, callbacks, failure compensation and `await`-spanning properties need other analysis. |
+| Contract evidence is not implementation conformance | A deterministic postcondition does not prove the implementation satisfies it; a native implementation verification is separate evidence. |
+| Source, extract and model have different trust | A sealed extract records omissions/stubs; an authored model needs an independent source-to-model correspondence argument. |
+| Solver/search coverage is incomplete | UNKNOWN, timeout, unsupported constructors or a finite candidate budget do not imply determinism or absence of witnesses. |
+| Feasibility and termination are normally unchecked | Global UNSAT can be vacuous if no valid input exists; a conditional alternative is not an unconditional counterexample. |
+| Language/backend support is bounded | Async contracts, opaque ownership/resources, some macros and quantifier-heavy goals can remain unsupported or inconclusive. |
+
 ## Setup
 
 Use the [maintained fork](https://github.com/tangruize/spec-completeness-checking/tree/improve-real-system-evidence), branch `improve-real-system-evidence`. Installation requires Python 3.11+, Git and a C compiler for the pinned grammar, plus a separately installed, project-compatible Verus toolchain.
